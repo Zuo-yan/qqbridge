@@ -1,0 +1,4 @@
+[plugin]
+name = "persona-manager"
+version = "0.2.0"
+enabled = true

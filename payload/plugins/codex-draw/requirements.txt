@@ -1,0 +1,1 @@
+# codex-draw 仅依赖 Python 标准库与 maibot_sdk（宿主提供），无额外第三方依赖。

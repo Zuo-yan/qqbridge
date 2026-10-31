@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "id": "local.gemini-web-search",
+  "version": "1.0.3",
+  "name": "Gemini 联网搜索",
+  "description": "通过 Magpie 调用 Gemini 的 Google Search grounding，为 MaiBot 提供 gemini_search 和安全网页读取 gemini_fetch。",
+  "author": {
+    "name": "local",
+    "url": "https://github.com/yetone/magpie"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/yetone/magpie",
+    "homepage": "https://usemagpie.ai/zh/",
+    "documentation": "https://github.com/yetone/magpie/blob/main/docs/subsystems/gateway-routing.md"
+  },
+  "changelog": "CHANGELOG.md",
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [
+    {
+      "type": "python_package",
+      "name": "httpx",
+      "version_spec": ">=0.27,<1"
+    }
+  ],
+  "plugin_type": "tool",
+  "display": {
+    "icon": {
+      "type": "lucide",
+      "value": "sparkles"
+    }
+  },
+  "capabilities": [],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  }
+}

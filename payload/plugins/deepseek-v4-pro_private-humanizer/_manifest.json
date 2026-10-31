@@ -1,0 +1,41 @@
+{
+  "manifest_version": 2,
+  "id": "deepseek-v4-pro.private-humanizer",
+  "version": "1.6.1",
+  "name": "麦麦私聊拟人化增强（深度优化版）",
+  "description": "私聊拟人化增强 v1.6.1：Planner+Replyer 双阶段提示词注入（兼容 1.0.x/1.1.x messages 与 1.2.x items 载荷），群聊硬拦截与会话确认缓存，时间感知、画像注入、回复守卫、记忆守卫、主动续话。",
+  "author": {
+    "name": "DeepSeek-V4",
+    "url": "https://github.com/DeepSeek-V4-Pro"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/DeepSeek-V4-Pro/private-humanizer",
+    "homepage": "https://github.com/DeepSeek-V4-Pro/private-humanizer"
+  },
+  "host_application": {
+    "min_version": "1.0.0",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [],
+  "plugin_type": "extension",
+  "display": {
+    "icon": {
+      "type": "lucide",
+      "value": "shield-check"
+    }
+  },
+  "capabilities": [
+    "maisaka.proactive.trigger"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  }
+}

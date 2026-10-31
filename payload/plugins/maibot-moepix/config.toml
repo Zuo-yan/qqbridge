@@ -1,0 +1,16 @@
+[plugin]
+enabled = true
+config_version = "1.0.0"
+[r18]
+allowed_chats = []
+[api]
+base_url = "https://api.lolicon.app/setu/v2"
+default_num = 1
+default_size = ["regular"]
+proxy = "i.pximg.net"
+exclude_ai = true
+max_num = 1
+send_mode = "both"
+[limits]
+rate_per_minute = 2
+recall_after_seconds = 0

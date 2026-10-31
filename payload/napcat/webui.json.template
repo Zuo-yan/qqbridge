@@ -1,0 +1,14 @@
+{
+  "host": "0.0.0.0",
+  "port": 6099,
+  "token": "@@WEBUI_TOKEN@@",
+  "loginRate": 3,
+  "autoLoginAccount": "",
+  "disableWebUI": false,
+  "accessControlMode": "none",
+  "ipWhitelist": [],
+  "ipBlacklist": [],
+  "enableXForwardedFor": false,
+  "enable2FA": false,
+  "totpSecret": ""
+}

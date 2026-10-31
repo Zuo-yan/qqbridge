@@ -1,0 +1,9 @@
+_staging/
+.env
+*.zip
+*.sha256
+backups/
+logs/
+*.log
+__pycache__/
+*.pyc

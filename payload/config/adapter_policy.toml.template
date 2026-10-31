@@ -1,0 +1,7 @@
+[defaults.group]
+default_action = "block"
+allow_ids = []
+
+[defaults.private]
+default_action = "block"
+allow_ids = []

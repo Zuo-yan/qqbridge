@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "package_version": "1.0.0",
+  "plugins": [
+    {
+      "name": "codex-draw",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "694aaa35b446033537a3b7817018a1261e0236c8ea56edc56d6e12a5985ee911",
+      "packaged_tree_sha256": "d332ceaf804f68768e09286a460f054f3214b0d2780cf4db25997a9109707e9e",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "Color2333_maibot-multi-platform-parser",
+      "upstream": "https://cnb.cool/Mai-with-u/p-color2333--maibot-multi-platform-parser-3a856f96d7dc.git",
+      "source_commit": "282054fedaca4fd885f73419643ddd4ab7af31ad",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "224d2cd9a846a8b8d6eb4b9a4b6ea18f1551e60acabe09cbdc8fb3fe45238622",
+      "packaged_tree_sha256": "f3c1123e32e17f1f10c77660598a85abefc8aa7345b27f565efc6e3dffebd9e1",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "com_maibot_link-parser",
+      "upstream": "https://cnb.cool/Mai-with-u/p-jh-mmm--maibot-link-parser-03604d2e4213.git",
+      "source_commit": "1f63b2a127de41a1b0f673add536ca9255155691",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "cc27f55c607e4a76b9f0e535aa2f2e64e5a14d63cc3772a32cddd881d33b05af",
+      "packaged_tree_sha256": "42bfe57924e7b8c9174bef3d93cd3ee56de9ccc0dc3095a50552038c8394467c",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "deepseek-v4-pro_private-humanizer",
+      "upstream": "https://cnb.cool/Mai-with-u/p-deepseek-v4-pro--private-humanizer-c190a8589778.git",
+      "source_commit": "543d3ee0ef9102701590357c7e306dbed31377d7",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "249ef2293b4042c8f7c39da47aeada3af797f309698a6d0c255ccd9213a90213",
+      "packaged_tree_sha256": "a55a93500708101d6576ef276e8dd0c5e7bc69c62b86f32f1f4835c898ec2a7f",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "gemini_web_search",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "108cc7479165e62264315c4c0a7757042a21895a083259aa923af90ba7866d51",
+      "packaged_tree_sha256": "7c3bdf34ea2afd028bb2daac73007eba1cebb531a02fe288d1573adf9b47c04b",
+      "license_files": []
+    },
+    {
+      "name": "github_erhan111119_mai-repost-shit",
+      "upstream": "https://cnb.cool/Mai-with-u/p-erhan111119--mai-repost-shit-cba0ab5ef271.git",
+      "source_commit": "c0b9e0d06ee1ffc9331bf093469793536be0fcb1",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "3d3186722d20b88c0f590b6b8bca3c7e2c3d1ff63af61b60a0994427345219f2",
+      "packaged_tree_sha256": "87ffbacbb0a59cb75e72be51ed1e1a93fcb578dc7be32c794a00632e6889e02f",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "hajimi-file-download",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "c750e4e5b0baa4999492c1c8d6382fdeeba5eb84671a9cfb48129d990be70fd8",
+      "packaged_tree_sha256": "fa09091325d2b34e4317a245f5a6535e3512acb5017324f32ff740730c3f796c",
+      "license_files": []
+    },
+    {
+      "name": "juzi865_emoji2face",
+      "upstream": "https://cnb.cool/Mai-with-u/p-juzi865--emoji2face-c5f38f3f6076.git",
+      "source_commit": "696ec97ea4c307b38185aec59e204e8c2d427187",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "e8cc9f7fb6707103c879a0d16cd646af0d0322412ebf1dba1d97fbd41d408d3c",
+      "packaged_tree_sha256": "b480fa5f2b57b2e67369e0415ac3b56f644d1fb9dc7e5b898e3d5c1c4b783bd0",
+      "license_files": []
+    },
+    {
+      "name": "maibot-community_mai-repeater",
+      "upstream": "https://cnb.cool/Mai-with-u/p-octmicy--mai-repeater-17be6267dfab.git",
+      "source_commit": "2b7ad6d0725f0aacd466e79e59ad80a87f55edaf",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "2a97821840795415bfcfb0c74804ac0598c32eadab0896ecde0354c1463acf17",
+      "packaged_tree_sha256": "f8b511a2b0890ed0f6019791b1914aa0e57bec2faf59de61e0ba7d556b19c955",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "maibot-moepix",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "b1db028e8e498d09afbda3f15b8774e3f62195ba6fd6c14d7ee55ba2b0595402",
+      "packaged_tree_sha256": "ad525cbef9ecdafd1ad942153fab6db593938d45a2a7bb9e71e2a3aeb566d58f",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "MaiBot-SnowLuma-Adapter",
+      "upstream": "https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git",
+      "source_commit": "54fcc7fcc4072983a1283d99fa0edd559125e1d7",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "1d1bb42e18bf09d61e5031581dbc30fa3187f5e39f237ef75d87d32db8b84dfc",
+      "packaged_tree_sha256": "de1407b39930577a08285321d049348803e4edf3154a188fce881b57c61e6ffe",
+      "license_files": []
+    },
+    {
+      "name": "mizuku003_tieba-share",
+      "upstream": "https://cnb.cool/Mai-with-u/p-mizuku003--maibot-tieba-share-5d4112c35f27.git",
+      "source_commit": "69d93dee4f2d1a816e21f9883bcccc38bf6b01fa",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "4c9661159626236217d21be483dbded324b64f48836a85a7708d3f74d4d3361d",
+      "packaged_tree_sha256": "246b28cfdbd5ac8ec8d5c2b9e06c58a07092d1f31ce3a5215f0fbc8ae9a3bec6",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "persona-manager",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "175231839005adaf8b01099c7f4439a219c6ec3e9bcee677ea6ad55bd9ccfe84",
+      "packaged_tree_sha256": "ac9df4ab891533f554372d1fd2b9be7d7930a05b39080ac3f693e52ad9862d71",
+      "license_files": []
+    },
+    {
+      "name": "TAIY2020_smart_poke_plugin",
+      "upstream": "https://cnb.cool/Mai-with-u/p-taiy2020--smart-poke-plugin-3a08fdd29965.git",
+      "source_commit": "59ff292b4d912a5cbe5d09cce32381e8497d350f",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "ab32b7f2767a07c3b9e8d1dab5c9023057892b8719532e57b4ac8006094e878a",
+      "packaged_tree_sha256": "f4dbc1a0c0cd294e7fb4089063fd33253296ce257c57672314def6b456ee04d5",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "token_usage_report",
+      "upstream": "https://github.com/CSSQY/token_usage_report.git",
+      "source_commit": "3da19a52917cc8216eb9a9e3a0594d219091e7b3",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "d2838cad73e20d53e0694a302a04cef3325891dfe8a243b95f35bf9737ec277a",
+      "packaged_tree_sha256": "996487f1f8f22a65fde12d200b9fdeedd47be654abdd357b24f9fb71dde3ad4f",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "xuqian13_tts_voice_plugin",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": false,
+      "source_tree_sha256": "f39cd3668cc2143f8a2ce0c7914229adfac8b034fa449804d1051564a405d0b9",
+      "packaged_tree_sha256": "99881421b364970f2a22a8b27743833876a3a9a44d8563500faf628867bcac4b",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "xxxxx7258_moegirl-wiki-plugin",
+      "upstream": "https://cnb.cool/Mai-with-u/p-xxxxx7258--moegirl-wiki-plugin-48930efcafe2.git",
+      "source_commit": "24a7e870afb1900bae7f85a14f9b0af8e34b951b",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "63e1fe7b36fbb280811168cb96889e23c50dfff079086d2fae6a567e93571f51",
+      "packaged_tree_sha256": "2497ffd42455751a2087f93063883ff9b6bfe905816a65e63dee7c7aba800ee4",
+      "license_files": [
+        "LICENSE"
+      ]
+    }
+  ]
+}

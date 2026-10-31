@@ -1,0 +1,603 @@
+<meta charset="utf-8">
+<style>
+:root {
+  --pm-paper: var(--retro-paper, var(--mil-screen, #eee6d5));
+  --pm-paper-deep: var(--retro-paper-deep, var(--mil-panel, #e3d9c5));
+  --pm-paper-soft: var(--retro-paper-soft, var(--mil-hi, #f8f3e6));
+  --pm-ink: var(--retro-ink, var(--mil-ink, #154b51));
+  --pm-ink-soft: var(--retro-ink-soft, var(--mil-print, #536a69));
+  --pm-line: var(--retro-line, var(--mil-line, #174d52));
+  --pm-rust: var(--retro-rust, var(--mil-hot, #bd572b));
+  --pm-rust-dark: var(--retro-rust-dark, var(--mil-danger, #903c21));
+  --pm-gold: var(--retro-gold, var(--mil-lo, #c79b46));
+  --pm-recessed: var(--retro-recessed, var(--mil-sunk, rgba(67, 48, 24, .08)));
+  --pm-recessed-strong: var(--retro-recessed-strong, var(--mil-lo, rgba(67, 48, 24, .13)));
+  --pm-font: var(--retro-font-body, var(--typography-font-family-base, "Microsoft YaHei UI", sans-serif));
+  --pm-mono: var(--typography-font-family-code, "JetBrains Mono", "Cascadia Mono", Consolas, monospace);
+  --pm-display: var(--retro-font-display, "Microsoft YaHei UI", sans-serif);
+  --pm-stroke: var(--retro-stroke, 2px);
+  --pm-control-height: 42px;
+  color: var(--pm-ink);
+  font-family: var(--pm-font);
+}
+
+* { box-sizing: border-box; }
+body {
+  width: min(100% - 32px, 1040px);
+  margin: 22px auto 56px;
+  color: var(--pm-ink);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pm-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+  padding: 18px 20px 20px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper);
+  box-shadow: 5px 5px 0 var(--pm-recessed-strong);
+}
+.pm-hero::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+  background: linear-gradient(90deg, var(--pm-ink) 0 32%, var(--pm-gold) 32% 66%, var(--pm-rust) 66%);
+}
+.pm-kicker,
+.pm-section-index,
+.pm-hint,
+.pm-status {
+  font-family: var(--pm-mono);
+  letter-spacing: .06em;
+}
+.pm-kicker {
+  margin: 4px 0 6px;
+  color: var(--pm-rust-dark);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 0;
+  font-family: var(--pm-display);
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: .04em;
+}
+.pm-intro {
+  max-width: 660px;
+  margin: 8px 0 0;
+  color: var(--pm-ink-soft);
+  font-size: 14px;
+}
+.pm-mark {
+  display: grid;
+  grid-template-columns: repeat(3, 13px);
+  gap: 4px;
+  padding: 8px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+}
+.pm-mark span { height: 34px; border: 1px solid var(--pm-line); }
+.pm-mark span:nth-child(1) { background: var(--pm-ink); }
+.pm-mark span:nth-child(2) { background: var(--pm-gold); }
+.pm-mark span:nth-child(3) { background: var(--pm-rust); }
+
+.pm-status {
+  min-height: 35px;
+  margin: 12px 0;
+  padding: 9px 12px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-recessed);
+  color: var(--pm-ink-soft);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.pm-status:empty { display: none; }
+.pm-status::before {
+  margin-right: 8px;
+  color: var(--pm-rust);
+  content: "▸";
+}
+
+.pm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.pm-section {
+  position: relative;
+  min-width: 0;
+  padding: 18px 20px 20px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+  box-shadow: 4px 4px 0 var(--pm-recessed-strong);
+}
+.pm-section--wide { grid-column: 1 / -1; }
+.pm-section-header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin: -18px -20px 18px;
+  padding: 13px 16px 11px;
+  border-bottom: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-recessed);
+}
+.pm-section-index {
+  color: var(--pm-rust);
+  font-size: 11px;
+  font-weight: 800;
+}
+h2 {
+  margin: 0;
+  font-family: var(--pm-display);
+  font-size: 20px;
+  letter-spacing: .04em;
+}
+.pm-section-lead {
+  margin: 0 0 16px;
+  color: var(--pm-ink-soft);
+  font-size: 13px;
+}
+
+.pm-field { margin-top: 15px; }
+.pm-field:first-of-type { margin-top: 0; }
+label,
+.pm-label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--pm-ink);
+  font-family: var(--pm-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+input,
+select,
+textarea,
+button,
+.pm-file {
+  border-radius: 0;
+  font: inherit;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: var(--pm-control-height);
+  padding: 9px 11px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  outline: 0;
+  background: var(--pm-paper);
+  color: var(--pm-ink);
+  box-shadow: inset 3px 3px 0 var(--pm-recessed);
+  transition: background-color .14s ease, border-color .14s ease;
+}
+select {
+  padding-right: 34px;
+  cursor: pointer;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--pm-rust);
+  background: var(--pm-paper-soft);
+  box-shadow: inset 3px 3px 0 var(--pm-recessed), 0 0 0 2px var(--pm-rust);
+}
+input[readonly] {
+  color: var(--pm-ink-soft);
+  background: var(--pm-recessed);
+}
+textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.65;
+}
+#notes { min-height: 74px; }
+
+.pm-file {
+  display: flex;
+  align-items: center;
+  min-height: var(--pm-control-height);
+  padding: 6px;
+  border: var(--pm-stroke) dashed var(--pm-line);
+  background: var(--pm-recessed);
+}
+.pm-file input {
+  min-height: 0;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.pm-file input:focus { box-shadow: none; }
+
+.pm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+  color: var(--pm-ink);
+  box-shadow: 3px 3px 0 var(--pm-recessed-strong);
+  cursor: pointer;
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+button:hover {
+  background: var(--pm-recessed-strong);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--pm-recessed-strong);
+}
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--pm-recessed-strong);
+}
+button:focus-visible {
+  outline: 2px solid var(--pm-rust);
+  outline-offset: 3px;
+}
+button.pm-primary {
+  border-color: var(--pm-rust-dark);
+  background: var(--pm-rust);
+  color: var(--pm-paper);
+  box-shadow: 3px 3px 0 var(--pm-rust-dark);
+}
+button.pm-primary:hover {
+  background: var(--pm-rust-dark);
+  box-shadow: 4px 4px 0 var(--pm-ink);
+}
+.pm-actions .pm-refresh { margin-left: auto; }
+
+.pm-current {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--pm-rust);
+  background: var(--pm-recessed);
+  font-size: 13px;
+}
+.pm-current-label {
+  color: var(--pm-ink-soft);
+  font-family: var(--pm-mono);
+  font-size: 11px;
+}
+.pm-current-value { font-weight: 700; }
+
+.pm-card-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+.pm-card-editor-head .pm-field { flex: 1 1 240px; margin-top: 0; }
+.pm-card-editor-head button { flex: none; }
+.pm-hint {
+  display: block;
+  margin-top: 7px;
+  color: var(--pm-ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+details {
+  margin-top: 15px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-paper);
+}
+summary {
+  padding: 9px 11px;
+  color: var(--pm-ink);
+  cursor: pointer;
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+details > pre { margin: 0; padding: 12px; border-top: 1px solid var(--pm-line); }
+pre {
+  max-height: 300px;
+  overflow: auto;
+  color: var(--pm-ink-soft);
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#versions { display: grid; gap: 8px; margin-top: 12px; }
+#versions:empty { display: none; }
+#versions details { margin-top: 0; }
+#versions details > pre { max-height: 180px; }
+#versions button { margin: 0 12px 12px; }
+
+@media (max-width: 760px) {
+  body { width: min(100% - 20px, 1040px); margin-top: 12px; }
+  .pm-hero { grid-template-columns: 1fr; padding: 16px; }
+  .pm-mark { display: none; }
+  .pm-grid { grid-template-columns: 1fr; }
+  .pm-section--wide { grid-column: auto; }
+  .pm-section { padding: 16px; }
+  .pm-section-header { margin: -16px -16px 16px; }
+  .pm-actions .pm-refresh { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+</style>
+
+<main class="pm-shell">
+  <header class="pm-hero">
+    <div>
+      <p class="pm-kicker">MAIBOT / PERSONA CONTROL</p>
+      <h1>人设管理</h1>
+      <p class="pm-intro">统一管理会话人设、角色草稿与发布版本。QQ 端与控制台共享同一份设置。</p>
+    </div>
+    <div class="pm-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+  </header>
+
+  <p id="status" class="pm-status" role="status"></p>
+
+  <div class="pm-grid">
+    <section class="pm-section">
+      <header class="pm-section-header">
+        <span class="pm-section-index">01</span>
+        <h2>会话选择</h2>
+      </header>
+      <p class="pm-section-lead">选择群聊或私聊，然后为当前会话切换已发布的人设。</p>
+      <div class="pm-field">
+        <label for="session">会话</label>
+        <select id="session"></select>
+      </div>
+      <div class="pm-current">
+        <span class="pm-current-label">当前生效</span>
+        <span id="current" class="pm-current-value"></span>
+      </div>
+      <div class="pm-field">
+        <label for="target">已发布的人设</label>
+        <select id="target"></select>
+      </div>
+      <div class="pm-actions">
+        <button id="switch" class="pm-primary">切换人设</button>
+        <button id="refresh" class="pm-refresh">刷新会话</button>
+      </div>
+    </section>
+
+    <section class="pm-section">
+      <header class="pm-section-header">
+        <span class="pm-section-index">02</span>
+        <h2>QQ 管理员</h2>
+      </header>
+      <p class="pm-section-lead">账号本人始终保留管理权限，其他管理员号码使用逗号分隔。</p>
+      <div class="pm-field">
+        <label for="owner">本人 QQ</label>
+        <input id="owner" readonly>
+      </div>
+      <div class="pm-field">
+        <label for="managers">管理员 QQ</label>
+        <input id="managers" inputmode="numeric" autocomplete="off">
+      </div>
+      <div class="pm-actions">
+        <button id="saveManagers" class="pm-primary">保存管理员</button>
+      </div>
+    </section>
+
+    <section class="pm-section pm-section--wide">
+      <header class="pm-section-header">
+        <span class="pm-section-index">03</span>
+        <h2>人设卡</h2>
+      </header>
+      <p class="pm-section-lead">编辑现有角色，或从 Markdown / TXT 导入正文。修改会先保存为草稿，发布后才供回复使用。</p>
+
+      <div class="pm-card-editor-head">
+        <div class="pm-field">
+          <label for="card">编辑现有卡</label>
+          <select id="card"></select>
+        </div>
+        <button id="new">新建空白卡</button>
+      </div>
+
+      <div class="pm-field">
+        <label for="file">从 MD / TXT 导入</label>
+        <div class="pm-file"><input id="file" type="file" accept=".md,.txt,text/plain,text/markdown"></div>
+        <small class="pm-hint">导入后请检查名称、运行正文和备注，再保存草稿；原文会保留。</small>
+      </div>
+
+      <div class="pm-field">
+        <label for="name">角色名称</label>
+        <input id="name" maxlength="80" autocomplete="off">
+      </div>
+
+      <div class="pm-field">
+        <label for="body">运行正文</label>
+        <textarea id="body" spellcheck="false"></textarea>
+      </div>
+
+      <div class="pm-field">
+        <label for="notes">备注</label>
+        <textarea id="notes" spellcheck="false"></textarea>
+      </div>
+
+      <details>
+        <summary>查看导入原文</summary>
+        <pre id="original"></pre>
+      </details>
+
+      <div class="pm-actions">
+        <button id="save" class="pm-primary">保存草稿</button>
+        <button id="publish">发布草稿</button>
+        <button id="history">查看版本历史</button>
+      </div>
+      <div id="versions"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let state, imported = '';
+
+function status(message) {
+  $('status').textContent = message;
+}
+
+async function call(kind, name, args = {}) {
+  try {
+    return await window.maibot[kind](name, args);
+  } catch (error) {
+    status('操作失败：' + error.message);
+    throw error;
+  }
+}
+
+function options(element, items, selected) {
+  element.replaceChildren();
+  for (const [value, label] of items) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    element.append(option);
+  }
+  if (selected) element.value = selected;
+}
+
+function showCard() {
+  const card = state.cards.find(item => String(item.id) === $('card').value);
+  if (!card) return;
+  $('name').value = card.name;
+  $('body').value = card.draft_body;
+  $('notes').value = card.draft_notes;
+  $('original').textContent = card.original;
+  imported = '';
+}
+
+async function refresh() {
+  const prior = $('session').value;
+  state = await call('query', 'state');
+  const liveStreams = state.live?.streams || state.live || [];
+  let saved = state.saved?.data || state.saved?.results || state.saved?.result || state.saved || [];
+  if (!Array.isArray(saved)) saved = [];
+  const sessions = new Map();
+  for (const session of [...saved, ...(Array.isArray(liveStreams) ? liveStreams : [])]) {
+    if (session.session_id) sessions.set(session.session_id, session);
+  }
+  options($('session'), [...sessions.values()].map(session => [
+    session.session_id,
+    session.group_id
+      ? '群 ' + (session.group_name || session.group_id) + ' (' + session.group_id + ')'
+      : '私聊 ' + (session.user_nickname || session.user_id) + ' (' + session.user_id + ')'
+  ]), prior);
+  options($('target'), state.cards.filter(card => card.published_id).map(card => [card.name, card.name]));
+  options($('card'), state.cards.map(card => [String(card.id), card.name]));
+  $('owner').value = state.owner;
+  $('managers').value = state.managers.join(', ');
+  showCard();
+  $('session').onchange();
+  status('数据已刷新');
+}
+
+$('card').onchange = showCard;
+$('new').onclick = () => {
+  $('name').value = '';
+  $('body').value = '';
+  $('notes').value = '';
+  $('original').textContent = '';
+  imported = '';
+  $('name').focus();
+  status('已新建空白卡，填写后保存草稿');
+};
+$('session').onchange = () => {
+  $('current').textContent = state.selections[$('session').value] || '哈基米';
+};
+$('file').onchange = async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!/\.(md|txt)$/i.test(file.name)) {
+    status('请选择 MD 或 TXT 文件');
+    return;
+  }
+  imported = await file.text();
+  $('name').value = file.name.replace(/\.(md|txt)$/i, '');
+  $('body').value = imported;
+  $('notes').value = '';
+  $('original').textContent = imported;
+  status('文件已导入，请检查名称、运行正文和备注');
+};
+$('save').onclick = async () => {
+  await call('action', 'save', {
+    name: $('name').value,
+    body: $('body').value,
+    notes: $('notes').value,
+    original: imported || $('body').value
+  });
+  await refresh();
+  status('草稿已保存');
+};
+$('publish').onclick = async () => {
+  await call('action', 'publish', { name: $('name').value });
+  await refresh();
+  status('人设已发布');
+};
+$('switch').onclick = async () => {
+  const session = $('session').value;
+  if (!session) {
+    status('请先选择会话');
+    return;
+  }
+  status('正在整理近期对话，请稍候…');
+  let job = await call('action', 'switch', { session, name: $('target').value });
+  while (job.status === 'running') {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    job = await call('query', 'job', { session });
+  }
+  if (job.status === 'done') {
+    state.selections[session] = $('target').value;
+    $('session').onchange();
+  }
+  status(job.message);
+};
+$('saveManagers').onclick = async () => {
+  await call('action', 'managers', { qqs: $('managers').value });
+  await refresh();
+  status('管理员已保存');
+};
+$('refresh').onclick = refresh;
+$('history').onclick = async () => {
+  const result = await call('query', 'history', { name: $('name').value });
+  $('versions').replaceChildren();
+  for (const version of result.versions || []) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const body = document.createElement('pre');
+    const button = document.createElement('button');
+    summary.textContent = '版本 ' + version.id + ' · ' + new Date(version.created * 1000).toLocaleString();
+    body.textContent = version.body + '\n\n备注：' + version.notes;
+    button.textContent = '回退到此版本';
+    button.onclick = async () => {
+      await call('action', 'rollback', { name: $('name').value, version: version.id });
+      await refresh();
+      status('已回退到版本 ' + version.id);
+    };
+    details.append(summary, body, button);
+    $('versions').append(details);
+  }
+};
+
+window.maibot.ready.then(refresh).catch(error => status('初始化失败：' + error.message));
+</script>

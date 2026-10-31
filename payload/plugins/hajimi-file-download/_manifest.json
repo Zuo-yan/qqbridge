@@ -1,0 +1,42 @@
+{
+  "author": {
+    "name": "QQBridge community",
+    "url": "http://127.0.0.1:18001"
+  },
+  "manifest_version": 2,
+  "capabilities": [
+    "send.text",
+    "message.get_by_id",
+    "api.call"
+  ],
+  "license": "MIT",
+  "plugin_type": "tool",
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
+  },
+  "id": "local.file-download",
+  "name": "哈基米文件下载",
+  "sdk": {
+    "min_version": "2.8.2",
+    "max_version": "2.99.99"
+  },
+  "description": "按自然语言需求查看官网及GitHub发布文件，下载上传当前群或私聊",
+  "version": "1.0.3",
+  "dependencies": [
+    {
+      "version_spec": ">=3.10,<4",
+      "type": "python_package",
+      "name": "aiohttp"
+    }
+  ],
+  "urls": {
+    "repository": "https://github.com/Mai-with-u/MaiBot"
+  },
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  }
+}

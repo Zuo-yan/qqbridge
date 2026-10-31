@@ -1,0 +1,19 @@
+[plugin]
+enabled = true
+config_version = "3"
+
+[codex]
+codex_path = "codex"
+proxy_url = "127.0.0.1:7890"
+model = ""
+reasoning_effort = "medium"
+# 连续无活动才超时；会话记录、事件或图片写入有更新时继续轮询。
+# 另有固定 30 分钟总时长上限，不会随活动信号延长。
+timeout_seconds = 180.0
+max_concurrent_jobs = 4
+generated_dir = ""
+
+[compliance]
+enabled = true
+review_model = "vlm"
+timeout_ms = 60000

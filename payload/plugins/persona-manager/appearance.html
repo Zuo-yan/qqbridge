@@ -1,0 +1,407 @@
+<meta charset="utf-8">
+<style>
+:root {
+  --pm-paper: var(--retro-paper, var(--mil-screen, #eee6d5));
+  --pm-paper-deep: var(--retro-paper-deep, var(--mil-panel, #e3d9c5));
+  --pm-paper-soft: var(--retro-paper-soft, var(--mil-hi, #f8f3e6));
+  --pm-ink: var(--retro-ink, var(--mil-ink, #154b51));
+  --pm-ink-soft: var(--retro-ink-soft, var(--mil-print, #536a69));
+  --pm-line: var(--retro-line, var(--mil-line, #174d52));
+  --pm-rust: var(--retro-rust, var(--mil-hot, #bd572b));
+  --pm-rust-dark: var(--retro-rust-dark, var(--mil-danger, #903c21));
+  --pm-gold: var(--retro-gold, var(--mil-lo, #c79b46));
+  --pm-recessed: var(--retro-recessed, var(--mil-sunk, rgba(67, 48, 24, .08)));
+  --pm-recessed-strong: var(--retro-recessed-strong, var(--mil-lo, rgba(67, 48, 24, .13)));
+  --pm-font: var(--retro-font-body, var(--typography-font-family-base, "Microsoft YaHei UI", sans-serif));
+  --pm-mono: var(--typography-font-family-code, "JetBrains Mono", "Cascadia Mono", Consolas, monospace);
+  --pm-display: var(--retro-font-display, "Microsoft YaHei UI", sans-serif);
+  --pm-stroke: var(--retro-stroke, 2px);
+  --pm-control-height: 42px;
+  color: var(--pm-ink);
+  font-family: var(--pm-font);
+}
+
+* { box-sizing: border-box; }
+body {
+  width: min(100% - 32px, 1040px);
+  margin: 22px auto 56px;
+  color: var(--pm-ink);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.pm-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: end;
+  padding: 18px 20px 20px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper);
+  box-shadow: 5px 5px 0 var(--pm-recessed-strong);
+}
+.pm-hero::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 5px;
+  content: "";
+  background: linear-gradient(90deg, var(--pm-ink) 0 32%, var(--pm-gold) 32% 66%, var(--pm-rust) 66%);
+}
+.pm-kicker,
+.pm-section-index,
+.pm-hint,
+.pm-status {
+  font-family: var(--pm-mono);
+  letter-spacing: .06em;
+}
+.pm-kicker {
+  margin: 4px 0 6px;
+  color: var(--pm-rust-dark);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+h1 {
+  margin: 0;
+  font-family: var(--pm-display);
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.1;
+  letter-spacing: .04em;
+}
+.pm-intro {
+  max-width: 660px;
+  margin: 8px 0 0;
+  color: var(--pm-ink-soft);
+  font-size: 14px;
+}
+.pm-mark {
+  display: grid;
+  grid-template-columns: repeat(3, 13px);
+  gap: 4px;
+  padding: 8px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+}
+.pm-mark span { height: 34px; border: 1px solid var(--pm-line); }
+.pm-mark span:nth-child(1) { background: var(--pm-ink); }
+.pm-mark span:nth-child(2) { background: var(--pm-gold); }
+.pm-mark span:nth-child(3) { background: var(--pm-rust); }
+
+.pm-status {
+  min-height: 35px;
+  margin: 12px 0;
+  padding: 9px 12px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-recessed);
+  color: var(--pm-ink-soft);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.pm-status:empty { display: none; }
+.pm-status::before {
+  margin-right: 8px;
+  color: var(--pm-rust);
+  content: "▸";
+}
+
+.pm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.pm-section {
+  position: relative;
+  min-width: 0;
+  padding: 18px 20px 20px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+  box-shadow: 4px 4px 0 var(--pm-recessed-strong);
+}
+.pm-section--wide { grid-column: 1 / -1; }
+.pm-section-header {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin: -18px -20px 18px;
+  padding: 13px 16px 11px;
+  border-bottom: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-recessed);
+}
+.pm-section-index {
+  color: var(--pm-rust);
+  font-size: 11px;
+  font-weight: 800;
+}
+h2 {
+  margin: 0;
+  font-family: var(--pm-display);
+  font-size: 20px;
+  letter-spacing: .04em;
+}
+.pm-section-lead {
+  margin: 0 0 16px;
+  color: var(--pm-ink-soft);
+  font-size: 13px;
+}
+
+.pm-field { margin-top: 15px; }
+.pm-field:first-of-type { margin-top: 0; }
+label,
+.pm-label {
+  display: block;
+  margin: 0 0 6px;
+  color: var(--pm-ink);
+  font-family: var(--pm-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+input,
+select,
+textarea,
+button,
+.pm-file {
+  border-radius: 0;
+  font: inherit;
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-height: var(--pm-control-height);
+  padding: 9px 11px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  outline: 0;
+  background: var(--pm-paper);
+  color: var(--pm-ink);
+  box-shadow: inset 3px 3px 0 var(--pm-recessed);
+  transition: background-color .14s ease, border-color .14s ease;
+}
+select {
+  padding-right: 34px;
+  cursor: pointer;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--pm-rust);
+  background: var(--pm-paper-soft);
+  box-shadow: inset 3px 3px 0 var(--pm-recessed), 0 0 0 2px var(--pm-rust);
+}
+input[readonly] {
+  color: var(--pm-ink-soft);
+  background: var(--pm-recessed);
+}
+textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.65;
+}
+#notes { min-height: 74px; }
+
+.pm-file {
+  display: flex;
+  align-items: center;
+  min-height: var(--pm-control-height);
+  padding: 6px;
+  border: var(--pm-stroke) dashed var(--pm-line);
+  background: var(--pm-recessed);
+}
+.pm-file input {
+  min-height: 0;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.pm-file input:focus { box-shadow: none; }
+
+.pm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: var(--pm-stroke) solid var(--pm-line);
+  background: var(--pm-paper-soft);
+  color: var(--pm-ink);
+  box-shadow: 3px 3px 0 var(--pm-recessed-strong);
+  cursor: pointer;
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+button:hover {
+  background: var(--pm-recessed-strong);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--pm-recessed-strong);
+}
+button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--pm-recessed-strong);
+}
+button:focus-visible {
+  outline: 2px solid var(--pm-rust);
+  outline-offset: 3px;
+}
+button.pm-primary {
+  border-color: var(--pm-rust-dark);
+  background: var(--pm-rust);
+  color: var(--pm-paper);
+  box-shadow: 3px 3px 0 var(--pm-rust-dark);
+}
+button.pm-primary:hover {
+  background: var(--pm-rust-dark);
+  box-shadow: 4px 4px 0 var(--pm-ink);
+}
+.pm-actions .pm-refresh { margin-left: auto; }
+
+.pm-current {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 4px solid var(--pm-rust);
+  background: var(--pm-recessed);
+  font-size: 13px;
+}
+.pm-current-label {
+  color: var(--pm-ink-soft);
+  font-family: var(--pm-mono);
+  font-size: 11px;
+}
+.pm-current-value { font-weight: 700; }
+
+.pm-card-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+}
+.pm-card-editor-head .pm-field { flex: 1 1 240px; margin-top: 0; }
+.pm-card-editor-head button { flex: none; }
+.pm-hint {
+  display: block;
+  margin-top: 7px;
+  color: var(--pm-ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+details {
+  margin-top: 15px;
+  border: 1px solid var(--pm-line);
+  background: var(--pm-paper);
+}
+summary {
+  padding: 9px 11px;
+  color: var(--pm-ink);
+  cursor: pointer;
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+details > pre { margin: 0; padding: 12px; border-top: 1px solid var(--pm-line); }
+pre {
+  max-height: 300px;
+  overflow: auto;
+  color: var(--pm-ink-soft);
+  font-family: var(--pm-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#versions { display: grid; gap: 8px; margin-top: 12px; }
+#versions:empty { display: none; }
+#versions details { margin-top: 0; }
+#versions details > pre { max-height: 180px; }
+#versions button { margin: 0 12px 12px; }
+
+@media (max-width: 760px) {
+  body { width: min(100% - 20px, 1040px); margin-top: 12px; }
+  .pm-hero { grid-template-columns: 1fr; padding: 16px; }
+  .pm-mark { display: none; }
+  .pm-grid { grid-template-columns: 1fr; }
+  .pm-section--wide { grid-column: auto; }
+  .pm-section { padding: 16px; }
+  .pm-section-header { margin: -16px -16px 16px; }
+  .pm-actions .pm-refresh { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+</style>
+
+
+<style>
+.ap-preview {width:112px;height:112px;object-fit:cover;border-radius:16px;border:2px solid var(--pm-ink);background:var(--pm-paper-deep)}
+.ap-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.ap-record{border-top:1px solid var(--pm-ink-soft);padding:12px 0;overflow-wrap:anywhere}
+button:disabled{opacity:.5;cursor:not-allowed}.ap-help{font-size:14px;line-height:1.7}#status{white-space:pre-wrap}
+@media(max-width:760px){.pm-shell{padding-bottom:190px}}
+</style>
+<main class="pm-shell">
+ <header class="pm-hero"><div><p class="pm-kicker">MAIBOT / QQ APPEARANCE</p><h1>QQ 外观</h1><p class="pm-intro">保存头像与昵称，手动切换整个 QQ 账号的外观。会话人设独立选择。</p></div></header>
+ <p id="status" class="pm-status" role="status">正在读取外观预设…</p>
+ <div class="pm-grid">
+  <section class="pm-section"><header class="pm-section-header"><span class="pm-section-index">01</span><h2>切换账号外观</h2></header>
+   <div class="pm-field"><label for="preset">外观预设</label><select id="preset"></select></div>
+   <div class="ap-row"><img id="preview" class="ap-preview" alt="所选预设头像" hidden><div><p id="detail"></p><p id="current"></p><p id="cooldown"></p></div></div>
+   <p class="ap-help">所有群和私聊共用这套账号外观；群名片、好友备注可能覆盖昵称。头像显示可能受缓存或审核影响。</p>
+   <div class="pm-actions"><button id="switch" class="pm-primary">切换外观</button><button id="refresh">刷新状态</button><button id="capture">备份当前外观</button></div>
+   <p class="ap-help">首次切换前自动保存「默认外观」，之后可选择它恢复。每次尝试间隔 5 分钟，失败后也需等待。</p>
+  </section>
+  <section class="pm-section"><header class="pm-section-header"><span class="pm-section-index">02</span><h2>编辑预设</h2></header>
+   <div class="pm-field"><label for="name">预设名称</label><input id="name" maxlength="80" placeholder="例如：哈基米"></div>
+   <div class="pm-field"><label for="nickname">QQ 昵称</label><input id="nickname" placeholder="输入账号昵称"></div>
+   <div class="pm-field"><label for="file">头像图片</label><input id="file" type="file" accept="image/png,image/jpeg"></div>
+   <p class="ap-help">PNG / JPG，不超过 2 MB；保存时居中裁为正方形。编辑已有预设时不选图片可保留原头像。</p>
+   <img id="uploadPreview" class="ap-preview" alt="新头像预览" hidden>
+   <div class="pm-actions"><button id="save" class="pm-primary">保存预设</button><button id="new">新建预设</button></div>
+   <p class="ap-help">保存只更新预设。点击「切换外观」才会修改 QQ 资料。「默认外观」作为恢复备份保留。</p>
+  </section>
+  <section class="pm-section pm-editor"><header class="pm-section-header"><span class="pm-section-index">03</span><h2>最近操作</h2></header><div id="history"></div></section>
+ </div>
+</main>
+<script>
+const $=id=>document.getElementById(id); let state,selectedImage=null,pollTimer;
+const status=message=>$('status').textContent=message;
+async function call(kind,name,args={}){try{const r=await window.maibot[kind](name,args);if(r?.ok===false)throw new Error(r.message);return r}catch(error){status('操作失败：'+error.message);throw error}}
+function show(){const p=state.presets.find(p=>p.name===$('preset').value);if(!p)return;
+ $('detail').textContent=p.ready?'昵称：'+p.nickname:'待配置：请保存头像和昵称';$('preview').hidden=!p.preview;if(p.preview)$('preview').src=p.preview;
+ $('name').value=p.name;$('nickname').value=p.nickname;$('file').value='';selectedImage=null;$('uploadPreview').hidden=true;
+ const backup=p.name==='默认外观';['name','nickname','file','save'].forEach(id=>$(id).disabled=backup);
+ $('switch').disabled=!p.ready||state.job.status==='running'||state.cooldown_seconds>0;
+}
+async function refresh(){clearTimeout(pollTimer);const selected=$('preset').value;state=await call('query','state');$('preset').replaceChildren();
+ for(const p of state.presets){const o=document.createElement('option');o.value=p.name;o.textContent=p.name+(p.ready?'':' · 待配置');$('preset').append(o)}
+ if(state.presets.some(p=>p.name===selected))$('preset').value=selected;
+ $('current').textContent='最近确认的外观：'+(state.current||'未确认');$('cooldown').textContent='剩余冷却：'+state.cooldown_seconds+' 秒';
+ const j=state.job;status(j.message||'预设已就绪。请配置四套外观后再切换。');
+ if(j.nickname)status($('status').textContent+'\n昵称：'+field(j.nickname)+'；头像：'+field(j.avatar));
+ $('capture').disabled=j.status==='running';$('history').replaceChildren();
+ for(const log of state.history){const row=document.createElement('div');row.className='ap-record';const result=JSON.parse(log.result);row.textContent=new Date(log.created*1000).toLocaleString()+' · '+log.actor+' · '+log.target+' · '+result.message;$('history').append(row)}
+ if(!state.history.length)$('history').textContent='暂无操作记录';show();
+ if(j.status==='running')pollTimer=setTimeout(()=>refresh().catch(()=>{}),2000);
+}
+function field(value){return ({pending:'未执行',unknown:'等待确认',accepted:'QQ 已接受',failed_or_unknown:'失败或结果未知'})[value]||value}
+$('preset').onchange=show;$('refresh').onclick=()=>refresh().catch(()=>{});
+$('new').onclick=()=>{['name','nickname','file','save'].forEach(id=>$(id).disabled=false);$('name').value='';$('nickname').value='';$('file').value='';selectedImage=null;$('uploadPreview').hidden=true;$('name').focus()};
+$('file').onchange=async()=>{selectedImage=null;$('uploadPreview').hidden=true;const file=$('file').files[0];if(!file)return;
+ if(!['image/png','image/jpeg'].includes(file.type)||file.size>2*1024*1024){$('file').value='';status('请选择不超过 2 MB 的 PNG 或 JPG');return}
+ selectedImage=file;const reader=new FileReader();reader.onload=()=>{$('uploadPreview').src=String(reader.result);$('uploadPreview').hidden=false};reader.readAsDataURL(file);
+};
+$('save').onclick=async()=>{const name=$('name').value;try{$('save').disabled=true;const args={name,nickname:$('nickname').value};if(selectedImage){const r=await window.maibot.upload('avatar',selectedImage,args);if(r?.ok===false)throw new Error(r.message)}else{await call('action','save',args)}await refresh();$('preset').value=name;show();status('预设已保存，尚未修改 QQ 外观')}catch(error){status('保存失败：'+error.message)}finally{$('save').disabled=$('name').value==='默认外观'}};
+$('capture').onclick=async()=>{try{await call('action','capture');await refresh()}catch{}};
+$('switch').onclick=async()=>{try{$('switch').disabled=true;await call('action','switch',{name:$('preset').value});await refresh()}catch{$('switch').disabled=false}};
+window.maibot.ready.then(refresh).catch(error=>status('初始化失败：'+error.message));
+</script>

@@ -1,0 +1,122 @@
+[inner]
+version = "1.17.24"
+
+[web]
+preview_chars = 4000
+
+[[models]]
+model_type = "llm"
+model_identifier = "@@LLM_MODEL@@"
+name = "primary"
+api_provider = "PrimaryProvider"
+price_in = 0.0
+cache = false
+cache_price_in = 0.0
+price_out = 0.0
+price_periods = []
+send_temperature = true
+force_stream_mode = false
+visual = true
+
+[models.extra_params.reasoning]
+effort = "none"
+
+[model_task_config.web_search]
+model_list = []
+
+[model_task_config.replyer]
+model_list = ["primary"]
+max_tokens = 2524
+temperature = 0.7
+selection_strategy = "random"
+hard_timeout = 90
+
+[model_task_config.planner]
+model_list = ["primary"]
+max_tokens = 2048
+temperature = 0.7
+selection_strategy = "random"
+hard_timeout = 90
+
+[model_task_config.memory]
+model_list = ["primary"]
+max_tokens = 2048
+temperature = 0.4
+selection_strategy = "random"
+hard_timeout = 90
+
+[model_task_config.utils]
+model_list = ["primary"]
+max_tokens = 1024
+temperature = 0.3
+selection_strategy = "random"
+hard_timeout = 90
+
+[model_task_config.learner]
+model_list = ["primary"]
+max_tokens = 1024
+temperature = 0.3
+selection_strategy = "balance"
+hard_timeout = 90
+
+[model_task_config.fast_model]
+model_list = ["primary"]
+max_tokens = 1024
+temperature = 0.3
+selection_strategy = "balance"
+hard_timeout = 90
+
+[model_task_config.emoji]
+model_list = ["primary"]
+max_tokens = 1024
+temperature = 0.5
+selection_strategy = "balance"
+hard_timeout = 90
+
+[model_task_config.vlm]
+model_list = ["primary"]
+max_tokens = 1024
+temperature = 0.3
+selection_strategy = "balance"
+hard_timeout = 90
+
+[model_task_config.voice]
+model_list = []
+max_tokens = 8192
+temperature = 0.7
+selection_strategy = "balance"
+hard_timeout = 120
+
+[model_task_config.embedding]
+model_list = []
+max_tokens = 4096
+temperature = 0.7
+selection_strategy = "balance"
+hard_timeout = 60
+
+[model_task_config.image_embedding]
+model_list = []
+max_tokens = 4096
+temperature = 0.7
+selection_strategy = "balance"
+hard_timeout = 60
+
+[[api_providers]]
+name = "PrimaryProvider"
+base_url = "@@LLM_BASE_URL@@"
+api_key = "@@LLM_API_KEY@@"
+client_type = "@@LLM_CLIENT_TYPE@@"
+auth_type = "bearer"
+auth_header_name = "Authorization"
+auth_header_prefix = "Bearer"
+auth_query_name = "api_key"
+model_list_endpoint = "/models"
+reasoning_parse_mode = "auto"
+tool_argument_parse_mode = "auto"
+max_retry = 1
+timeout = 60
+retry_interval = 2
+
+[api_providers.default_headers]
+
+[api_providers.default_query]

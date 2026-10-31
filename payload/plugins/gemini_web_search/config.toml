@@ -1,0 +1,23 @@
+[plugin]
+config_version = "1.0.0"
+enabled = false
+
+[provider]
+base_url = "@@SEARCH_BASE_URL@@"
+api_key = "@@SEARCH_API_KEY@@"
+model = "@@SEARCH_MODEL@@"
+timeout_seconds = 90.0
+
+[search]
+default_sources = 6
+max_sources = 10
+max_output_tokens = 1800
+max_output_chars = 12000
+cache_ttl_seconds = 300
+max_uses = 3
+
+[fetch]
+max_content_chars = 10000
+max_bytes = 5000000
+timeout_seconds = 30.0
+max_redirects = 5

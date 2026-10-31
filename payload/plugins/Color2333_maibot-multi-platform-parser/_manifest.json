@@ -1,0 +1,54 @@
+{
+  "manifest_version": 2,
+  "id": "Color2333.maibot-multi-platform-parser",
+  "version": "1.0.2",
+  "name": "多平台链接解析",
+  "description": "自动解析抖音、小红书、小黑盒等平台链接，并把图文/视频发送到 QQ 群。MaiBot 移植版，迁移来源：Zhalslar/astrbot_plugin_parser。",
+  "author": {
+    "name": "Color2333",
+    "url": "https://github.com/Color2333"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/Color2333/maibot-multi-platform-parser"
+  },
+  "host_application": {
+    "min_version": "1.0.0",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [
+    {
+      "type": "python_package",
+      "name": "aiofiles",
+      "version_spec": ">=25.1.0"
+    },
+    {
+      "type": "python_package",
+      "name": "msgspec",
+      "version_spec": ">=0.21.0"
+    },
+    {
+      "type": "python_package",
+      "name": "yt-dlp",
+      "version_spec": ">=2026.3.17"
+    },
+    {
+      "type": "python_package",
+      "name": "bilibili-api-python",
+      "version_spec": ">=17.4.1"
+    }
+  ],
+  "capabilities": [
+    "send.text",
+    "send.custom",
+    "config.get",
+    "send.forward"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN"
+  }
+}

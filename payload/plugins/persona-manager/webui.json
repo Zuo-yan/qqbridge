@@ -1,0 +1,195 @@
+{
+  "schema_version": 2,
+  "required_capabilities": [
+    "custom_pages",
+    "image_upload"
+  ],
+  "workspace_title": "人设管理",
+  "pages": [
+    {
+      "id": "personas",
+      "title": "人设管理",
+      "placement": "workspace",
+      "mode": "custom",
+      "entry": "manager.html",
+      "queries": {
+        "state": {
+          "api": "persona.state",
+          "parameters": {}
+        },
+        "history": {
+          "api": "persona.history",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            }
+          }
+        },
+        "job": {
+          "api": "persona.job",
+          "parameters": {
+            "session": {
+              "type": "string",
+              "required": true,
+              "max_length": 255
+            }
+          }
+        }
+      },
+      "actions": {
+        "save": {
+          "api": "persona.save",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            },
+            "body": {
+              "type": "string",
+              "required": true,
+              "max_length": 45000
+            },
+            "notes": {
+              "type": "string",
+              "required": true,
+              "max_length": 4000
+            },
+            "original": {
+              "type": "string",
+              "required": true,
+              "max_length": 45000
+            }
+          }
+        },
+        "publish": {
+          "api": "persona.publish",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            }
+          },
+          "confirmation": "发布草稿，供后续回复使用？"
+        },
+        "rollback": {
+          "api": "persona.rollback",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            },
+            "version": {
+              "type": "integer",
+              "required": true
+            }
+          },
+          "confirmation": "将这个版本设为当前发布版本？"
+        },
+        "switch": {
+          "api": "persona.switch",
+          "parameters": {
+            "session": {
+              "type": "string",
+              "required": true,
+              "max_length": 255
+            },
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            }
+          },
+          "confirmation": "确认切换该会话的人设？"
+        },
+        "managers": {
+          "api": "persona.managers",
+          "parameters": {
+            "qqs": {
+              "type": "string",
+              "required": true,
+              "max_length": 4000
+            }
+          },
+          "confirmation": "确认更新 QQ 管理员名单？"
+        }
+      }
+    },
+    {
+      "id": "appearance",
+      "title": "外观",
+      "placement": "workspace",
+      "mode": "custom",
+      "entry": "appearance.html",
+      "queries": {
+        "state": {
+          "api": "appearance.state",
+          "parameters": {}
+        }
+      },
+      "uploads": {
+        "avatar": {
+          "action": "upload",
+          "image_max_edge": 640
+        }
+      },
+      "actions": {
+        "save": {
+          "api": "appearance.save",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            },
+            "nickname": {
+              "type": "string",
+              "required": true,
+              "max_length": 60
+            }
+          }
+        },
+        "upload": {
+          "api": "appearance.upload",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            },
+            "nickname": {
+              "type": "string",
+              "required": true,
+              "max_length": 60
+            },
+            "upload_id": {
+              "type": "string",
+              "required": true,
+              "max_length": 64
+            }
+          }
+        },
+        "capture": {
+          "api": "appearance.capture",
+          "parameters": {},
+          "confirmation": "将当前 QQ 外观保存为首次恢复备份？已有备份将保留。"
+        },
+        "switch": {
+          "api": "appearance.switch",
+          "parameters": {
+            "name": {
+              "type": "string",
+              "required": true,
+              "max_length": 80
+            }
+          },
+          "confirmation": "这会修改整个 QQ 账号的头像和昵称，影响所有群和私聊。确认切换？"
+        }
+      }
+    }
+  ]
+}

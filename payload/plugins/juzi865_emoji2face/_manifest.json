@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "id": "juzi865.emoji2face",
+  "version": "1.0.0",
+  "name": "Emoji 转 QQ 表情",
+  "description": "将 Unicode emoji 自动转换为 QQ 自定义表情（face 类型），让 bot 发的表情更贴近 QQ 原生体验。",
+  "author": {
+    "name": "juzi865",
+    "url": "https://github.com/juzi865"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/juzi865/emoji2face",
+    "homepage": "https://github.com/juzi865/emoji2face"
+  },
+  "host_application": {
+    "min_version": "1.0.0",
+    "max_version": "1.99.99"
+  },
+  "sdk": {
+    "min_version": "2.3.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [],
+  "capabilities": [
+    "hook.send_service.before_send"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN"
+  }
+}

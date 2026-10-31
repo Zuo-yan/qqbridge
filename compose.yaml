@@ -1,0 +1,93 @@
+name: qqbridge
+
+services:
+  maibot:
+    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.0.0}
+    build:
+      context: ./image
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ${MAIBOT_BASE_IMAGE}
+    container_name: qqbridge-maibot
+    hostname: maibot
+    restart: unless-stopped
+    stop_grace_period: 70s
+    mem_limit: ${MAIBOT_MEMORY_LIMIT:-1024m}
+    pids_limit: 512
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      EULA_AGREE: 8e6e7d647f7f82d6ea98456b73908656
+      PRIVACY_AGREE: 91e5db7659c560bc3545e63859b6ebc0
+      WEBUI_HOST: 0.0.0.0
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
+      MAIBOT_LEGACY_0X_UPGRADE_CONFIRMED: "1"
+      QQBRIDGE_OWNER_QQ: ${OWNER_QQ:-}
+      QQBRIDGE_BOT_QQ: ${BOT_QQ:-}
+      QQBRIDGE_ONEBOT_TOKEN: ${ONEBOT_TOKEN}
+    ports:
+      - "${MAIBOT_BIND:-0.0.0.0}:${MAIBOT_PORT:-18001}:8001"
+    volumes:
+      - "${INSTANCE_DIR}/config:/MaiMBot/config"
+      - "${INSTANCE_DIR}/data:/MaiMBot/data"
+      - "${INSTANCE_DIR}/plugins:/MaiMBot/plugins"
+      - "${INSTANCE_DIR}/logs:/MaiMBot/logs"
+      - "${INSTANCE_DIR}/depends-data:/MaiMBot/depends-data"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import socket; s=socket.create_connection(('127.0.0.1',8001),5); s.close()"
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    networks:
+      - qqbridge
+
+  napcat:
+    image: ${NAPCAT_BASE_IMAGE}
+    container_name: qqbridge-napcat
+    hostname: napcat
+    restart: unless-stopped
+    stop_grace_period: 30s
+    mem_limit: ${NAPCAT_MEMORY_LIMIT:-1024m}
+    pids_limit: 512
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      NAPCAT_UID: ${NAPCAT_UID:-1000}
+      NAPCAT_GID: ${NAPCAT_GID:-1000}
+      MODE: astrbot
+      WEBUI_TOKEN: ${WEBUI_TOKEN}
+    ports:
+      - "${NAPCAT_BIND:-0.0.0.0}:${NAPCAT_PORT:-6099}:6099"
+      - "127.0.0.1:${ONEBOT_PORT:-3001}:3001"
+    volumes:
+      - "${INSTANCE_DIR}/napcat/config:/app/napcat/config"
+      - "${INSTANCE_DIR}/napcat/ntqq:/app/.config/QQ"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -c "exec 3<>/dev/tcp/127.0.0.1/6099"
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    networks:
+      - qqbridge
+
+networks:
+  qqbridge:
+    name: qqbridge-network
+    driver: bridge

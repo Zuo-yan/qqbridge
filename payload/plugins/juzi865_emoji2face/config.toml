@@ -1,0 +1,7 @@
+[plugin]
+enabled = true
+config_version = "1.0.0"
+
+[convert]
+mode = "auto"
+max_emoji_per_message = 5
