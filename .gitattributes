@@ -1,2 +1,3 @@
 # Package integrity uses the SHA-256 of each file's exact bytes.
 * -text
+*.cmd whitespace=cr-at-eol

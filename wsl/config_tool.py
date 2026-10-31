@@ -8,6 +8,7 @@ import re
 import secrets
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -40,9 +41,17 @@ def read_text(path: Path) -> str:
 
 def write_text(path: Path, value: str, mode: int | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(value, encoding="utf-8", newline="\n")
-    if mode is not None:
-        path.chmod(mode)
+    # Bind-mounted files are replaced atomically; configure.sh recreates containers
+    # so they reopen the new inode. Retain the existing private mode when editing.
+    effective_mode = mode if mode is not None else (path.stat().st_mode & 0o777 if path.exists() else 0o600)
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(value)
+        os.chmod(temporary, effective_mode)
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
 
 
 def load_env(path: Path) -> dict[str, str]:

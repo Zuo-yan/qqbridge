@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "package_version": "1.1.2",
+  "package_version": "1.2.0",
   "plugins": [
     {
       "name": "codex-draw",

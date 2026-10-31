@@ -7,3 +7,6 @@ logs/
 *.log
 __pycache__/
 *.pyc
+# Local deployment configuration belongs outside the distributable package.
+deploy.local.json
+qqbridge-config.json

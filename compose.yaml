@@ -2,7 +2,7 @@ name: ${COMPOSE_PROJECT_NAME:-qqbridge}
 
 services:
   maibot:
-    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.1.2}
+    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.2.0}
     build:
       context: ./image
       dockerfile: Dockerfile
@@ -26,7 +26,7 @@ services:
       QQBRIDGE_BOT_QQ: ${BOT_QQ:-}
       QQBRIDGE_ONEBOT_TOKEN: ${ONEBOT_TOKEN}
     ports:
-      - "${MAIBOT_BIND:-0.0.0.0}:${MAIBOT_PORT:-18001}:8001"
+      - "${MAIBOT_BIND:-127.0.0.1}:${MAIBOT_PORT:-18001}:8001"
     volumes:
       - "${INSTANCE_DIR}/config:/MaiMBot/config"
       - "${INSTANCE_DIR}/data:/MaiMBot/data"
@@ -66,7 +66,7 @@ services:
       MODE: astrbot
       WEBUI_TOKEN: ${WEBUI_TOKEN}
     ports:
-      - "${NAPCAT_BIND:-0.0.0.0}:${NAPCAT_PORT:-6099}:6099"
+      - "${NAPCAT_BIND:-127.0.0.1}:${NAPCAT_PORT:-6099}:6099"
       - "127.0.0.1:${ONEBOT_PORT:-3001}:3001"
     volumes:
       - "${INSTANCE_DIR}/napcat/config:/app/napcat/config"

@@ -34,24 +34,35 @@ OLD_RELEASE="$INSTALL_ROOT/releases/$PREVIOUS_VERSION"
 INSTANCE="$INSTALL_ROOT/instances/default"
 ENV_FILE="$INSTANCE/.env"
 if [[ -f "$ENV_FILE" && -e "$INSTALL_ROOT/current" ]]; then
-  compose "$TARGET_USER" "$INSTALL_ROOT" "$ENV_FILE" down --remove-orphans || true
+  compose "$TARGET_USER" "$INSTALL_ROOT" "$ENV_FILE" down --remove-orphans || die "could not stop containers; instance files were preserved"
 fi
 
 log "restoring backup $BACKUP_ID"
-case "$INSTANCE" in
-  "$INSTALL_ROOT"/instances/default) ;;
-  *) die "refusing unsafe instance path: $INSTANCE" ;;
-esac
-rm -rf -- "$INSTANCE"
-tar -C "$INSTALL_ROOT/instances" -xzf "$BACKUP_DIR/instance.tar.gz"
-[[ -f "$INSTANCE/config/bot_config.toml" ]] || die "restored instance is invalid"
+mkdir -p "$INSTALL_ROOT/recovery"
+RECOVERY="$(mktemp -d "$INSTALL_ROOT/recovery/rollback-$BACKUP_ID-XXXXXX")"
+chmod 700 "$INSTALL_ROOT/recovery" "$RECOVERY"
+mkdir "$RECOVERY/restored"
+tar -C "$RECOVERY/restored" -xzf "$BACKUP_DIR/instance.tar.gz"
+[[ -f "$RECOVERY/restored/default/config/bot_config.toml" && -f "$RECOVERY/restored/default/.env" ]] || die "restored instance is invalid; current instance was preserved"
+if [[ -e "$INSTANCE" || -L "$INSTANCE" ]]; then
+  mv -- "$INSTANCE" "$RECOVERY/previous-instance"
+fi
+if ! mv -- "$RECOVERY/restored/default" "$INSTANCE"; then
+  if [[ -e "$RECOVERY/previous-instance" ]]; then
+    mv -- "$RECOVERY/previous-instance" "$INSTANCE" || true
+  fi
+  die "could not activate restored instance; recovery files are at $RECOVERY"
+fi
+log "previous instance preserved at $RECOVERY/previous-instance"
 
 ln -sfn "releases/$PREVIOUS_VERSION" "$INSTALL_ROOT/current"
-chown -R "$TARGET_USER:$TARGET_USER" "$INSTANCE"
-chmod 600 "$INSTANCE/.env" "$INSTANCE/config/"*.toml "$INSTANCE/napcat/config/"*.json
+TARGET_GROUP="$(id -gn "$TARGET_USER")"
+chown -R "$TARGET_USER:$TARGET_GROUP" "$INSTANCE"
+secure_instance_files "$INSTANCE"
 
 compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d --build
 wait_for_health qqbridge-maibot 240 || die "MaiBot did not become healthy after rollback"
 wait_for_health qqbridge-napcat 180 || die "NapCat did not become healthy after rollback"
+secure_instance_files "$INSTANCE"
 prune_backups "$INSTALL_ROOT" 3
 log "rollback complete: restored version $PREVIOUS_VERSION from $BACKUP_ID"

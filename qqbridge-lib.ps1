@@ -25,6 +25,73 @@ function ConvertTo-CleanText {
     return (($Text -replace '[\x00-\x1F\x7F]', '')).Trim()
 }
 
+function Assert-InstallRoot {
+    param([Parameter(Mandatory)][string]$Path)
+    # 路径稍后会传给 Linux；限制为单个、无 shell 元字符的目录，并禁止宿主机挂载路径。
+    if ($Path -notmatch '^(~/|/)[A-Za-z0-9_][A-Za-z0-9_./-]*$' -or
+        $Path -match '(^|/)\.\.?(/|$)' -or $Path -match '^/(mnt|proc|sys|dev|etc|bin|sbin|usr)(/|$)') {
+        Stop-QQBridge '请使用 WSL 内的独立目录，例如 ~/qqbridge 或 /srv/qqbridge；不能使用 Windows 盘符、空格、.. 或系统目录。'
+    }
+}
+
+function Test-ModelBaseUrl {
+    param([AllowEmptyString()][string]$Value)
+    $parsed = $null
+    return ([uri]::TryCreate($Value, [UriKind]::Absolute, [ref]$parsed) -and
+        $parsed.Scheme -in @('http', 'https') -and $parsed.Host -and -not $parsed.UserInfo -and
+        -not $parsed.Query -and -not $parsed.Fragment -and $Value -notmatch '[\x00-\x20\x7f"\\]')
+}
+
+function Read-QqNumber {
+    param([Parameter(Mandatory)][string]$Prompt)
+    while ($true) {
+        $value = ConvertTo-CleanText (Read-Host $Prompt)
+        if (-not $value -or $value -match '^[0-9]{5,12}$') { return $value }
+        Write-Host 'QQ 号应为 5-12 位数字，请重新输入。' -ForegroundColor Yellow
+    }
+}
+
+function Read-LocalSecret {
+    param([Parameter(Mandatory)][string]$Title, [Parameter(Mandatory)][string]$Prompt, [switch]$AllowEmpty)
+    Add-Type -AssemblyName System.Windows.Forms
+    Add-Type -AssemblyName System.Drawing
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = $Title
+    $form.Size = New-Object System.Drawing.Size(530, 220)
+    $form.StartPosition = 'CenterScreen'
+    $form.FormBorderStyle = 'FixedDialog'
+    $form.MaximizeBox = $false
+    $form.MinimizeBox = $false
+    $label = New-Object System.Windows.Forms.Label
+    $label.Text = $Prompt
+    $label.SetBounds(16, 16, 480, 55)
+    $inputBox = New-Object System.Windows.Forms.TextBox
+    $inputBox.UseSystemPasswordChar = $true
+    $inputBox.SetBounds(16, 78, 480, 26)
+    $ok = New-Object System.Windows.Forms.Button
+    $ok.Text = '确定'
+    $ok.SetBounds(310, 125, 85, 28)
+    $cancel = New-Object System.Windows.Forms.Button
+    $cancel.Text = '取消'
+    $cancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $cancel.SetBounds(410, 125, 85, 28)
+    $ok.Add_Click({
+        if ($inputBox.Text -match '[\x00-\x20\x7f]' -or $inputBox.Text -match '^https?://') {
+            [void][System.Windows.Forms.MessageBox]::Show('Key 不能包含空白、控制字符，也不能是 URL。请重新粘贴。', '输入无效')
+        } elseif ($inputBox.Text -or $AllowEmpty) {
+            $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+            $form.Close()
+        } else { [void][System.Windows.Forms.MessageBox]::Show('API Key 不能为空。', '输入无效') }
+    })
+    $form.Controls.AddRange(@($label, $inputBox, $ok, $cancel))
+    $form.AcceptButton = $ok
+    $form.CancelButton = $cancel
+    try {
+        if ($form.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { Stop-QQBridge '用户取消凭据输入；未开始写入部署配置。' }
+        return $inputBox.Text
+    } finally { $inputBox.Clear(); $form.Dispose() }
+}
+
 function Test-IsAdministrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($identity)
@@ -36,17 +103,14 @@ function Restart-Elevated {
         [Parameter(Mandatory)][string]$EntryScript,
         [object[]]$Arguments = @()
     )
-    $quoted = @()
-    foreach ($value in $Arguments) {
-        $quoted += '"' + ([string]$value).Replace('"', '\"') + '"'
-    }
-    $argumentLine = "-NoExit -NoProfile -ExecutionPolicy Bypass -File `"$EntryScript`" " + ($quoted -join ' ')
-    Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentLine
-    exit 0
+    $values = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $EntryScript) + $Arguments
+    $argumentLine = (@($values | ForEach-Object { ConvertTo-NativeArgument ([string]$_) })) -join ' '
+    $child = Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentLine -Wait -PassThru
+    exit $child.ExitCode
 }
 
 function Assert-Windows11 {
-    if (-not [Environment]::Is64BitOperatingSystem) {
+    if (-not [Environment]::Is64BitOperatingSystem -or $env:PROCESSOR_ARCHITECTURE -ne 'AMD64') {
         Stop-QQBridge 'QQBridge 仅支持 Windows 11 x64。'
     }
     $os = Get-CimInstance Win32_OperatingSystem
@@ -126,30 +190,72 @@ function Invoke-NativeQuiet {
     return [pscustomobject]@{ ExitCode = $code; Output = @($output) }
 }
 
+function ConvertTo-NativeArgument {
+    param([AllowEmptyString()][string]$Value)
+    # WSL's launcher requires option names without redundant surrounding quotes.
+    if ($Value -and $Value -notmatch '[\s"]') { return $Value }
+    # Windows argv quoting: preserve spaces, embedded quotes and trailing backslashes.
+    $escaped = [regex]::Replace($Value, '(\\*)"', '$1$1\"')
+    $escaped = [regex]::Replace($escaped, '(\\+)$', '$1$1')
+    return '"' + $escaped + '"'
+}
+
+function Invoke-WslProcess {
+    param([string]$User, [string[]]$Arguments, [switch]$Stream)
+    $info = New-Object System.Diagnostics.ProcessStartInfo
+    $info.FileName = 'wsl.exe'
+    $values = @('-d', $script:DistroName, '-u', $User, '--exec') + $Arguments
+    $info.Arguments = (@($values | ForEach-Object { ConvertTo-NativeArgument ([string]$_) })) -join ' '
+    $info.UseShellExecute = $false
+    $info.CreateNoWindow = $true
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
+    $info.StandardOutputEncoding = New-Object System.Text.UTF8Encoding($false)
+    $info.StandardErrorEncoding = New-Object System.Text.UTF8Encoding($false)
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $info
+    $stdout = New-Object System.Collections.Generic.List[string]
+    $stderr = New-Object System.Collections.Generic.List[string]
+    try {
+        [void]$process.Start()
+        $outTask = $process.StandardOutput.ReadLineAsync()
+        $errTask = $process.StandardError.ReadLineAsync()
+        while ($null -ne $outTask -or $null -ne $errTask) {
+            foreach ($channel in @('out', 'err')) {
+                $task = if ($channel -eq 'out') { $outTask } else { $errTask }
+                if ($null -ne $task -and $task.IsCompleted) {
+                    $line = $task.GetAwaiter().GetResult()
+                    if ($null -ne $line) {
+                        if ($channel -eq 'out') { $stdout.Add($line) } else { $stderr.Add($line) }
+                        if ($Stream) { Write-Host $line }
+                    }
+                    if ($channel -eq 'out') {
+                        $outTask = if ($null -eq $line) { $null } else { $process.StandardOutput.ReadLineAsync() }
+                    } else {
+                        $errTask = if ($null -eq $line) { $null } else { $process.StandardError.ReadLineAsync() }
+                    }
+                }
+            }
+            $pending = @(@($outTask, $errTask) | Where-Object { $null -ne $_ })
+            if ($pending.Count) { [void][System.Threading.Tasks.Task]::WaitAny([System.Threading.Tasks.Task[]]$pending, 200) }
+        }
+        $process.WaitForExit()
+        return [pscustomobject]@{ ExitCode = $process.ExitCode; Output = $stdout.ToArray(); StdErr = ($stderr -join "`n") }
+    } finally { $process.Dispose() }
+}
+
 function Invoke-WslRaw {
     param(
         [Parameter(Mandatory)][string]$User,
         [Parameter(Mandatory)][string[]]$Arguments,
         [switch]$AllowFailure
     )
-    $wslArgs = @('-d', $script:DistroName, '-u', $User, '--') + $Arguments
-    $previous = $ErrorActionPreference
-    # PowerShell 5.1 在 Stop 下会把原生 stderr 当成 NativeCommandError 抛出。
-    # 临时改为 Continue 并用 2>&1 捕获：不会抛异常，也不会把进度刷成红字。
-    $ErrorActionPreference = 'Continue'
-    try {
-        $raw = & wsl.exe @wslArgs 2>&1
-        $code = $LASTEXITCODE
-    } finally {
-        $ErrorActionPreference = $previous
+    $result = Invoke-WslProcess -User $User -Arguments $Arguments
+    if ($result.ExitCode -ne 0 -and -not $AllowFailure) {
+        # 原始错误可能含凭据，保留在内存中供调用者检查，不自动打印。
+        throw "WSL 命令失败（退出码 $($result.ExitCode)）；请检查当前步骤和本机服务状态。"
     }
-    $stdout = @($raw | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { [string]$_ })
-    $stderr = (@($raw | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | ForEach-Object { [string]$_ })) -join [Environment]::NewLine
-    if ($code -ne 0 -and -not $AllowFailure) {
-        $detail = (@($stdout) + @($stderr)) -join [Environment]::NewLine
-        throw "WSL command failed ($code): $detail"
-    }
-    return [pscustomobject]@{ ExitCode = $code; Output = $stdout; StdErr = $stderr }
+    return $result
 }
 
 function Invoke-WslBash {
@@ -159,26 +265,11 @@ function Invoke-WslBash {
         [string[]]$ScriptArguments = @(),
         [switch]$AllowFailure
     )
-    $arguments = @('bash', $ScriptPath) + $ScriptArguments
-    $wslArgs = @('-d', $script:DistroName, '-u', $User, '--') + $arguments
-    $lines = New-Object System.Collections.Generic.List[string]
-    $previous = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        # 逐行转发，让 docker compose 的拉取/构建进度实时显示，而不是等整段结束。
-        & wsl.exe @wslArgs 2>&1 | ForEach-Object {
-            $line = [string]$_
-            $lines.Add($line)
-            Write-Host $line
-        }
-        $code = $LASTEXITCODE
-    } finally {
-        $ErrorActionPreference = $previous
+    $result = Invoke-WslProcess -User $User -Arguments (@('bash', $ScriptPath) + $ScriptArguments) -Stream
+    if ($result.ExitCode -ne 0 -and -not $AllowFailure) {
+        throw "部署步骤失败（退出码 $($result.ExitCode)）。请保留实例；安装中断可运行 install.ps1 -Resume。"
     }
-    if ($code -ne 0 -and -not $AllowFailure) {
-        throw "WSL command failed ($code): $($lines -join [Environment]::NewLine)"
-    }
-    return [pscustomobject]@{ ExitCode = $code; Output = @($lines); StdErr = '' }
+    return $result
 }
 
 function Get-WslDefaultUser {
@@ -487,6 +578,7 @@ function Read-Port {
         [Parameter(Mandatory)][int]$Default
     )
     while ($true) {
+        $value = 0
         $text = Read-Host "$Label [$Default]"
         if (-not $text) {
             $value = $Default
@@ -508,9 +600,20 @@ function Read-Port {
 function Save-SecureAnswers {
     param([Parameter(Mandatory)][hashtable]$Answers)
     $path = [System.IO.Path]::GetTempFileName()
-    Write-Utf8NoBom -Path $path -Content ($Answers | ConvertTo-Json -Depth 10)
-    & icacls.exe $path /inheritance:r /grant:r "$($env:USERDOMAIN)\$($env:USERNAME):(R,W,D)" | Out-Null
-    return $path
+    try {
+        $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User
+        $acl = New-Object System.Security.AccessControl.FileSecurity
+        $acl.SetAccessRuleProtection($true, $false)
+        $acl.SetOwner($sid)
+        $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, 'FullControl', 'Allow')
+        $acl.AddAccessRule($rule)
+        Set-Acl -LiteralPath $path -AclObject $acl
+        Write-Utf8NoBom -Path $path -Content ($Answers | ConvertTo-Json -Depth 10)
+        return $path
+    } catch {
+        Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        throw '无法创建权限受限的本机临时配置文件，已停止。'
+    }
 }
 
 function Update-QQBridgeFirewall {
@@ -550,9 +653,11 @@ function Set-DockerAutostart {
         Stop-QQBridge '无法创建自启动任务：Docker Desktop 路径不存在。'
     }
     $action = New-ScheduledTaskAction -Execute $script:DockerDesktopPath
-    $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
+    $account = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $trigger = New-ScheduledTaskTrigger -AtLogOn -User $account
     $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable
-    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Force | Out-Null
+    $principal = New-ScheduledTaskPrincipal -UserId $account -LogonType Interactive -RunLevel Limited
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
     Write-QQLog '已创建 Docker Desktop 登录自启动任务。'
 }
 
@@ -561,6 +666,8 @@ function Get-QQBridgeContext {
     if (-not $state -or -not $state.install_root -or -not $state.linux_user) {
         Stop-QQBridge '未找到 QQBridge 安装状态。请先运行 install.ps1。'
     }
+    $script:LinuxUser = [string]$state.linux_user
+    if ($state.distro) { $script:DistroName = [string]$state.distro }
     return [pscustomobject]@{
         InstallRoot = [string]$state.install_root
         LinuxUser = [string]$state.linux_user

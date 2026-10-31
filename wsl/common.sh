@@ -46,6 +46,17 @@ compose() {
     "$@"
 }
 
+secure_instance_files() {
+  local instance="$1"
+  chmod 600 "$instance/.env"
+  find "$instance/config" -type f -name '*.toml' -exec chmod 600 {} +
+  find "$instance/napcat/config" -type f -name '*.json' -exec chmod 600 {} +
+  find "$instance/plugins" "$instance/data" -type f \( \
+    -name 'config.toml' -o -iname '*webui*' -o -iname 'credentials.json' \
+    -o -iname 'token.json' -o -iname 'tokens.json' -o -iname 'auth.json' \
+    \) -exec chmod 600 {} +
+}
+
 wait_for_health() {
   local container="$1"
   local timeout="${2:-180}"
@@ -59,7 +70,8 @@ wait_for_health() {
     fi
     sleep 5
   done
-  docker logs --tail 80 "$container" >&2 || true
+  printf 'Health check timed out for %s (status: %s). Application logs were not printed.\n' \
+    "$container" "${status:-unavailable}" >&2
   return 1
 }
 
@@ -68,15 +80,17 @@ backup_instance() {
   local instance="$2"
   local previous_version="$3"
   local backup_id
-  backup_id="$(date -u +%Y%m%dT%H%M%SZ)"
+  backup_id="$(date -u +%Y%m%dT%H%M%S%NZ)"
   local dir="$install_root/backups/$backup_id"
-  mkdir -p "$dir"
-  tar -C "$(dirname "$instance")" \
-    --exclude='./default/logs/*' \
-    -czf "$dir/instance.tar.gz" "$(basename "$instance")"
+  # A collision must never overwrite an earlier backup.
+  mkdir -m 700 "$dir" || return 1
+  (umask 077; tar -C "$(dirname "$instance")" \
+    --exclude='default/logs/*' \
+    -czf "$dir/instance.tar.gz" "$(basename "$instance")") || return 1
+  tar -tzf "$dir/instance.tar.gz" >/dev/null || return 1
   printf 'BACKUP_ID=%s\nPREVIOUS_VERSION=%s\nCREATED_UTC=%s\n' \
-    "$backup_id" "$previous_version" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$dir/metadata.env"
-  chmod 600 "$dir/instance.tar.gz" "$dir/metadata.env"
+    "$backup_id" "$previous_version" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$dir/metadata.env" || return 1
+  chmod 600 "$dir/instance.tar.gz" "$dir/metadata.env" || return 1
   printf '%s\n' "$backup_id"
 }
 

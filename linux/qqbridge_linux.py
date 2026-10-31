@@ -587,6 +587,59 @@ def command_install(args: argparse.Namespace) -> None:
     log(f"Linux: {distro_name()} ({platform.machine()})")
     if args.local_only and args.lan:
         fail("--local-only and --lan cannot be used together")
+    if args.resume:
+        state = context_from_state()
+        user = str(state["target_user"])
+        install_root = Path(str(state["install_root"]))
+        if state.get("platform") != "linux" or state.get("phase") != "installing":
+            fail("--resume requires saved Linux state with phase installing")
+        if args.target_user and args.target_user != user:
+            fail("--resume target user differs from the saved installation")
+        if args.install_root and resolve_install_root(args.install_root, user).resolve() != install_root.resolve():
+            fail("--resume install root differs from the saved installation")
+        if state.get("package_version") != package_version(PACKAGE_ROOT):
+            fail("--resume requires the same package version as the interrupted install")
+        try:
+            progress = json.loads((install_root / "instances/default/install-progress.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            fail("resume marker unavailable; files were preserved for manual recovery")
+        if not isinstance(progress, dict) or progress.get("phase") not in {"ready_to_start", "complete"}:
+            fail("installation stopped before ready_to_start; recover manually or use a new empty install root")
+        expected = {"package_version": package_version(PACKAGE_ROOT), "platform": "linux",
+                    "install_root": str(install_root.resolve()),
+                    "release": str(install_root.resolve() / "releases" / package_version(PACKAGE_ROOT)),
+                    "target_user": user}
+        instance = install_root / "instances/default"
+        release = install_root / "releases" / package_version(PACKAGE_ROOT)
+        if (not (release / "VERSION").is_file()
+                or any(progress.get(key) != value for key, value in expected.items())
+                or not (install_root / "current").is_symlink()
+                or (install_root / "current").resolve() != release.resolve()
+                or package_version(release) != package_version(PACKAGE_ROOT)
+                or not all((instance / name).is_file() for name in
+                           (".env", "config/bot_config.toml", "config/model_config.toml"))
+                or (instance / "install-progress.json").is_symlink()
+                or (instance / "install-progress.json").stat().st_mode & 0o777 != 0o600):
+            fail("resume context is invalid; installation files were preserved")
+        # The shell repeats these checks before running Compose.
+        ensure_docker_installed()
+        ensure_docker_access(user)
+        run([
+            "bash", str(PACKAGE_ROOT / "wsl/install.sh"),
+            "--package", str(PACKAGE_ROOT), "--install-root", str(install_root),
+            "--target-user", user, "--platform", "linux", "--resume",
+        ], capture=False)
+        if not state.get("local_only"):
+            state["firewall_rules"] = apply_firewall_rules(
+                str(state["lan_bind_ip"]), list(state.get("lan_cidrs", [])),
+                [int(state["maibot_port"]), int(state["napcat_port"])],
+                list(state.get("firewall_rules", [])),
+            )
+        state["phase"] = "complete"
+        save_state(state)
+        log("installation complete")
+        print_urls(state)
+        return
     user = target_user_name(args.target_user)
     install_root = resolve_install_root(args.install_root, user)
     if install_root.exists() and any(install_root.iterdir()):
@@ -625,6 +678,24 @@ def command_install(args: argparse.Namespace) -> None:
         if os.environ.get(env_name):
             answers[answer_name] = os.environ[env_name]
 
+    state = {
+        "schema_version": 1,
+        "platform": "linux",
+        "phase": "installing",
+        "package_version": package_version(PACKAGE_ROOT),
+        "install_root": str(install_root.resolve()),
+        "target_user": user,
+        "instance": "default",
+        "local_only": local_only,
+        "lan_bind_ip": "" if local_only else bind_address,
+        "lan_cidrs": lan_cidrs,
+        "maibot_port": answers["maibot_port"],
+        "napcat_port": answers["napcat_port"],
+        "onebot_port": answers["onebot_port"],
+        "disable_autostart": args.disable_autostart,
+        "firewall_rules": [],
+    }
+    save_state(state)
     user_record = pwd.getpwnam(user)
     with answers_file(answers) as answer_path:
         run(
@@ -658,21 +729,8 @@ def command_install(args: argparse.Namespace) -> None:
             [],
         )
 
-    state = {
-        "schema_version": 1,
-        "platform": "linux",
-        "package_version": package_version(PACKAGE_ROOT),
-        "install_root": str(install_root),
-        "target_user": user,
-        "instance": "default",
-        "local_only": local_only,
-        "lan_bind_ip": "" if local_only else bind_address,
-        "lan_cidrs": lan_cidrs,
-        "maibot_port": answers["maibot_port"],
-        "napcat_port": answers["napcat_port"],
-        "onebot_port": answers["onebot_port"],
-        "firewall_rules": firewall_rules,
-    }
+    state["phase"] = "complete"
+    state["firewall_rules"] = firewall_rules
     save_state(state)
     log("installation complete")
     print_urls(state)
@@ -958,7 +1016,7 @@ def command_verify(args: argparse.Namespace) -> None:
             args.instance,
             "--target-user",
             str(state["target_user"]),
-        ],
+        ] + (["--require-login"] if args.require_login else []),
         capture=False,
     )
     if result.returncode != 0:
@@ -1109,6 +1167,7 @@ def build_parser() -> argparse.ArgumentParser:
     install = subparsers.add_parser("install", help="install a new instance")
     add_target_user(install)
     install.add_argument("--install-root")
+    install.add_argument("--resume", action="store_true", help="resume the saved interrupted installation")
     install.add_argument(
         "--local-only",
         action="store_true",
@@ -1130,6 +1189,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = subparsers.add_parser("verify", help="verify an installed instance")
     verify.add_argument("--instance", default="default")
+    verify.add_argument("--require-login", action="store_true", help="fail if OneBot login verification fails")
 
     upgrade = subparsers.add_parser("upgrade", help="upgrade from a verified ZIP")
     upgrade.add_argument("--package", dest="package_path", required=True)

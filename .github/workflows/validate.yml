@@ -1,0 +1,35 @@
+name: Validate deployment package
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PowerShell 5.1 regression checks
+        shell: powershell
+        run: .\tests\windows.ps1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Package syntax, encoding, credentials and integrity
+        run: python -I tools/release.py --root .
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Isolated deployment and recovery regressions
+        run: python -I tests/test_shared.py
+      - name: Package validation
+        run: python -I tools/release.py --root .
+      - name: Compose validation with example values only
+        run: docker compose --env-file .env.example -f compose.yaml config --quiet

@@ -32,11 +32,13 @@ python3 "$PACKAGE/wsl/config_tool.py" \
   --package "$PACKAGE" \
   ${ANSWERS:+--answers "$ANSWERS"}
 
-chown -R "$TARGET_USER:$TARGET_USER" "$INSTANCE"
-chmod 600 "$INSTANCE/.env" "$INSTANCE/config/"*.toml "$INSTANCE/napcat/config/"*.json
+TARGET_GROUP="$(id -gn "$TARGET_USER")"
+chown -R "$TARGET_USER:$TARGET_GROUP" "$INSTANCE"
+secure_instance_files "$INSTANCE"
 
 log "applying configuration"
-compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d
+compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d --force-recreate
 wait_for_health qqbridge-maibot 180 || die "MaiBot did not become healthy after configuration"
 wait_for_health qqbridge-napcat 120 || die "NapCat did not become healthy after configuration"
+secure_instance_files "$INSTANCE"
 log "configuration applied"

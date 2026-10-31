@@ -36,12 +36,13 @@ $currentOnePort = [int](Get-InstanceEnvValue -Context $context -Key 'ONEBOT_PORT
 $currentBind = Get-InstanceEnvValue -Context $context -Key 'MAIBOT_BIND'
 $answers = @{}
 
+if (-not $DiscoverGroups -or $Advanced) {
 Write-Host ''
 Write-Host '基础配置（直接回车表示保留）' -ForegroundColor Cyan
 Write-Host "当前模型: $currentModel @ $currentBase ($currentClient)"
 $base = ConvertTo-CleanText (Read-Host '新的 Base URL')
 if ($base) {
-    if ($base -notmatch '^https?://') {
+    if (-not (Test-ModelBaseUrl $base)) {
         Stop-QQBridge 'Base URL 必须以 http:// 或 https:// 开头。'
     }
     $answers.llm_base_url = $base
@@ -55,18 +56,16 @@ switch ($clientChoice) {
     '2' { $answers.llm_client_type = 'openai_responses' }
     '3' { $answers.llm_client_type = 'gemini' }
 }
-$secureKey = Read-Host '新的 API Key（回车保留，输入不回显）' -AsSecureString
-$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
-try {
-    $newKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
-} finally {
-    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
-}
-$newKey = ConvertTo-CleanText $newKey
+$newKey = Read-LocalSecret -Title 'QQBridge 更新模型 API Key' -Prompt '输入或粘贴新 Key；留空并确定表示保留。内容仅在本机处理。' -AllowEmpty
 if ($newKey) { $answers.llm_api_key = $newKey }
 $newKey = $null
+$effectiveBase = if ($answers.ContainsKey('llm_base_url')) { $answers.llm_base_url } else { $currentBase }
+$effectiveClient = if ($answers.ContainsKey('llm_client_type')) { $answers.llm_client_type } else { $currentClient }
+if (([uri]$effectiveBase).Host -eq 'api.deepseek.com' -and $effectiveClient -ne 'openai') {
+    Stop-QQBridge 'DeepSeek 官方接口需要 openai（Chat Completions）；请改为选项 1。'
+}
 
-Write-Host "当前群主 QQ: $(if($currentOwner){$currentOwner}else{'(未设置)'})"
+Write-Host "当前机器人管理员 QQ: $(if($currentOwner){$currentOwner}else{'(未设置)'})"
 $owner = (Read-Host '新的管理员/机器人主人 QQ（即接入者本人，输入 - 可清空）').Trim()
 if ($owner -eq '-') {
     $answers.owner_qq = ''
@@ -115,13 +114,7 @@ if ($Advanced) {
     Write-Host '高级外部服务（直接回车表示跳过/保留）' -ForegroundColor Cyan
     $searchBase = (Read-Host '搜索服务 Base URL').Trim()
     $searchModel = (Read-Host '搜索服务模型').Trim()
-    $secureSearch = Read-Host '搜索服务 API Key（不回显）' -AsSecureString
-    $searchBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureSearch)
-    try {
-        $searchKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($searchBstr)
-    } finally {
-        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($searchBstr)
-    }
+    $searchKey = Read-LocalSecret -Title '搜索服务 API Key' -Prompt '仅在本机填写搜索服务 Key；留空表示跳过。' -AllowEmpty
     if ($searchBase -or $searchModel -or $searchKey) {
         if (-not ($searchBase -and $searchModel -and $searchKey)) {
             Stop-QQBridge '启用搜索插件时，Base URL、模型和 API Key 必须同时填写。'
@@ -132,13 +125,7 @@ if ($Advanced) {
     }
     $searchKey = $null
 
-    $secureTts = Read-Host '小米 MiMo TTS API Key（留空跳过，输入不回显）' -AsSecureString
-    $ttsBstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureTts)
-    try {
-        $ttsKey = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ttsBstr)
-    } finally {
-        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ttsBstr)
-    }
+    $ttsKey = Read-LocalSecret -Title 'TTS API Key' -Prompt '仅在本机填写 TTS Key；留空表示跳过。' -AllowEmpty
     if ($ttsKey) {
         $answers.tts_api_key = $ttsKey
         $ttsUrl = (Read-Host 'TTS API URL [https://api.xiaomimimo.com/v1/chat/completions]').Trim()
@@ -162,9 +149,11 @@ if ($Advanced) {
         @{ Prompt = 'Bilibili Cookie'; Key = 'bilibili_cookie' },
         @{ Prompt = '萌娘百科 Cookie'; Key = 'moegirl_cookie' }
     )) {
-        $value = (Read-Host "$($item.Prompt)（留空跳过）").Trim()
+        $value = Read-LocalSecret -Title $item.Prompt -Prompt '在本机填写 Cookie；留空并确定表示跳过。' -AllowEmpty
         if ($value) { $answers[$item.Key] = $value }
     }
+}
+
 }
 
 if ($DiscoverGroups) {

@@ -1,0 +1,12 @@
+{
+  "install_root": "~/qqbridge",
+  "llm_base_url": "https://api.deepseek.com/v1",
+  "llm_model": "replace-with-your-provider-model-id",
+  "llm_client_type": "openai",
+  "owner_qq": "",
+  "owner_name": "接入者",
+  "bot_qq": "",
+  "maibot_port": 18001,
+  "napcat_port": 6099,
+  "onebot_port": 3001
+}

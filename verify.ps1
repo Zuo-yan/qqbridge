@@ -1,6 +1,7 @@
 ﻿[CmdletBinding()]
 param(
-    [string]$Instance = 'default'
+    [string]$Instance = 'default',
+    [switch]$RequireLogin
 )
 
 . (Join-Path $PSScriptRoot 'qqbridge-lib.ps1')
@@ -20,15 +21,9 @@ if ($probe.ExitCode -ne 0) {
 
 Write-Host ''
 Write-Host 'QQBridge 运行验证' -ForegroundColor Cyan
-$result = Invoke-WslBash `
-    -User 'root' `
-    -ScriptPath "$release/wsl/verify.sh" `
-    -ScriptArguments @(
-        '--install-root', $context.InstallRoot,
-        '--instance', $Instance,
-        '--target-user', $context.LinuxUser
-    ) `
-    -AllowFailure
+$verifyArguments = @('--install-root', $context.InstallRoot, '--instance', $Instance, '--target-user', $context.LinuxUser)
+if ($RequireLogin) { $verifyArguments += '--require-login' }
+$result = Invoke-WslBash -User 'root' -ScriptPath "$release/wsl/verify.sh" -ScriptArguments $verifyArguments -AllowFailure
 
 $state = Read-State
 if (-not $state.local_only) {
@@ -45,4 +40,8 @@ if ($result.ExitCode -ne 0) {
     exit $result.ExitCode
 }
 
-Write-Host '验证通过。' -ForegroundColor Green
+if ($RequireLogin) {
+    Write-Host '基础服务与 QQ 登录检查通过；请在已选群中发送消息完成最终验收。' -ForegroundColor Green
+} else {
+    Write-Host '基础服务检查通过；是否已登录 QQ 请查看上方 WARN。扫码后运行 verify.ps1 -RequireLogin。' -ForegroundColor Green
+}
