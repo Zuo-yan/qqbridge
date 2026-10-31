@@ -1,6 +1,6 @@
 # QQBridge 一键部署包
 
-版本：`1.1.1`
+版本：`1.1.2`
 
 这是一个可同时部署到 **Windows 11 x64** 和 **原生 Linux x86_64** 的私人 QQ 聊天机器人部署包，组合 MaiBot、NapCat、17 个插件、14 个运行时补丁、当前“哈基米”人设、表情包和提示图片。
 
@@ -22,8 +22,9 @@ Windows 使用 Docker Desktop + WSL2 Ubuntu；原生 Linux 使用 Docker Engine 
 
 1. 把 ZIP 解压到任意本地目录，不要在压缩包内直接运行。
 2. 双击 `install.cmd`，在 UAC 提示中点“是”。
-3. 按窗口提示填写模型和 QQ 信息；如果提示需要重启，重启后再次双击 `install.cmd`。
-4. 在 NapCat WebUI 扫码登录后，双击 `configure.cmd` 选择允许的群，再双击 `verify.cmd` 检查。
+3. 按窗口提示选择安装目录（直接回车使用默认 `~/qqbridge`，也可输入 `~/xxx` 或绝对路径）、填写模型和 QQ 信息；如果提示需要重启，重启后再次双击 `install.cmd`。
+4. 安装完成时窗口会显示 NapCat 和 MaiBot 的 WebUI Token，并自动打开两个页面（加 `-NoBrowser` 可关闭自动打开）。
+5. 在 NapCat WebUI 扫码登录后，双击 `configure.cmd` 选择允许的群，再双击 `verify.cmd` 检查。
 
 `install.cmd` / `configure.cmd` / `verify.cmd` 会自动提权并绕过执行策略，不需要手动打开管理员终端，也不需要修改 `Set-ExecutionPolicy`。所有 `.ps1` 均以 UTF-8 BOM 保存，兼容中文 Windows PowerShell 5.1。
 
@@ -55,8 +56,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 要求 Linux x86_64、Python 3.10+、`systemd`、`sudo`、Docker Engine 和 Docker Compose v2。默认按 rootful Docker 管理；已测试目标为常见 Ubuntu/Debian 系发行版。
 
 ```bash
-unzip qqbridge-v1.1.1.zip
-cd qqbridge-v1.1.1
+unzip qqbridge-v1.1.2.zip
+cd qqbridge-v1.1.2
 bash ./install-linux.sh
 ```
 
@@ -90,7 +91,7 @@ bash ./install-linux.sh --disable-autostart
 两个平台首次安装都会询问：
 
 - OpenAI 兼容主模型的 Base URL、模型标识、API Key 和客户端类型。
-- 群主 QQ、群主称呼和可选的机器人 QQ。
+- 管理员/“群主” QQ、称呼和可选的机器人 QQ。这里的“群主”指**机器人主人（接入者本人）**，不是 QQ 群群主；它用于人设管理命令和私聊白名单。留空会失去人设管理命令，且私聊默认全部阻断。
 - MaiBot、NapCat、OneBot 端口与时区。
 
 API Key、OneBot token 和 NapCat WebUI token 不会写进安装包；运行时 `.env` 权限为 `600`。token 在每台主机首次安装时重新生成。
@@ -144,8 +145,8 @@ bash ./configure-linux.sh --advanced
 
 ```text
 ~/qqbridge/                       # Linux 默认；Windows 位于 WSL 用户主目录
-├── releases/1.1.1/
-├── current -> releases/1.1.1/
+├── releases/1.1.2/
+├── current -> releases/1.1.2/
 ├── backups/
 └── instances/default/
     ├── .env

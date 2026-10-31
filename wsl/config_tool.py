@@ -18,6 +18,15 @@ except ModuleNotFoundError:  # Python 3.10 fallback; generated files are still c
 
 
 PLACEHOLDER_RE = re.compile(r"@@([A-Z0-9_]+)@@")
+CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def clean_answer_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return CONTROL_RE.sub("", value).strip()
+    if isinstance(value, list):
+        return [clean_answer_value(item) for item in value]
+    return value
 
 
 def fail(message: str) -> "NoReturn":
@@ -182,7 +191,7 @@ def set_section_assignment(text: str, section: str, key: str, value: str) -> str
 
 def render_model(config_dir: Path, package: Path, env: dict[str, str]) -> None:
     for key in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL", "LLM_CLIENT_TYPE"):
-        if any(char in env.get(key, "") for char in "\r\n\"\\"):
+        if any(char in env.get(key, "") for char in "\r\n\"\\") or CONTROL_RE.search(env.get(key, "")):
             fail(f"{key} contains an unsupported character")
     if env.get("LLM_CLIENT_TYPE") not in {"openai", "openai_responses", "gemini"}:
         fail("LLM_CLIENT_TYPE must be openai, openai_responses or gemini")
@@ -463,7 +472,8 @@ def write_plugin_report(instance: Path, package: Path) -> None:
 def load_answers(path: Path | None) -> dict[str, Any]:
     if path is None:
         return {}
-    return json.loads(read_text(path))
+    answers = json.loads(read_text(path))
+    return {key: clean_answer_value(value) for key, value in answers.items()}
 
 
 def command_install(args: argparse.Namespace) -> None:

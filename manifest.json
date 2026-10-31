@@ -1,7 +1,7 @@
 {
     "package":  "qqbridge",
-    "package_version":  "1.1.1",
-    "created_at_utc":  "2026-10-31T07:20:22Z",
+    "package_version":  "1.1.2",
+    "created_at_utc":  "2026-10-31T10:48:11Z",
     "platform":  "Windows 11 x64 / Linux x86_64",
     "runtime":  "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
     "config_schema":  "1.0",
@@ -9,7 +9,7 @@
                         "maibot":  "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
                         "napcat":  "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e"
                     },
-    "local_image":  "qqbridge-maibot:1.1.1",
+    "local_image":  "qqbridge-maibot:1.1.2",
     "entrypoints":  [
                         "install.cmd",
                         "configure.cmd",
@@ -284,7 +284,7 @@
     "files":  {
                   ".env.example":  {
                                        "size":  709,
-                                       "sha256":  "08225b1619ee8630a95613e4a652646536510f18469d0019e6b672ac22485a5c"
+                                       "sha256":  "a715b3ffd9c160955c85aeb91d49848a3e9f858a78ab54cad20eac63c8dee78a"
                                    },
                   ".gitattributes":  {
                                          "size":  73,
@@ -300,7 +300,7 @@
                                 },
                   "compose.yaml":  {
                                        "size":  2624,
-                                       "sha256":  "d34a5f14a6431cbf85d9c2e52b5915a9861d6ea552f766835774832ffe65f534"
+                                       "sha256":  "e1f1cbce19a798a700572da723bf6591665f6c34c9cb59a65df7875e46110d9b"
                                    },
                   "configure-linux.sh":  {
                                              "size":  273,
@@ -311,20 +311,20 @@
                                         "sha256":  "db63fb0d61fdf47f9557859e9394e894c361ba12226fc0e1166279b4b1db8cc1"
                                     },
                   "configure.ps1":  {
-                                        "size":  11026,
-                                        "sha256":  "8e3b5c578345c5ea6255cb0c330ce43d7b528625c2e9004bb0c0083868221014"
+                                        "size":  11300,
+                                        "sha256":  "9d5d0cac525dd3a89f038d29d2a8fa918b2c3bd5219a07948406e10122df25a5"
                                     },
                   "install-linux.sh":  {
                                            "size":  271,
                                            "sha256":  "69a40f915f78e2e4f315f5c9a0626aafd052c1bc06eca41fd0924536918e9e40"
                                        },
                   "install.cmd":  {
-                                      "size":  531,
-                                      "sha256":  "4815ecb05276b6bf38dc3c2189918dd3e22863be771564fd9459fc0cda38d2f2"
+                                      "size":  855,
+                                      "sha256":  "836ee054823de22a9a8daa978df8c382277001dac86d05d3dabab84d4c0cc9d0"
                                   },
                   "install.ps1":  {
-                                      "size":  5831,
-                                      "sha256":  "96431238e809c8a26317280988b5f480903f687a1eab70a730b986d9d2d78d16"
+                                      "size":  9658,
+                                      "sha256":  "af364db5d469166a77d8b56c98f86893c0f4391a36642f104b335c5cda314041"
                                   },
                   "LICENSE":  {
                                   "size":  1078,
@@ -332,15 +332,15 @@
                               },
                   "plugin-metadata.json":  {
                                                "size":  7774,
-                                               "sha256":  "39bbf5d33d66b16fd7f8681c55207a6b6e50d2a3d1a57a362547e18c9a53bac8"
+                                               "sha256":  "0c3c59a40ffaf56655b73e0a3e16b38cb57aa1f4591d1ef34577859c50e02d75"
                                            },
                   "qqbridge-lib.ps1":  {
-                                           "size":  21859,
-                                           "sha256":  "d105596a3921c48c2834fdbf5477dafce6e18549bc97e21c989fd884f48d1c5a"
+                                           "size":  25504,
+                                           "sha256":  "277f9a45b87938f78a1d70ce5995a449196f3b12aab0ba53cb14c6d802917657"
                                        },
                   "README.md":  {
-                                    "size":  9185,
-                                    "sha256":  "b5b7b5f71ec08f5ce791ff1dcc5a802d8e75bda73faeca6881e9fa6d4e110ac9"
+                                    "size":  9646,
+                                    "sha256":  "6485ef76f46355255e819261164141ea97498bb8de61286ce68811c6ecf5f102"
                                 },
                   "rollback-linux.sh":  {
                                             "size":  272,
@@ -380,11 +380,11 @@
                                  },
                   "VERSION":  {
                                   "size":  6,
-                                  "sha256":  "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"
+                                  "sha256":  "77123b8e4bdbd54505bf6e8021527ac60281602a06fe307564532c4dba39dbca"
                               },
                   "image/Dockerfile":  {
                                            "size":  1344,
-                                           "sha256":  "2bce22df9c7b509b677f1faf2295c6ecbcea43bcab4bf6e20cf9a129677bc5d2"
+                                           "sha256":  "338a9063ebe693c6bbb60f545ed0b7233173789932d38f949cb59901f841c2e4"
                                        },
                   "image/patches/chat_loop_service.py":  {
                                                              "size":  81283,
@@ -5343,8 +5343,8 @@
                                            "sha256":  "d99ecf311fed849097466960cc50e9519dd6f59bd674186ed03018c9d8d33926"
                                        },
                   "wsl/config_tool.py":  {
-                                             "size":  24732,
-                                             "sha256":  "eecb561bc3bde31d51a1e728e9a299b3a3a9df19c15d9920423aea047f2d7487"
+                                             "size":  25130,
+                                             "sha256":  "4238456ef461f252eb4c32c2b916d6fef35e002ab50fe39c856adb4019c9c960"
                                          },
                   "wsl/env_tool.py":  {
                                           "size":  1119,

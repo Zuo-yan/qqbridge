@@ -39,9 +39,14 @@ $answers = @{}
 Write-Host ''
 Write-Host '基础配置（直接回车表示保留）' -ForegroundColor Cyan
 Write-Host "当前模型: $currentModel @ $currentBase ($currentClient)"
-$base = (Read-Host '新的 Base URL').Trim()
-if ($base) { $answers.llm_base_url = $base }
-$model = (Read-Host '新的模型标识').Trim()
+$base = ConvertTo-CleanText (Read-Host '新的 Base URL')
+if ($base) {
+    if ($base -notmatch '^https?://') {
+        Stop-QQBridge 'Base URL 必须以 http:// 或 https:// 开头。'
+    }
+    $answers.llm_base_url = $base
+}
+$model = ConvertTo-CleanText (Read-Host '新的模型标识')
 if ($model) { $answers.llm_model = $model }
 Write-Host '客户端类型：1) openai  2) openai_responses  3) gemini  空) 保留'
 $clientChoice = (Read-Host '选择').Trim()
@@ -57,18 +62,19 @@ try {
 } finally {
     [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
 }
+$newKey = ConvertTo-CleanText $newKey
 if ($newKey) { $answers.llm_api_key = $newKey }
 $newKey = $null
 
 Write-Host "当前群主 QQ: $(if($currentOwner){$currentOwner}else{'(未设置)'})"
-$owner = (Read-Host '新的群主 QQ（输入 - 可清空）').Trim()
+$owner = (Read-Host '新的管理员/机器人主人 QQ（即接入者本人，输入 - 可清空）').Trim()
 if ($owner -eq '-') {
     $answers.owner_qq = ''
 } elseif ($owner) {
     if ($owner -notmatch '^\d{5,12}$') { Stop-QQBridge 'QQ 号格式无效。' }
     $answers.owner_qq = $owner
 }
-$ownerName = (Read-Host '新的群主称呼').Trim()
+$ownerName = ConvertTo-CleanText (Read-Host '新的管理员称呼（机器人怎么称呼你）')
 if ($ownerName) { $answers.owner_name = $ownerName }
 Write-Host "当前机器人 QQ: $(if($currentBot){$currentBot}else{'(未设置)'})"
 $bot = (Read-Host '新的机器人 QQ（输入 - 可清空）').Trim()

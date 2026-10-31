@@ -18,6 +18,13 @@ function Stop-QQBridge {
     throw $Message
 }
 
+function ConvertTo-CleanText {
+    param([AllowEmptyString()][string]$Text)
+    if ($null -eq $Text) { return '' }
+    # 去掉控制字符：控制台里 Ctrl+V 可能插入 ^V(0x16) 而不是粘贴。
+    return (($Text -replace '[\x00-\x1F\x7F]', '')).Trim()
+}
+
 function Test-IsAdministrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = New-Object Security.Principal.WindowsPrincipal($identity)
@@ -103,6 +110,22 @@ function ConvertTo-WslPath {
     return "/mnt/$drive/$rest"
 }
 
+function Invoke-NativeQuiet {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string[]]$Arguments
+    )
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $output = & $FilePath @Arguments 2>&1
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+    return [pscustomobject]@{ ExitCode = $code; Output = @($output) }
+}
+
 function Invoke-WslRaw {
     param(
         [Parameter(Mandatory)][string]$User,
@@ -110,12 +133,23 @@ function Invoke-WslRaw {
         [switch]$AllowFailure
     )
     $wslArgs = @('-d', $script:DistroName, '-u', $User, '--') + $Arguments
-    $output = & wsl.exe @wslArgs 2>&1
-    $code = $LASTEXITCODE
-    if ($code -ne 0 -and -not $AllowFailure) {
-        throw "WSL command failed ($code): $($output -join [Environment]::NewLine)"
+    $previous = $ErrorActionPreference
+    # PowerShell 5.1 在 Stop 下会把原生 stderr 当成 NativeCommandError 抛出。
+    # 临时改为 Continue 并用 2>&1 捕获：不会抛异常，也不会把进度刷成红字。
+    $ErrorActionPreference = 'Continue'
+    try {
+        $raw = & wsl.exe @wslArgs 2>&1
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
     }
-    return [pscustomobject]@{ ExitCode = $code; Output = @($output) }
+    $stdout = @($raw | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { [string]$_ })
+    $stderr = (@($raw | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | ForEach-Object { [string]$_ })) -join [Environment]::NewLine
+    if ($code -ne 0 -and -not $AllowFailure) {
+        $detail = (@($stdout) + @($stderr)) -join [Environment]::NewLine
+        throw "WSL command failed ($code): $detail"
+    }
+    return [pscustomobject]@{ ExitCode = $code; Output = $stdout; StdErr = $stderr }
 }
 
 function Invoke-WslBash {
@@ -126,11 +160,25 @@ function Invoke-WslBash {
         [switch]$AllowFailure
     )
     $arguments = @('bash', $ScriptPath) + $ScriptArguments
-    $result = Invoke-WslRaw -User $User -Arguments $arguments -AllowFailure:$AllowFailure
-    if ($result.Output.Count -gt 0) {
-        $result.Output | ForEach-Object { Write-Host $_ }
+    $wslArgs = @('-d', $script:DistroName, '-u', $User, '--') + $arguments
+    $lines = New-Object System.Collections.Generic.List[string]
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        # 逐行转发，让 docker compose 的拉取/构建进度实时显示，而不是等整段结束。
+        & wsl.exe @wslArgs 2>&1 | ForEach-Object {
+            $line = [string]$_
+            $lines.Add($line)
+            Write-Host $line
+        }
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
     }
-    return $result
+    if ($code -ne 0 -and -not $AllowFailure) {
+        throw "WSL command failed ($code): $($lines -join [Environment]::NewLine)"
+    }
+    return [pscustomobject]@{ ExitCode = $code; Output = @($lines); StdErr = '' }
 }
 
 function Get-WslDefaultUser {
@@ -191,14 +239,15 @@ function Ensure-WslUbuntu {
         Set-RebootPending 'WSL Windows 功能已启用'
     }
 
-    $list = & wsl.exe -l -q 2>$null
     # wsl.exe 在重定向时输出 UTF-16LE，PowerShell 5.1 会按控制台代码页解码，需去掉夹带的 NUL。
+    $list = (Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('-l', '-q')).Output
     $distros = @($list | ForEach-Object { ([string]$_ -replace "`0", '').Trim() } | Where-Object { $_ })
     if ($distros -notcontains $script:DistroName) {
         Confirm-SystemChange '需要安装 WSL2 Ubuntu 发行版。是否继续？'
         Write-QQLog '安装 Ubuntu（可能需要下载数分钟）'
-        $output = @(& wsl.exe --install -d $script:DistroName --no-launch 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '') })
-        $code = $LASTEXITCODE
+        $installProbe = Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('--install', '-d', $script:DistroName, '--no-launch')
+        $output = @($installProbe.Output | ForEach-Object { ([string]$_ -replace "`0", '') })
+        $code = $installProbe.ExitCode
         $output | ForEach-Object { Write-Host $_ }
         if ($code -ne 0) {
             if (($output -join ' ') -match 'restart|重启|reboot') {
@@ -211,16 +260,19 @@ function Ensure-WslUbuntu {
         }
     }
 
-    $setDefault = @(& wsl.exe --set-default-version 2 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '') })
-    if ($LASTEXITCODE -ne 0 -and (($setDefault -join ' ') -notmatch 'already|已经|2')) {
+    $defaultProbe = Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('--set-default-version', '2')
+    $setDefault = @($defaultProbe.Output | ForEach-Object { ([string]$_ -replace "`0", '') })
+    if ($defaultProbe.ExitCode -ne 0 -and (($setDefault -join ' ') -notmatch 'already|已经|2')) {
         Write-QQLog "无法显式设置 WSL 默认版本为 2：$($setDefault -join ' ')"
     }
-    $versionOutput = @(& wsl.exe -l -v 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '').Trim() })
+    $versionProbe = Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('-l', '-v')
+    $versionOutput = @($versionProbe.Output | ForEach-Object { ([string]$_ -replace "`0", '').Trim() })
     $ubuntuVersionLine = @($versionOutput | Where-Object { ([string]$_) -match "(^|\s)$([regex]::Escape($script:DistroName))(\s|$)" }) | Select-Object -First 1
     if ($ubuntuVersionLine -and ([string]$ubuntuVersionLine) -notmatch '\s2\s*$') {
         Write-QQLog "将 $($script:DistroName) 切换到 WSL2"
-        & wsl.exe --set-version $script:DistroName 2 2>&1 | ForEach-Object { Write-Host $_ }
-        if ($LASTEXITCODE -ne 0) {
+        $setVersion = Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('--set-version', $script:DistroName, '2')
+        $setVersion.Output | ForEach-Object { Write-Host $_ }
+        if ($setVersion.ExitCode -ne 0) {
             Stop-QQBridge 'Ubuntu 无法切换到 WSL2，请更新 WSL 并重试。'
         }
     }
@@ -228,7 +280,8 @@ function Ensure-WslUbuntu {
     $probe = Invoke-WslRaw -User 'root' -Arguments @('bash', '-lc', 'true') -AllowFailure
     if ($probe.ExitCode -ne 0) {
         Write-QQLog '初始化 Ubuntu 实例'
-        & wsl.exe --update 2>&1 | ForEach-Object { Write-Host $_ }
+        $updateProbe = Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('--update')
+        $updateProbe.Output | ForEach-Object { Write-Host $_ }
         $probe = Invoke-WslRaw -User 'root' -Arguments @('bash', '-lc', 'true') -AllowFailure
         if ($probe.ExitCode -ne 0) {
             Set-RebootPending 'Ubuntu 实例尚未完成初始化'
@@ -265,14 +318,18 @@ fi
     $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($script))
     $command = "echo $encoded | base64 -d | bash"
     $result = Invoke-WslRaw -User 'root' -Arguments @('bash', '-lc', $command)
-    & wsl.exe --terminate $script:DistroName | Out-Null
-    Start-Sleep -Seconds 2
+    # 只在 Docker Desktop 未运行时重启发行版；否则会杀掉 Docker Desktop 的 WSL 集成代理。
+    if (-not (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue)) {
+        Invoke-NativeQuiet -FilePath 'wsl.exe' -Arguments @('--terminate', $script:DistroName) | Out-Null
+        Start-Sleep -Seconds 2
+    }
     $homeResult = Invoke-WslRaw -User 'root' -Arguments @('bash', '-lc', "getent passwd '$safeUser' | cut -d: -f6")
-    $home = (($homeResult.Output | Select-Object -First 1) -as [string]).Trim()
-    if (-not $home) {
+    # 注意：不能命名为 $home，PowerShell 的 $HOME 是只读自动变量，赋值会直接抛异常。
+    $linuxHome = (($homeResult.Output | Select-Object -First 1) -as [string]).Trim()
+    if (-not $linuxHome) {
         Stop-QQBridge "无法读取 Linux 用户 $safeUser 的主目录。"
     }
-    return [pscustomobject]@{ User = $safeUser; Home = $home }
+    return [pscustomobject]@{ User = $safeUser; Home = $linuxHome }
 }
 
 function Get-DockerExe {
@@ -311,8 +368,16 @@ function Set-DockerWslIntegration {
     Write-Utf8NoBom -Path $settingsPath -Content ($settings | ConvertTo-Json -Depth 30)
     if (-not $alreadyIntegrated -and (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue)) {
         Confirm-SystemChange '需要重启 Docker Desktop 以应用 Ubuntu WSL Integration。是否继续？'
-        Get-Process -Name 'Docker Desktop','com.docker.backend','com.docker.build','com.docker.cli' -ErrorAction SilentlyContinue |
-            Stop-Process -Force -ErrorAction SilentlyContinue
+        $docker = Get-DockerExe
+        $stopped = $false
+        if ($docker) {
+            $stop = Invoke-NativeQuiet -FilePath $docker -Arguments @('desktop', 'stop')
+            $stopped = ($stop.ExitCode -eq 0)
+        }
+        if (-not $stopped) {
+            Get-Process -Name 'Docker Desktop','com.docker.backend','com.docker.build','com.docker.cli' -ErrorAction SilentlyContinue |
+                Stop-Process -Force -ErrorAction SilentlyContinue
+        }
         Start-Sleep -Seconds 5
     }
 }
@@ -321,11 +386,20 @@ function Start-DockerDesktop {
     if (-not (Test-Path -LiteralPath $script:DockerDesktopPath)) {
         Stop-QQBridge "找不到 Docker Desktop: $script:DockerDesktopPath"
     }
-    $process = Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue
-    if (-not $process) {
-        Write-QQLog '启动 Docker Desktop；如出现登录、许可或 WSL 提示，请在窗口中完成。'
-        Start-Process -FilePath $script:DockerDesktopPath
+    if (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue) {
+        return
     }
+    $docker = Get-DockerExe
+    if ($docker) {
+        Write-QQLog '通过 docker desktop start 启动 Docker Desktop'
+        $start = Invoke-NativeQuiet -FilePath $docker -Arguments @('desktop', 'start')
+        if ($start.ExitCode -eq 0) {
+            return
+        }
+        $start.Output | ForEach-Object { Write-Host $_ }
+    }
+    Write-QQLog '启动 Docker Desktop；如出现登录、许可或 WSL 提示，请在窗口中完成。'
+    Start-Process -FilePath $script:DockerDesktopPath
 }
 
 function Ensure-LinuxDockerGroup {
@@ -351,8 +425,8 @@ function Ensure-LinuxDockerGroup {
     Invoke-WslRaw -User 'root' -Arguments @(
         'usermod', '-aG', 'docker', $safeUser
     ) | Out-Null
-    & wsl.exe --terminate $script:DistroName | Out-Null
-    Start-Sleep -Seconds 2
+    # 不要 terminate：组变更对新进程立即生效，而 terminate 会中断 Docker Desktop 的
+    # WSL 集成代理，触发 “WSL integration with distro 'Ubuntu' unexpectedly stopped”。
 }
 
 function Wait-DockerEngine {
@@ -361,8 +435,8 @@ function Wait-DockerEngine {
     while (((Get-Date) - $started).TotalSeconds -lt $TimeoutSeconds) {
         $docker = Get-DockerExe
         if ($docker) {
-            $output = & $docker info --format '{{.OSType}}' 2>$null
-            if ($LASTEXITCODE -eq 0 -and (($output -join '').Trim().ToLowerInvariant() -eq 'linux')) {
+            $dockerProbe = Invoke-NativeQuiet -FilePath $docker -Arguments @('info', '--format', '{{.OSType}}')
+            if ($dockerProbe.ExitCode -eq 0 -and (($dockerProbe.Output -join '').Trim().ToLowerInvariant() -eq 'linux')) {
                 $wslProbe = Invoke-WslRaw -User $script:LinuxUser -Arguments @('docker', 'info', '--format', '{{.OSType}}') -AllowFailure
                 if ($wslProbe.ExitCode -eq 0 -and (($wslProbe.Output -join '').Trim().ToLowerInvariant() -eq 'linux')) {
                     return
