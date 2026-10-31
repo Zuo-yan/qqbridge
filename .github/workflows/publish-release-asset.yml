@@ -1,0 +1,80 @@
+name: Publish Release Asset
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: GitHub release database ID
+        required: true
+        type: string
+      parts_ref:
+        description: Branch containing the split release archive
+        required: true
+        type: string
+      asset_name:
+        description: Final release asset name
+        required: true
+        type: string
+      expected_sha256:
+        description: Expected SHA-256 of the reassembled archive
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out split archive
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.parts_ref }}
+          fetch-depth: 1
+
+      - name: Reassemble and verify archive
+        env:
+          ASSET_NAME: ${{ inputs.asset_name }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          parts=(release-parts/*.part-*)
+          if (( ${#parts[@]} == 0 )); then
+            echo "No archive parts found" >&2
+            exit 1
+          fi
+          cat "${parts[@]}" > "$ASSET_NAME"
+          actual_sha256="$(sha256sum "$ASSET_NAME" | awk '{print $1}')"
+          printf 'Expected SHA-256: %s\nActual SHA-256:   %s\n' "$EXPECTED_SHA256" "$actual_sha256"
+          test "$actual_sha256" = "$EXPECTED_SHA256"
+
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ inputs.release_id }}
+          ASSET_NAME: ${{ inputs.asset_name }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_url="repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}"
+          upload_url="$(gh api "$release_url" --jq .upload_url)"
+          upload_url="${upload_url%\{*\}}"
+          response="$(curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@${ASSET_NAME}" \
+            "${upload_url}?name=${ASSET_NAME}")"
+          asset_state="$(jq -r '.state' <<<"$response")"
+          asset_size="$(jq -r '.size' <<<"$response")"
+          asset_digest="$(jq -r '.digest' <<<"$response")"
+          expected_size="$(stat -c %s "$ASSET_NAME")"
+          test "$asset_state" = "uploaded"
+          test "$asset_size" = "$expected_size"
+          test "$asset_digest" = "sha256:${EXPECTED_SHA256}"
+          jq '{id, name, state, size, digest, browser_download_url}' <<<"$response"
