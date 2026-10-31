@@ -1,6 +1,6 @@
 # QQBridge 一键部署包
 
-版本：`1.1.0`
+版本：`1.1.1`
 
 这是一个可同时部署到 **Windows 11 x64** 和 **原生 Linux x86_64** 的私人 QQ 聊天机器人部署包，组合 MaiBot、NapCat、17 个插件、14 个运行时补丁、当前“哈基米”人设、表情包和提示图片。
 
@@ -12,11 +12,20 @@ Windows 使用 Docker Desktop + WSL2 Ubuntu；原生 Linux 使用 Docker Engine 
 
 | 操作 | Windows 11 | 原生 Linux |
 |---|---|---|
-| 安装 | `.\install.ps1` | `bash ./install-linux.sh` |
-| 配置 | `.\configure.ps1` | `bash ./configure-linux.sh` |
-| 验证 | `.\verify.ps1` | `bash ./verify-linux.sh` |
+| 安装 | 双击 `install.cmd` 或 `.\install.ps1` | `bash ./install-linux.sh` |
+| 配置 | 双击 `configure.cmd` 或 `.\configure.ps1` | `bash ./configure-linux.sh` |
+| 验证 | 双击 `verify.cmd` 或 `.\verify.ps1` | `bash ./verify-linux.sh` |
 | 升级 | `.\upgrade.ps1 -Package <ZIP>` | `bash ./upgrade-linux.sh --package <ZIP>` |
 | 回滚 | `.\rollback.ps1` | `bash ./rollback-linux.sh` |
+
+## Windows 11 一键安装（推荐）
+
+1. 把 ZIP 解压到任意本地目录，不要在压缩包内直接运行。
+2. 双击 `install.cmd`，在 UAC 提示中点“是”。
+3. 按窗口提示填写模型和 QQ 信息；如果提示需要重启，重启后再次双击 `install.cmd`。
+4. 在 NapCat WebUI 扫码登录后，双击 `configure.cmd` 选择允许的群，再双击 `verify.cmd` 检查。
+
+`install.cmd` / `configure.cmd` / `verify.cmd` 会自动提权并绕过执行策略，不需要手动打开管理员终端，也不需要修改 `Set-ExecutionPolicy`。所有 `.ps1` 均以 UTF-8 BOM 保存，兼容中文 Windows PowerShell 5.1。
 
 ## Windows 11 安装
 
@@ -46,8 +55,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 要求 Linux x86_64、Python 3.10+、`systemd`、`sudo`、Docker Engine 和 Docker Compose v2。默认按 rootful Docker 管理；已测试目标为常见 Ubuntu/Debian 系发行版。
 
 ```bash
-unzip qqbridge-v1.1.0.zip
-cd qqbridge-v1.1.0
+unzip qqbridge-v1.1.1.zip
+cd qqbridge-v1.1.1
 bash ./install-linux.sh
 ```
 
@@ -135,8 +144,8 @@ bash ./configure-linux.sh --advanced
 
 ```text
 ~/qqbridge/                       # Linux 默认；Windows 位于 WSL 用户主目录
-├── releases/1.1.0/
-├── current -> releases/1.1.0/
+├── releases/1.1.1/
+├── current -> releases/1.1.1/
 ├── backups/
 └── instances/default/
     ├── .env

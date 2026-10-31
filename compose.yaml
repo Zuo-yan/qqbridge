@@ -2,7 +2,7 @@ name: ${COMPOSE_PROJECT_NAME:-qqbridge}
 
 services:
   maibot:
-    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.1.0}
+    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.1.1}
     build:
       context: ./image
       dockerfile: Dockerfile

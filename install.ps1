@@ -1,16 +1,19 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [string]$InstallRoot = '~/qqbridge',
     [switch]$LocalOnly,
-    [switch]$DisableAutoStart
+    [switch]$DisableAutoStart,
+    [switch]$Yes
 )
 
 . (Join-Path $PSScriptRoot 'qqbridge-lib.ps1')
+$script:AssumeYes = [bool]$Yes
 
 if (-not (Test-IsAdministrator)) {
     $arguments = @('-InstallRoot', $InstallRoot)
     if ($LocalOnly) { $arguments += '-LocalOnly' }
     if ($DisableAutoStart) { $arguments += '-DisableAutoStart' }
+    if ($Yes) { $arguments += '-Yes' }
     Restart-Elevated -EntryScript $PSCommandPath -Arguments $arguments
 }
 

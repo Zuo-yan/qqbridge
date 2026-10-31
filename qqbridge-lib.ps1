@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $script:PackageRoot = Split-Path -Parent $PSCommandPath
 $script:StateDir = Join-Path $env:ProgramData 'QQBridge'
@@ -6,6 +6,7 @@ $script:StateFile = Join-Path $script:StateDir 'install-state.json'
 $script:DistroName = 'Ubuntu'
 $script:DockerDesktopPath = 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 $script:DockerExePath = 'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+$script:AssumeYes = $false
 
 function Write-QQLog {
     param([Parameter(Mandatory)][string]$Message)
@@ -32,7 +33,7 @@ function Restart-Elevated {
     foreach ($value in $Arguments) {
         $quoted += '"' + ([string]$value).Replace('"', '\"') + '"'
     }
-    $argumentLine = "-NoProfile -ExecutionPolicy Bypass -File `"$EntryScript`" " + ($quoted -join ' ')
+    $argumentLine = "-NoExit -NoProfile -ExecutionPolicy Bypass -File `"$EntryScript`" " + ($quoted -join ' ')
     Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentLine
     exit 0
 }
@@ -69,6 +70,15 @@ function Read-State {
     return Get-Content -LiteralPath $script:StateFile -Raw -Encoding UTF8 | ConvertFrom-Json
 }
 
+function Write-Utf8NoBom {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][AllowEmptyString()][string]$Content
+    )
+    $encoding = New-Object System.Text.UTF8Encoding($false)
+    [IO.File]::WriteAllText($Path, $Content, $encoding)
+}
+
 function Write-State {
     param([Parameter(Mandatory)]$State)
     New-Item -ItemType Directory -Force -Path $script:StateDir | Out-Null
@@ -79,7 +89,7 @@ function Write-State {
         foreach ($property in $State.PSObject.Properties) { $values[$property.Name] = $property.Value }
     }
     $values['updated_at'] = (Get-Date).ToUniversalTime().ToString('o')
-    $values | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $script:StateFile -Encoding UTF8
+    Write-Utf8NoBom -Path $script:StateFile -Content ($values | ConvertTo-Json -Depth 8)
 }
 
 function ConvertTo-WslPath {
@@ -153,6 +163,10 @@ function Set-RebootPending {
 
 function Confirm-SystemChange {
     param([Parameter(Mandatory)][string]$Message)
+    if ($script:AssumeYes) {
+        Write-QQLog "$Message 已自动确认（-Yes）。"
+        return
+    }
     $answer = Read-Host "$Message [Y/n]"
     if ($answer -and $answer.Trim().ToLowerInvariant() -notin @('y', 'yes', '是')) {
         Stop-QQBridge '用户取消了安装。'
@@ -178,11 +192,12 @@ function Ensure-WslUbuntu {
     }
 
     $list = & wsl.exe -l -q 2>$null
-    $distros = @($list | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
+    # wsl.exe 在重定向时输出 UTF-16LE，PowerShell 5.1 会按控制台代码页解码，需去掉夹带的 NUL。
+    $distros = @($list | ForEach-Object { ([string]$_ -replace "`0", '').Trim() } | Where-Object { $_ })
     if ($distros -notcontains $script:DistroName) {
         Confirm-SystemChange '需要安装 WSL2 Ubuntu 发行版。是否继续？'
         Write-QQLog '安装 Ubuntu（可能需要下载数分钟）'
-        $output = & wsl.exe --install -d $script:DistroName --no-launch 2>&1
+        $output = @(& wsl.exe --install -d $script:DistroName --no-launch 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '') })
         $code = $LASTEXITCODE
         $output | ForEach-Object { Write-Host $_ }
         if ($code -ne 0) {
@@ -196,11 +211,11 @@ function Ensure-WslUbuntu {
         }
     }
 
-    $setDefault = & wsl.exe --set-default-version 2 2>&1
+    $setDefault = @(& wsl.exe --set-default-version 2 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '') })
     if ($LASTEXITCODE -ne 0 -and (($setDefault -join ' ') -notmatch 'already|已经|2')) {
         Write-QQLog "无法显式设置 WSL 默认版本为 2：$($setDefault -join ' ')"
     }
-    $versionOutput = & wsl.exe -l -v 2>&1
+    $versionOutput = @(& wsl.exe -l -v 2>&1 | ForEach-Object { ([string]$_ -replace "`0", '').Trim() })
     $ubuntuVersionLine = @($versionOutput | Where-Object { ([string]$_) -match "(^|\s)$([regex]::Escape($script:DistroName))(\s|$)" }) | Select-Object -First 1
     if ($ubuntuVersionLine -and ([string]$ubuntuVersionLine) -notmatch '\s2\s*$') {
         Write-QQLog "将 $($script:DistroName) 切换到 WSL2"
@@ -293,7 +308,7 @@ function Set-DockerWslIntegration {
     $settings | Add-Member -NotePropertyName EnableIntegrationWithDefaultWslDistro -NotePropertyValue $true -Force
     $settings | Add-Member -NotePropertyName IntegratedWslDistros -NotePropertyValue @($integrated) -Force
     $settings | Add-Member -NotePropertyName UseWindowsContainers -NotePropertyValue $false -Force
-    $settings | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $settingsPath -Encoding UTF8
+    Write-Utf8NoBom -Path $settingsPath -Content ($settings | ConvertTo-Json -Depth 30)
     if (-not $alreadyIntegrated -and (Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue)) {
         Confirm-SystemChange '需要重启 Docker Desktop 以应用 Ubuntu WSL Integration。是否继续？'
         Get-Process -Name 'Docker Desktop','com.docker.backend','com.docker.build','com.docker.cli' -ErrorAction SilentlyContinue |
@@ -352,6 +367,8 @@ function Wait-DockerEngine {
                 if ($wslProbe.ExitCode -eq 0 -and (($wslProbe.Output -join '').Trim().ToLowerInvariant() -eq 'linux')) {
                     return
                 }
+                # Docker Desktop 启动后才创建 docker 组；在等待期间持续尝试把用户加入该组。
+                Ensure-LinuxDockerGroup
             }
         }
         Start-Sleep -Seconds 5
@@ -417,8 +434,8 @@ function Read-Port {
 function Save-SecureAnswers {
     param([Parameter(Mandatory)][hashtable]$Answers)
     $path = [System.IO.Path]::GetTempFileName()
-    $Answers | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $path -Encoding UTF8
-    & icacls.exe $path /inheritance:r /grant:r "$($env:USERNAME):(R,W,D)" | Out-Null
+    Write-Utf8NoBom -Path $path -Content ($Answers | ConvertTo-Json -Depth 10)
+    & icacls.exe $path /inheritance:r /grant:r "$($env:USERDOMAIN)\$($env:USERNAME):(R,W,D)" | Out-Null
     return $path
 }
 

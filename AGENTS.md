@@ -4,7 +4,8 @@
 
 ## 平台选择
 
-- Windows 11 x64：使用 `install.ps1`、`configure.ps1`、`verify.ps1`、`upgrade.ps1`、`rollback.ps1`。
+- Windows 11 x64：优先双击 `install.cmd`、`configure.cmd`、`verify.cmd`（自动提权并绕过执行策略）；也可使用 `install.ps1`、`configure.ps1`、`verify.ps1`、`upgrade.ps1`、`rollback.ps1`。
+- `install.ps1 -Yes` 会跳过系统变更确认，供 `install.cmd` 一键安装使用；手动安装时建议不加。
 - 原生 Linux x86_64：使用 `install-linux.sh`、`configure-linux.sh`、`verify-linux.sh`、`upgrade-linux.sh`、`rollback-linux.sh`。
 - 不要从 Windows 执行 Linux 入口，也不要在 Linux 上尝试 PowerShell 入口。
 

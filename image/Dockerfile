@@ -17,5 +17,5 @@ COPY patches/show_emoji_list.py /MaiMBot/src/maisaka/builtin_tool/show_emoji_lis
 COPY patches/send_emoji.py /MaiMBot/src/maisaka/builtin_tool/send_emoji.py
 
 LABEL org.opencontainers.image.title="QQBridge MaiBot"
-LABEL org.opencontainers.image.version="1.1.0"
-LABEL org.opencontainers.image.description="MaiBot base image with the QQBridge v1.1.0 runtime patches"
+LABEL org.opencontainers.image.version="1.1.1"
+LABEL org.opencontainers.image.description="MaiBot base image with the QQBridge v1.1.1 runtime patches"

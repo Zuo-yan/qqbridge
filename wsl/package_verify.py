@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 
-EXCLUDED_ROOTS = {".git", "_staging", "backups"}
+EXCLUDED_ROOTS = {".git", ".github", "_staging", "backups"}
 EXCLUDED_NAMES = {"manifest.json"}
 
 
