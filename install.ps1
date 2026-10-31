@@ -100,6 +100,7 @@ $answers = @{
     maibot_bind = $bind
     napcat_bind = $bind
     timezone = 'Asia/Shanghai'
+    restart_policy = if ($DisableAutoStart) { 'no' } else { 'unless-stopped' }
     allowed_groups = @()
     allowed_users = @($ownerQq | Where-Object { $_ })
 }
@@ -120,7 +121,8 @@ try {
             '--answers', $wslAnswers,
             '--target-user', $linux.User,
             '--napcat-uid', $uid,
-            '--napcat-gid', $gid
+            '--napcat-gid', $gid,
+            '--platform', 'wsl'
         )
 } finally {
     Remove-Item -LiteralPath $answerFile -Force -ErrorAction SilentlyContinue
@@ -131,9 +133,10 @@ $disableAutostartValue = [bool]$DisableAutoStart.IsPresent
 Update-QQBridgeFirewall -LocalOnly:$localOnlyValue -MaiBotPort $maiPort -NapCatPort $napPort
 Set-DockerAutostart -Disable:$disableAutostartValue
 
+$packageVersion = (Get-Content -LiteralPath (Join-Path $script:PackageRoot 'VERSION') -Raw -Encoding UTF8).Trim()
 Write-State @{
     phase = 'installed'
-    package_version = '1.0.0'
+    package_version = $packageVersion
     distro = $script:DistroName
     linux_user = $linux.User
     linux_home = $linux.Home

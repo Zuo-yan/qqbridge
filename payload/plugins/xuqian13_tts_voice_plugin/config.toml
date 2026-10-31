@@ -1,0 +1,19 @@
+[plugin]
+enabled = false
+config_version = "3.3.0"
+[general]
+default_backend = "mimo"
+use_replyer_rewrite = false
+use_base64_audio = true
+split_sentences = false
+send_error_messages = true
+[components]
+action_enabled = true
+command_enabled = true
+[mimo]
+api_url = "https://api.xiaomimimo.com/v1/chat/completions"
+api_key = ""
+model = "mimo-v2.5-tts"
+default_voice = "冰糖"
+audio_format = "wav"
+timeout = 60

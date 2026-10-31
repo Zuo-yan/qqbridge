@@ -1,0 +1,70 @@
+[plugin]
+enabled = false
+config_version = "1.2.2"
+
+[target]
+groups = []
+daily_times = 1
+active_hours = [11, 18]
+catch_up_minutes = 5
+include_header_text = true
+
+[source]
+keywords = ["鬼畜", "抽象", "整活", "答辩", "难绷", "绷不住", "逆天", "离谱", "沙雕"]
+keywords_per_run = 3
+orders = ["totalrank", "pubdate"]
+page_max = 3
+window_hours = [72, 720]
+play_min = 50000
+play_max = 300000
+min_video_review = 40
+max_video_review = 600
+max_check_per_run = 8
+
+[judge]
+at_ratio_threshold = 0.3
+min_comments = 20
+comment_pages = 3
+
+[download]
+max_duration_seconds = 120
+max_size_mb = 10
+quality_preference = [64, 32, 16]
+inline_video_max_mb = 10
+keep_files = 2
+
+[filters]
+title_blacklist = ["原神", "崩坏", "星穹铁道", "剧透", "直播回放", "录播", "合集"]
+tag_blacklist = []
+up_blacklist = []
+
+[tool]
+enabled = true
+permission = "anyone"
+whitelist = []
+speaker_cache_ttl_seconds = 600
+min_gap_seconds = 300
+max_count = 1
+suppress_reply = true
+suppress_reply_window_seconds = 120
+
+[pretty]
+enabled = true
+keywords = ["MMD", "手书", "同人动画", "MAD", "AMV", "动漫混剪", "踩点剪辑", "纸片人", "虚拟主播", "二创"]
+keywords_per_run = 6
+orders = ["totalrank", "pubdate"]
+page_max = 3
+window_hours = [72, 720]
+play_min = 10000
+play_max = 500000
+max_duration_seconds = 120
+favorite_rate_metric = "fav_like"
+min_favorite_rate = 0.5
+typename_whitelist = ["MMD", "手书", "MAD", "AMV", "VOCALOID", "动画", "同人", "虚拟"]
+real_blacklist = ["真人", "cos", "仿妆", "颜值", "网红", "模特", "街拍", "vlog", "探店", "旅拍", "素人"]
+block_words = ["教程", "教学", "教你", "手把手", "零基础", "入门", "画法", "步骤", "解析", "讲解", "思路分享", "干货", "保姆级", "新番", "自制剧", "连续剧", "小剧场", "剧情向", "大电影", "剧场版", "解说", "配音", "会限", "直播切片", "切片", "录播", "回放"]
+min_gap_seconds = 300
+
+[retry]
+rounds = 3
+gap_seconds = 15

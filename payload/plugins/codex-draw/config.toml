@@ -1,0 +1,15 @@
+[plugin]
+enabled = false
+config_version = "3"
+[codex]
+codex_path = ""
+proxy_url = ""
+model = ""
+reasoning_effort = "low"
+timeout_seconds = 600.0
+max_concurrent_jobs = 1
+generated_dir = "/MaiMBot/data/codex-draw/generated_images"
+[compliance]
+enabled = true
+review_model = "vlm"
+timeout_ms = 60000

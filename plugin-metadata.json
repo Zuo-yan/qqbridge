@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "package_version": "1.0.0",
+  "package_version": "1.1.0",
   "plugins": [
     {
       "name": "codex-draw",
@@ -72,7 +72,7 @@
       "source_commit": "",
       "source_had_local_changes": false,
       "source_tree_sha256": "c750e4e5b0baa4999492c1c8d6382fdeeba5eb84671a9cfb48129d990be70fd8",
-      "packaged_tree_sha256": "fa09091325d2b34e4317a245f5a6535e3512acb5017324f32ff740730c3f796c",
+      "packaged_tree_sha256": "de207519b22d8b722a74a710c6ef77ef728fff2acd420c964c248437ee8671f2",
       "license_files": []
     },
     {

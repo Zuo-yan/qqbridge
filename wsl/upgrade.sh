@@ -45,7 +45,7 @@ cleanup_upgrade() {
       rollback_script="$PACKAGE/wsl/rollback.sh"
     fi
     if [[ -f "$rollback_script" ]]; then
-      "$rollback_script" \
+      bash "$rollback_script" \
         --install-root "$INSTALL_ROOT" \
         --target-user "$TARGET_USER" \
         --backup-id "$BACKUP_ID" || log "rollback also failed; manual recovery may be required"

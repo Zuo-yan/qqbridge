@@ -8,9 +8,13 @@ import re
 import secrets
 import shutil
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 fallback; generated files are still checked in CI.
+    tomllib = None
 
 
 PLACEHOLDER_RE = re.compile(r"@@([A-Z0-9_]+)@@")
@@ -54,6 +58,7 @@ def load_env(path: Path) -> dict[str, str]:
 def save_env(path: Path, values: dict[str, str]) -> None:
     preferred = [
         "INSTANCE_DIR",
+        "COMPOSE_PROJECT_NAME",
         "PACKAGE_VERSION",
         "MAIBOT_BASE_IMAGE",
         "NAPCAT_BASE_IMAGE",
@@ -66,6 +71,7 @@ def save_env(path: Path, values: dict[str, str]) -> None:
         "MAIBOT_MEMORY_LIMIT",
         "NAPCAT_MEMORY_LIMIT",
         "TZ",
+        "RESTART_POLICY",
         "NAPCAT_UID",
         "NAPCAT_GID",
         "OWNER_QQ",
@@ -109,6 +115,8 @@ def render_template(text: str, values: dict[str, str]) -> str:
 
 
 def validate_toml(path: Path) -> None:
+    if tomllib is None:
+        return
     try:
         with path.open("rb") as handle:
             tomllib.load(handle)
@@ -422,7 +430,7 @@ def configure_advanced(instance: Path, answers: dict[str, Any], env: dict[str, s
         validate_toml(moegirl)
 
 
-def write_plugin_report(instance: Path) -> None:
+def write_plugin_report(instance: Path, package: Path) -> None:
     reasons = {
         "codex-draw": "Codex CLI 未配置，默认停用。",
         "gemini_web_search": "搜索服务凭据未配置，默认停用。",
@@ -445,7 +453,7 @@ def write_plugin_report(instance: Path) -> None:
             }
         )
     report = {
-        "generated_by": "qqbridge-windows-v1.0.0",
+        "generated_by": f"qqbridge-{read_text(package / 'VERSION').strip()}",
         "plugins": items,
         "note": "enabled=null 表示插件未显式声明开关，由 MaiBot 插件系统默认处理。",
     }
@@ -464,23 +472,46 @@ def command_install(args: argparse.Namespace) -> None:
     answers = load_answers(Path(args.answers) if args.answers else None)
     env_path = instance / ".env"
     env = load_env(env_path)
+    package_version = read_text(package / "VERSION").strip()
     env.update(
         {
             "INSTANCE_DIR": str(instance),
-            "PACKAGE_VERSION": read_text(package / "VERSION").strip(),
+            "COMPOSE_PROJECT_NAME": str(
+                answers.get(
+                    "compose_project_name",
+                    os.environ.get("QQBRIDGE_COMPOSE_PROJECT_NAME", "qqbridge"),
+                )
+            ).strip(),
+            "PACKAGE_VERSION": package_version,
             "MAIBOT_BASE_IMAGE": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
             "NAPCAT_BASE_IMAGE": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e",
-            "MAIBOT_IMAGE": "qqbridge-maibot:1.0.0",
+            "MAIBOT_IMAGE": f"qqbridge-maibot:{package_version}",
         }
     )
+    if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", env["COMPOSE_PROJECT_NAME"]):
+        fail("COMPOSE_PROJECT_NAME contains invalid characters")
     env.setdefault("MAIBOT_PORT", str(answers.get("maibot_port", "18001")))
     env.setdefault("NAPCAT_PORT", str(answers.get("napcat_port", "6099")))
     env.setdefault("ONEBOT_PORT", str(answers.get("onebot_port", "3001")))
     env.setdefault("MAIBOT_BIND", str(answers.get("maibot_bind", "0.0.0.0")))
     env.setdefault("NAPCAT_BIND", str(answers.get("napcat_bind", "0.0.0.0")))
-    env.setdefault("MAIBOT_MEMORY_LIMIT", "1024m")
-    env.setdefault("NAPCAT_MEMORY_LIMIT", "1024m")
+    env.setdefault(
+        "MAIBOT_MEMORY_LIMIT",
+        str(answers.get("maibot_memory_limit", "1024m")),
+    )
+    env.setdefault(
+        "NAPCAT_MEMORY_LIMIT",
+        str(answers.get("napcat_memory_limit", "1024m")),
+    )
+    for memory_key in ("MAIBOT_MEMORY_LIMIT", "NAPCAT_MEMORY_LIMIT"):
+        if not re.fullmatch(r"[1-9][0-9]*[mMgG]", env[memory_key]):
+            fail(f"{memory_key} must look like 512m or 1g")
     env.setdefault("TZ", str(answers.get("timezone", "Asia/Shanghai")))
+    env.setdefault(
+        "RESTART_POLICY", str(answers.get("restart_policy", "unless-stopped"))
+    )
+    if env["RESTART_POLICY"] not in {"unless-stopped", "always", "on-failure", "no"}:
+        fail("RESTART_POLICY must be unless-stopped, always, on-failure or no")
     env.setdefault("NAPCAT_UID", str(args.napcat_uid))
     env.setdefault("NAPCAT_GID", str(args.napcat_gid))
     env["OWNER_QQ"] = str(answers.get("owner_qq", env.get("OWNER_QQ", ""))).strip()
@@ -515,7 +546,7 @@ def command_install(args: argparse.Namespace) -> None:
     else:
         owner_file.unlink(missing_ok=True)
     configure_advanced(instance, answers, env)
-    write_plugin_report(instance)
+    write_plugin_report(instance, package)
 
 
 def command_configure(args: argparse.Namespace) -> None:
@@ -526,6 +557,15 @@ def command_configure(args: argparse.Namespace) -> None:
     if not env_path.exists():
         fail(f"instance environment not found: {env_path}")
     env = load_env(env_path)
+    package_version = read_text(package / "VERSION").strip()
+    env.update(
+        {
+            "PACKAGE_VERSION": package_version,
+            "MAIBOT_BASE_IMAGE": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
+            "NAPCAT_BASE_IMAGE": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e",
+            "MAIBOT_IMAGE": f"qqbridge-maibot:{package_version}",
+        }
+    )
     previous_owner_name = env.get("OWNER_NAME", "群主")
     mapping = {
         "owner_qq": "OWNER_QQ",
@@ -543,10 +583,18 @@ def command_configure(args: argparse.Namespace) -> None:
         "search_base_url": "SEARCH_BASE_URL",
         "search_api_key": "SEARCH_API_KEY",
         "search_model": "SEARCH_MODEL",
+        "restart_policy": "RESTART_POLICY",
     }
     for answer_key, env_key in mapping.items():
         if answer_key in answers:
             env[env_key] = str(answers[answer_key]).strip()
+    if env.get("RESTART_POLICY", "unless-stopped") not in {
+        "unless-stopped",
+        "always",
+        "on-failure",
+        "no",
+    }:
+        fail("RESTART_POLICY must be unless-stopped, always, on-failure or no")
     save_env(env_path, env)
     config = instance / "config"
     if any(key in answers for key in ("llm_base_url", "llm_api_key", "llm_model", "llm_client_type")):
@@ -563,7 +611,7 @@ def command_configure(args: argparse.Namespace) -> None:
     else:
         owner_file.unlink(missing_ok=True)
     configure_advanced(instance, answers, env)
-    write_plugin_report(instance)
+    write_plugin_report(instance, package)
 
 
 def main() -> None:

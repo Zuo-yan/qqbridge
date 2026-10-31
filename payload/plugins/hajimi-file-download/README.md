@@ -23,4 +23,4 @@ MaiBot 1.3.15 / SDK 2.16.0 的本地原生工具，工具名 `file_download`。�
 
 ## 验证与回滚
 
-安装完成后由 `verify.ps1` 统一检查容器、OneBot 连接和插件清单。快速停用可在 WebUI 关闭本插件；完整升级与回滚由 `upgrade.ps1` / `rollback.ps1` 统一完成。
+安装完成后由对应平台的验证入口（`verify.ps1` 或 `verify-linux.sh`）统一检查容器、OneBot 连接和插件清单。快速停用可在 WebUI 关闭本插件；完整升级与回滚由对应平台的升级/回滚入口统一完成。

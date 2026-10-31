@@ -1,0 +1,60 @@
+[plugin]
+enabled = true
+config_version = "1.1.5"
+
+[stone]
+preset_forums = ["搬石"]
+forums = []
+count_per_forum = 1
+min_replies = 0
+min_agree = 10
+skip_top = true
+block_keywords = ["水贴", "水楼", "+3"]
+keep_records = 500
+
+[admin]
+admins = []
+allow_groups = []
+
+[schedule]
+auto_enabled = false
+interval_minutes = 120
+base_time = "0:00"
+lead_seconds = 30
+group_mode = "白名单"
+group_list = []
+daily_times = ["20:30"]
+quiet_start = "23:00"
+quiet_end = "09:00"
+
+[send]
+card_style = "自绘卡片"
+forward = true
+forward_name = "帖子分享"
+send_video = true
+video_max_mb = 10
+post_link = true
+thread_filter = "不限"
+max_images = 3
+image_max_width = 1080
+image_quality = 85
+card_width = 830
+closing_text = ""
+
+[tool]
+enabled = true
+forums = []
+max_count = 1
+post_link = true
+max_images = 3
+thread_filter = "不限"
+
+[fetch]
+max_pages = 1
+max_floors = 8
+max_chars = 400
+max_comments = 1
+delay_seconds = 3.0
+timeout = 30
+proxy = ""
+user_agent = ""

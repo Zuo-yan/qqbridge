@@ -8,6 +8,7 @@ PACKAGE=""
 INSTALL_ROOT=""
 ANSWERS=""
 TARGET_USER=""
+INSTANCE_NAME="default"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -15,12 +16,14 @@ while [[ $# -gt 0 ]]; do
     --install-root) INSTALL_ROOT="$2"; shift 2 ;;
     --answers) ANSWERS="$2"; shift 2 ;;
     --target-user) TARGET_USER="$2"; shift 2 ;;
+    --instance) INSTANCE_NAME="$2"; shift 2 ;;
     *) die "unknown argument: $1" ;;
   esac
 done
 
 [[ -n "$PACKAGE" && -n "$INSTALL_ROOT" && -n "$TARGET_USER" ]] || die "package, install root and target user are required"
-INSTANCE="$INSTALL_ROOT/instances/default"
+[[ "$INSTANCE_NAME" =~ ^[A-Za-z0-9_-]+$ ]] || die "invalid instance name: $INSTANCE_NAME"
+INSTANCE="$INSTALL_ROOT/instances/$INSTANCE_NAME"
 [[ -f "$INSTANCE/.env" ]] || die "instance not found: $INSTANCE"
 
 python3 "$PACKAGE/wsl/config_tool.py" \

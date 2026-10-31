@@ -10,6 +10,7 @@ ANSWERS=""
 TARGET_USER=""
 NAPCAT_UID="1000"
 NAPCAT_GID="1000"
+PLATFORM="wsl"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -19,13 +20,15 @@ while [[ $# -gt 0 ]]; do
     --target-user) TARGET_USER="$2"; shift 2 ;;
     --napcat-uid) NAPCAT_UID="$2"; shift 2 ;;
     --napcat-gid) NAPCAT_GID="$2"; shift 2 ;;
+    --platform) PLATFORM="$2"; shift 2 ;;
     *) die "unknown argument: $1" ;;
   esac
 done
 
 [[ -n "$PACKAGE" && -n "$INSTALL_ROOT" && -n "$TARGET_USER" ]] || die "package, install root and target user are required"
+case "$PLATFORM" in wsl|linux) ;; *) die "platform must be wsl or linux" ;; esac
 [[ -f "$PACKAGE/VERSION" ]] || die "invalid package directory"
-id "$TARGET_USER" >/dev/null 2>&1 || die "WSL user does not exist: $TARGET_USER"
+id "$TARGET_USER" >/dev/null 2>&1 || die "target user does not exist: $TARGET_USER"
 
 TARGET_HOME="$(target_home "$TARGET_USER")"
 case "$INSTALL_ROOT" in
@@ -38,12 +41,16 @@ VERSION="$(tr -d '\r\n' < "$PACKAGE/VERSION")"
 RELEASE="$INSTALL_ROOT/releases/$VERSION"
 INSTANCE="$INSTALL_ROOT/instances/default"
 
-if [[ -e "$INSTALL_ROOT/current" || -e "$INSTANCE/config/bot_config.toml" ]]; then
-  die "an existing instance was found under $INSTALL_ROOT; use configure.ps1 or upgrade.ps1 instead"
+if [[ -e "$INSTALL_ROOT/current" || -L "$INSTALL_ROOT/current" || -e "$INSTANCE/config/bot_config.toml" ]]; then
+  die "an existing instance was found under $INSTALL_ROOT; use a configure or upgrade entrypoint instead"
 fi
 
-log "checking Docker Desktop Linux engine"
-as_target "$TARGET_USER" docker info >/dev/null 2>&1 || die "Docker Linux engine is not available to WSL user $TARGET_USER"
+log "checking Docker Linux engine"
+as_target "$TARGET_USER" docker info >/dev/null 2>&1 || die "Docker Linux engine is not available to target user $TARGET_USER"
+if as_target "$TARGET_USER" docker inspect qqbridge-maibot >/dev/null 2>&1 \
+  || as_target "$TARGET_USER" docker inspect qqbridge-napcat >/dev/null 2>&1; then
+  die "QQBridge containers already exist; use a configure or upgrade entrypoint instead"
+fi
 
 log "installing release $VERSION into $RELEASE"
 mkdir -p "$INSTALL_ROOT/releases" "$INSTALL_ROOT/instances" "$INSTALL_ROOT/backups"
@@ -91,9 +98,18 @@ fi
 wait_for_health qqbridge-maibot 240 || die "MaiBot did not become healthy"
 wait_for_health qqbridge-napcat 180 || die "NapCat did not become healthy"
 
+if [[ "$PLATFORM" == "linux" ]]; then
+  CONFIGURE_COMMAND="./configure-linux.sh --discover-groups"
+  VERIFY_COMMAND="./verify-linux.sh"
+else
+  CONFIGURE_COMMAND="powershell -ExecutionPolicy Bypass -File configure.ps1 -DiscoverGroups"
+  VERIFY_COMMAND="powershell -ExecutionPolicy Bypass -File verify.ps1"
+fi
+
 cat > "$INSTANCE/install-report.json" <<EOF
 {
   "package_version": "$VERSION",
+  "platform": "$PLATFORM",
   "installed_at_utc": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "install_root": "$INSTALL_ROOT",
   "release": "$RELEASE",
@@ -101,8 +117,8 @@ cat > "$INSTANCE/install-report.json" <<EOF
   "containers": ["qqbridge-maibot", "qqbridge-napcat"],
   "next_steps": [
     "Open the NapCat WebUI and scan the QQ login QR code.",
-    "Run configure.ps1 -DiscoverGroups after login to set group and private allowlists.",
-    "Run verify.ps1 for a full health report."
+    "Run $CONFIGURE_COMMAND after login to set group and private allowlists.",
+    "Run $VERIFY_COMMAND for a full health report."
   ]
 }
 EOF

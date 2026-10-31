@@ -22,12 +22,12 @@ if [[ -z "$BACKUP_ID" ]]; then
   BACKUP_ID="$(find "$INSTALL_ROOT/backups" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -r | head -n 1)"
 fi
 [[ -n "$BACKUP_ID" ]] || die "no backup is available"
+[[ "$BACKUP_ID" =~ ^[0-9TZ-]+$ ]] || die "invalid backup ID: $BACKUP_ID"
 BACKUP_DIR="$INSTALL_ROOT/backups/$BACKUP_ID"
 [[ -f "$BACKUP_DIR/instance.tar.gz" && -f "$BACKUP_DIR/metadata.env" ]] || die "backup is incomplete: $BACKUP_ID"
 
-# shellcheck disable=SC1090
-source "$BACKUP_DIR/metadata.env"
-[[ -n "${PREVIOUS_VERSION:-}" ]] || die "backup metadata has no previous version"
+PREVIOUS_VERSION="$(awk -F= '$1 == "PREVIOUS_VERSION" { print substr($0, index($0, "=") + 1); exit }' "$BACKUP_DIR/metadata.env")"
+[[ "$PREVIOUS_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "backup metadata has an invalid previous version"
 OLD_RELEASE="$INSTALL_ROOT/releases/$PREVIOUS_VERSION"
 [[ -f "$OLD_RELEASE/VERSION" ]] || die "previous release is missing: $OLD_RELEASE"
 

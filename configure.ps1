@@ -225,7 +225,8 @@ try {
             '--package', $package,
             '--install-root', $context.InstallRoot,
             '--answers', $answerPath,
-            '--target-user', $context.LinuxUser
+            '--target-user', $context.LinuxUser,
+            '--instance', $Instance
         ) | Out-Null
 } finally {
     Remove-Item -LiteralPath $answerFile -Force -ErrorAction SilentlyContinue
@@ -233,8 +234,16 @@ try {
 
 $finalMai = if ($answers.ContainsKey('maibot_port')) { [int]$answers.maibot_port } else { $currentMaiPort }
 $finalNap = if ($answers.ContainsKey('napcat_port')) { [int]$answers.napcat_port } else { $currentNapPort }
+$finalOne = if ($answers.ContainsKey('onebot_port')) { [int]$answers.onebot_port } else { $currentOnePort }
 $localOnly = $currentBind -in @('127.0.0.1', 'localhost')
 Update-QQBridgeFirewall -LocalOnly:$localOnly -MaiBotPort $finalMai -NapCatPort $finalNap
+$state = Read-State
+if ($state) {
+    $state.maibot_port = $finalMai
+    $state.napcat_port = $finalNap
+    $state.onebot_port = $finalOne
+    Write-State $state
+}
 
 Write-Host ''
 Write-Host '配置已应用。' -ForegroundColor Green

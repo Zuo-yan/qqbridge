@@ -1,0 +1,127 @@
+[plugin]
+enabled = true
+config_version = "1.10.0"
+
+[token_unit]
+unit_name = "Token"
+
+[model_aliases]
+aliases = []
+
+[text_template]
+template = "📊 {unit_name} 消耗统计（{date}）\n统计范围：{scope_name}\n今日：{today}（{today_requests}次请求 / {today_cost}）\n本周：{this_week}（{this_week_requests}次请求 / {this_week_cost}）\n本月：{this_month}（{this_month_requests}次请求 / {this_month_cost}）\n最近24小时：{last_24h}（{last_24h_requests}次请求 / {last_24h_cost}）\n最近7×24小时：{last_7d}（{last_7d_requests}次请求 / {last_7d_cost}）\n最近30×24小时：{last_30d}（{last_30d_requests}次请求 / {last_30d_cost}）\n总计（{total_scope}）：{total_tokens}\n输入 {total_prompt} / 输出 {total_completion} / 请求 {total_requests}次 / 花费 {total_cost}\n消息 {messages}条 · 回复 {replies}条 · 接收 {received_messages}条 · 在线 {online_duration}\n平均响应 {total_avg_response} · 花费/100条消息 {cost_per_100_messages} · 花费/小时 {cost_per_hour} · {tokens_per_hour}\n{model_ranking}\n{module_breakdown}\n{chat_message_share}"
+
+[llm_rewrite]
+provider = "host"
+llm_task_name = "utils"
+api_base_url = ""
+api_key = ""
+model = ""
+temperature = 0.7
+extra_body = ""
+max_retries = 2
+timeout_seconds = 60.0
+retry_interval_seconds = 1.0
+use_persona = true
+persona_template = ""
+persona_extra = ""
+llm_prompt = "请用自然、口语化的中文，把下面这份用量统计数据转述给群友或用户。要求：保留全部数字，不要编造、不要省略任何一项，不要输出表格或代码块，控制在 10 行以内。数据里给出了用量单位名称，转述时请照用该单位名。"
+
+[report]
+enabled = false
+schedule_times = ["08:00", "20:00"]
+platform = "qq"
+target_groups = []
+target_users = []
+send_mode = "image"
+
+[command]
+enabled = true
+notify_no_permission = true
+deny_message = "你没有权限使用该指令"
+send_mode = "image"
+
+[llm_tool_permission]
+permission_mode = "off"
+whitelist_groups = []
+whitelist_users = []
+blacklist_groups = []
+blacklist_users = []
+allow_scope_current = true
+allow_scope_all = false
+allow_scope_group = false
+allow_scope_user = false
+allow_window_all = true
+allow_window_today = true
+allow_window_this_week = true
+allow_window_this_month = true
+allow_window_last_24h = true
+allow_window_last_7d = true
+allow_window_last_30d = true
+scope_overrides = []
+
+[command_permission]
+permission_mode = "off"
+whitelist_groups = []
+whitelist_users = []
+blacklist_groups = []
+blacklist_users = []
+allow_scope_current = true
+allow_scope_all = true
+allow_scope_group = true
+allow_scope_user = true
+allow_window_all = true
+allow_window_today = true
+allow_window_this_week = true
+allow_window_this_month = true
+allow_window_last_24h = true
+allow_window_last_7d = true
+allow_window_last_30d = true
+scope_overrides = []
+
+[render]
+template_name = "simple"
+custom_templates = []
+image_format = "png"
+jpeg_quality = 90
+resolution_scale = 2.0
+first_round_timeout_ms = 15000
+second_round_timeout_ms = 25000
+viewport_width = 1000
+viewport_height = 600
+fallback_viewport_width = 900
+fallback_viewport_height = 1200
+allow_network = true
+font_services = ["内地|https://fonts.loli.net|https://gstatic.loli.net", "海外|https://fonts.googleapis.com|https://fonts.gstatic.com"]
+show_details = true
+anonymize = true
+
+[chart]
+bar_granularity = "day"
+chart_style = "bar_line"
+bar_days = 30
+series_top = 5
+bar_tokens = true
+bar_cost = true
+bar_model_cost = true
+bar_module_cost = true
+bar_chat_messages = true
+pie_module_tokens = true
+pie_module_cost = true
+pie_model_tokens = true
+pie_model_cost = true
+pie_model_requests = true
+pie_chat_messages = true
+
+[module_groups]
+planner = ["planner", "maisaka.plan", "plan"]
+replyer = ["replyer", "maisaka.replyer", "response.splitter", "reply", "response", "smart_segmentation"]
+image = ["image", "vlm", "A_Memorix.ImageEmbedding"]
+memory = ["memory", "A_Memorix", "maisaka", "heuristic_memory_impression", "memory_feedback_correction", "memories", "person_fact_writeback", "chat_history_summarizer", "dream", "story", "expression", "jargon", "behavior", "embedding"]
+emoji = ["emoji"]
+plugin = ["plugin", "mcp_sampling"]
+
+[limits]
+max_session_rows = 20000
+top_models = 20
+top_modules = 8

@@ -25,7 +25,7 @@ target_home() {
 as_target() {
   local user="$1"
   shift
-  if [[ "$user" == "root" ]]; then
+  if [[ "$user" == "root" || "$(id -un)" == "$user" ]]; then
     "$@"
   else
     runuser -u "$user" -- "$@"

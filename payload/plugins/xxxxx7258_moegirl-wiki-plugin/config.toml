@@ -1,0 +1,20 @@
+[plugin]
+config_version = "2.1.0"
+
+[network]
+timeout_seconds = 10
+
+[auth]
+cookie_string = ""
+
+[search]
+prefer_generator_search = true
+
+[cache]
+ttl_seconds = 300
+
+[result]
+max_candidates = 5
+
+[tool]
+prefer_exact_title = true
