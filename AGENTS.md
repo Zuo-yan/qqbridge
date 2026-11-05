@@ -31,7 +31,7 @@
 - Windows 默认仅本机访问、登录后自启。仅明确要求局域网访问时加 `-Lan`；仅明确要求手动启动时加 `-DisableAutoStart`。不要改变已有实例偏好。
 - 默认安装目录是 WSL 内的 `~/qqbridge`，自定义目录也是 Linux 路径；不能直接填 Windows 盘符。
 - 中断后 Windows 用 `install-local.ps1 -Resume`，Linux 用 `install-linux.sh --resume`。只有安装器记录且达到 ready_to_start 或 complete 的配置才能续装；不要通过改名目录/删除数据来自动重装。
-- Token 只由使用者在本机 `access.cmd` 凭据窗口查看复制；不要把窗口内容读取、截图或带回对话。不要打印内部 OneBot token。
+- Token 只由使用者在本机 `access.cmd` 凭据窗口或 Linux 交互终端 `access-linux.sh` 查看复制；Agent 不得执行后者或读取、截图、带回凭据。不要打印内部 OneBot token。
 - `configure.ps1 -DiscoverGroups` 只管理白名单，不要求重填模型。扫码后必须运行 `verify.ps1 -RequireLogin` / `verify-linux.sh --require-login`；基础安装成功与 QQ 接入成功分开报告。
 - 不得执行全量 `.env`、容器环境、Compose 展开配置或未经脱敏的容器日志输出。不要为排错重新生成发布清单哈希。
 - 已有版本未包含新入口时，优先下载并校验新 Release，再按升级流程处理，不覆盖旧实例。

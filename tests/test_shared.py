@@ -102,6 +102,8 @@ root = base / 'install'
 args = ['--package', str(package), '--install-root', str(root), '--target-user', user, '--platform', 'linux']
 run('install.sh', args, False, {'FAIL_UP':'1'})
 instance = root / 'instances/default'
+override = instance / 'compose.override.yml'
+override.write_text('services: {}\n')
 progress = instance / 'install-progress.json'
 assert json.loads(progress.read_text())['phase'] == 'ready_to_start'
 assert progress.stat().st_mode & 0o777 == 0o600
@@ -141,7 +143,9 @@ run('verify.sh', verify_args, False)
 (instance / 'napcat/config/webui.json').chmod(0o600)
 run('configure.sh', ['--package', str(package)] + verify_args)
 assert '--force-recreate' in trace.read_text()
+assert str(override) in trace.read_text()
 assert (instance / 'data/webui.json').stat().st_mode & 0o777 == 0o600
+assert override.read_text() == 'services: {}\n'
 run('verify.sh', verify_args + ['--require-login'], overrides={'LOGIN':'1'})
 print('PASS strict login, expected plugin, private modes, explicit configure recreation')
 
@@ -174,6 +178,7 @@ exit 0
 trace.write_text('')
 run('upgrade.sh', ['--package', str(new), '--install-root', str(root), '--target-user', user], False)
 assert (root / 'current').resolve().name == '9.1.0'
+assert override.read_text() == 'services: {}\n'
 assert not (root / 'releases/9.2.0').exists()
 assert list((root / 'recovery').glob('failed-release-9.2.0-*/release'))
 assert list((root / 'recovery').glob('rollback-*/previous-instance/data/keep'))
@@ -196,6 +201,7 @@ exit 0
 ''')
 run('upgrade.sh', ['--package', str(new), '--install-root', str(root), '--target-user', user])
 assert (root / 'current').resolve().name == '9.2.0'
+assert override.read_text() == 'services: {}\n'
 report = root / 'instances/default/upgrade-report.json'
 assert json.loads(report.read_text())['to_version'] == '9.2.0'
 assert report.stat().st_mode & 0o777 == 0o600

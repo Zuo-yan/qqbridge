@@ -1,0 +1,3 @@
+# Optional SOCKS support for the base image's HTTPX and requests clients.
+socksio==1.0.0
+PySocks==1.7.1

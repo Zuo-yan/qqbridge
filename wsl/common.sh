@@ -39,11 +39,33 @@ compose() {
   shift 3
   local release
   release="$(readlink -f "$install_root/current")"
+  local instance_dir override
+  instance_dir="$(dirname "$env_file")"
+  local -a files=(-f "$release/compose.yaml")
+  local count=0
+  for override in compose.override.yaml compose.override.yml docker-compose.override.yml docker-compose.override.yaml; do
+    if [[ -f "$instance_dir/$override" ]]; then
+      files+=(-f "$instance_dir/$override")
+      count=$((count + 1))
+    fi
+  done
+  (( count <= 1 )) || { die "keep only one Compose override file in the instance directory"; return 1; }
   as_target "$user" docker compose \
     --project-directory "$release" \
     --env-file "$env_file" \
-    -f "$release/compose.yaml" \
+    "${files[@]}" \
     "$@"
+}
+
+start_containers() {
+  local user="$1" install_root="$2" env_file="$3"
+  # Pull output may contain authenticated proxy URLs; keep failures out of logs.
+  log "pulling release images (local build is the fallback)"
+  if ! compose "$user" "$install_root" "$env_file" pull --quiet >/dev/null 2>&1; then
+    log "image pull unavailable; building the patched MaiBot image locally"
+    compose "$user" "$install_root" "$env_file" build maibot || return 1
+  fi
+  compose "$user" "$install_root" "$env_file" up -d --no-build
 }
 
 secure_instance_files() {

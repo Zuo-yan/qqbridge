@@ -1,5 +1,13 @@
 # 更新记录
 
+## 1.3.0
+
+- Linux 新增 `--config-file`、`--non-interactive` 和 `QQBRIDGE_*` 环境配置；无人值守模式缺少必需项时直接失败，凭据只从环境接收。
+- HTTP/HTTPS/SOCKS5 代理从安装配置写入实例环境并透传到 MaiBot；保留内部通信的 NO_PROXY，镜像补充 SOCKS 依赖。
+- 实例目录支持 Compose override，安装、配置、验证、升级和回滚共用；核心发布文件仍严格校验。
+- 安装、升级和回滚优先拉取 GHCR 版本镜像，拉取失败回退本地构建；新增 Release 镜像发布和 CI 构建检查。
+- 新增 `access-linux.sh` 本机终端凭据查看和按实际端口生成的 SSH 转发命令。
+
 ## 1.2.0
 
 面向“把仓库交给朋友的 Agent 部署”的流程改进。

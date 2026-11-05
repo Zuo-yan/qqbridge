@@ -1,6 +1,6 @@
 # QQBridge 一键部署包
 
-版本：`1.2.0`
+版本：`1.3.0`
 
 这是一个可同时部署到 **Windows 11 x64** 和 **原生 Linux x86_64** 的私人 QQ 聊天机器人部署包，组合 MaiBot、NapCat、17 个插件、14 个运行时补丁、当前“哈基米”人设、表情包和提示图片。
 
@@ -21,6 +21,7 @@ Windows 推荐由 Agent 填写 `deploy.example.json` 的本机副本，再执行
 | 安装 | 双击 `install.cmd` 或 `.\install.ps1` | `bash ./install-linux.sh` |
 | 配置 | 双击 `configure.cmd` 或 `.\configure.ps1` | `bash ./configure-linux.sh` |
 | 验证 | 双击 `verify.cmd` 或 `.\verify.ps1` | `bash ./verify-linux.sh` |
+| 查看凭据 | 双击 `access.cmd` | 使用者本机终端运行 `bash ./access-linux.sh` |
 | 升级 | `.\upgrade.ps1 -Package <ZIP>` | `bash ./upgrade-linux.sh --package <ZIP>` |
 | 回滚 | `.\rollback.ps1` | `bash ./rollback-linux.sh` |
 
@@ -65,8 +66,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 要求 Linux x86_64、Python 3.10+、`systemd`、`sudo`、Docker Engine 和 Docker Compose v2。默认按 rootful Docker 管理；已测试目标为常见 Ubuntu/Debian 系发行版。
 
 ```bash
-unzip qqbridge-v1.2.0.zip
-cd qqbridge-v1.2.0
+unzip qqbridge-v1.3.0.zip
+cd qqbridge-v1.3.0
 bash ./install-linux.sh
 ```
 
@@ -88,6 +89,56 @@ bash ./install-linux.sh --lan --lan-bind-ip 192.168.1.20
 bash ./install-linux.sh --lan --lan-cidr 192.168.1.0/24
 bash ./install-linux.sh --disable-autostart
 ```
+
+### Linux 配置文件与无人值守安装
+
+复制 `deploy.example.json` 到发布目录以外，填写非敏感配置。配置文件模式跳过普通问题，仅在本机隐藏输入 API Key：
+
+```bash
+bash ./install-linux.sh --config-file /path/to/qqbridge-config.json
+```
+
+CI/Headless 环境预先安装 Docker Engine 和 Compose v2，通过 CI 的秘密变量设置 `QQBRIDGE_LLM_API_KEY`，再执行：
+
+```bash
+bash ./install-linux.sh --config-file /path/to/qqbridge-config.json --non-interactive
+```
+
+不要把 Key 写进 JSON、命令行或聊天。`QQBRIDGE_` 加大写字段名可覆盖 JSON，如 `QQBRIDGE_LLM_BASE_URL`、`QQBRIDGE_LLM_MODEL`、`QQBRIDGE_INSTALL_ROOT`、`QQBRIDGE_HTTP_PROXY`；白名单环境变量是 JSON 数组，如 `QQBRIDGE_ALLOWED_GROUPS='[123456789]'`。优先级为安装目录命令行参数 > 环境 > JSON > 默认值。`--non-interactive` 遇到缺少配置、Key、Docker 或提权权限直接失败，不等待输入；非 root 用户须预先具备免交互 sudo 权限。普通 JSON 模式仍可交互确认 Docker 安装。`--lan` 和 `--disable-autostart` 始终由命令行明确选择，不能由配置文件改变。`--resume` 只复用已保存的实例，不重读 Key 或普通配置。
+
+### 出站代理
+
+Windows 和 Linux 的安装 JSON 均接受 `http_proxy`、`https_proxy`、`all_proxy`、`no_proxy`。`http_proxy` 默认同时用于 HTTP 和 HTTPS；`https_proxy` 可单独覆盖。SOCKS5 使用 `all_proxy`，例如 `socks5://proxy.example:1080`。HTTP(S) 代理优先于 ALL_PROXY；只用 SOCKS5 时将 HTTP(S) 代理留空。代理字段留空可清除对应配置。
+
+这些设置写入实例 `.env`，以大小写环境变量传入 MaiBot；NO_PROXY 始终保留 `127.0.0.1,localhost,napcat,maibot`，以便容器内部直连。镜像包含 HTTPX/requests 所需的 SOCKS 依赖。各插件使用的网络库仍决定其具体代理支持。代理地址必须能从容器内访问；容器内的 `127.0.0.1` 指容器自身。需要宿主机代理时，Docker Desktop 通常使用 `host.docker.internal`；原生 Linux 可用下文 override 添加 `host-gateway`，并确保宿主代理实际监听该接口。
+
+这些变量只配置应用出站请求；Docker 引擎拉取镜像所需代理应在引擎中另行配置。含认证信息的代理 URL 也属于凭据，私人配置请放在发布目录之外。
+
+### Compose 扩展与预构建镜像
+
+在 `<安装目录>/instances/default/compose.override.yml` 写扩展，或使用 `compose.override.yaml`、`docker-compose.override.yml`、`docker-compose.override.yaml`；同一实例只保留一个。所有管理入口自动以 `-f <发布目录>/compose.yaml -f <实例扩展文件>` 合并。实例扩展不属于发布包校验范围，并随实例备份、升级和回滚；核心 compose 文件继续严格校验。不要直接修改 `releases/X.Y.Z/compose.yaml`。
+
+```yaml
+services:
+  maibot:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # 也可添加所需 devices、volumes 或网络配置。
+```
+
+Compose 合并遵循 Docker 规则：相对路径基于核心发布目录解析，使用 `${INSTANCE_DIR}` 可引用实例文件；端口列表通常会合并，修改常用管理端口请优先使用配置入口，以同步 URL 和防火墙。扩展中的端口与网络由维护者自行管理。
+
+安装、升级和回滚优先 `docker compose pull`，使用 `ghcr.io/zuo-yan/qqbridge-maibot:vX.Y.Z`；拉取失败则本地构建，再启动容器。首次发布或 GHCR 不可达时同样支持回退，耗时取决于网络和基础镜像缓存。GitHub 正式 Release 发布事件触发镜像构建与推送；提交源码本身不会发布镜像。GHCR 包需要允许部署用户拉取，公开部署应将包设为公开。
+
+### Linux 凭据与 SSH 转发
+
+安装完成会按实际端口显示客户端 SSH 转发命令，默认示例：
+
+```bash
+ssh -N -L 18001:127.0.0.1:18001 -L 6099:127.0.0.1:6099 user@SERVER
+```
+
+在保持转发的客户端打开 `http://127.0.0.1:18001` 和 `http://127.0.0.1:6099`。使用者在服务器交互终端运行 `bash ./access-linux.sh`，读取两个 WebUI Token；内部 OneBot Token 不显示。该命令只写控制终端，拒绝管道、重定向和非交互调用；不要由 Agent 执行、录屏或收集其输出。
 
 - Windows 和 Linux 默认均仅本机访问。
 - `--lan` 只绑定一个自动检测或显式指定的局域网 IPv4 地址，不会绑定 `0.0.0.0`。
@@ -154,8 +205,8 @@ bash ./configure-linux.sh --advanced
 
 ```text
 ~/qqbridge/                       # Linux 默认；Windows 位于 WSL 用户主目录
-├── releases/1.2.0/
-├── current -> releases/1.2.0/
+├── releases/1.3.0/
+├── current -> releases/1.3.0/
 ├── backups/
 └── instances/default/
     ├── .env
@@ -184,13 +235,13 @@ Windows 局域网模式只创建“专用网络”和 `LocalSubnet` 入站规则
 
 ```powershell
 # Windows
-.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.2.0.zip'
+.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.3.0.zip'
 .\rollback.ps1
 ```
 
 ```bash
 # Linux
-bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.2.0.zip
+bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.3.0.zip
 bash ./rollback-linux.sh
 bash ./rollback-linux.sh --backup-id 20261031T120000Z
 ```

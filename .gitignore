@@ -10,3 +10,7 @@ __pycache__/
 # Local deployment configuration belongs outside the distributable package.
 deploy.local.json
 qqbridge-config.json
+compose.override.yaml
+compose.override.yml
+docker-compose.override.yaml
+docker-compose.override.yml

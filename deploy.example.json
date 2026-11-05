@@ -8,5 +8,7 @@
   "bot_qq": "",
   "maibot_port": 18001,
   "napcat_port": 6099,
-  "onebot_port": 3001
+  "onebot_port": 3001,
+  "http_proxy": "",
+  "all_proxy": ""
 }

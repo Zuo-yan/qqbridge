@@ -146,8 +146,7 @@ if (( RESUME == 0 )); then
   READY=1
 fi
 
-log "building patched MaiBot image and starting containers"
-compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d --build || die "container startup failed"
+start_containers "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" || die "container startup failed"
 wait_for_health qqbridge-maibot 240 || die "MaiBot did not become healthy"
 wait_for_health qqbridge-napcat 180 || die "NapCat did not become healthy"
 # Startup may create new WebUI credential files after the initial permission pass.

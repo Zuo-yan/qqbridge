@@ -33,7 +33,7 @@ $state = Read-State
 $settings = @{}
 if ($ConfigFile) {
     $configObject = Get-Content -LiteralPath $ConfigFile -Raw -Encoding UTF8 | ConvertFrom-Json
-    $allowed = @('install_root', 'llm_base_url', 'llm_model', 'llm_client_type', 'owner_qq', 'owner_name', 'bot_qq', 'maibot_port', 'napcat_port', 'onebot_port')
+    $allowed = @('install_root', 'llm_base_url', 'llm_model', 'llm_client_type', 'owner_qq', 'owner_name', 'bot_qq', 'maibot_port', 'napcat_port', 'onebot_port', 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy')
     foreach ($property in $configObject.PSObject.Properties) {
         if ($property.Name -notin $allowed) { Stop-QQBridge "配置文件含不支持的字段 $($property.Name)。API Key 必须在本机安全窗口填写。" }
         $settings[$property.Name] = $property.Value
@@ -150,6 +150,9 @@ if ($Resume) {
         maibot_bind = $bind; napcat_bind = $bind; timezone = 'Asia/Shanghai'
         restart_policy = if ($disableAutostartValue) { 'no' } else { 'unless-stopped' }
         allowed_groups = @(); allowed_users = @($ownerQq | Where-Object { $_ })
+    }
+    foreach ($proxyField in @('http_proxy', 'https_proxy', 'all_proxy', 'no_proxy')) {
+        if ($settings.ContainsKey($proxyField)) { $answers[$proxyField] = [string]$settings[$proxyField] }
     }
     $answerFile = Save-SecureAnswers -Answers $answers
     $apiKey = $null

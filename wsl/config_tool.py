@@ -11,6 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 try:
     import tomllib
@@ -20,6 +21,33 @@ except ModuleNotFoundError:  # Python 3.10 fallback; generated files are still c
 
 PLACEHOLDER_RE = re.compile(r"@@([A-Z0-9_]+)@@")
 CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def configure_proxies(answers: dict[str, Any], env: dict[str, str]) -> None:
+    for field in ("http_proxy", "https_proxy", "all_proxy"):
+        if field in answers:
+            value = str(answers[field]).strip()
+            if value:
+                try:
+                    parsed = urlsplit(value)
+                    valid = (
+                        parsed.scheme in {"http", "https", "socks5", "socks5h"}
+                        and parsed.hostname and parsed.port
+                    )
+                except ValueError:
+                    valid = False
+                if not valid or CONTROL_RE.search(value):
+                    fail(f"{field} must be an HTTP(S) or SOCKS5 proxy URL with a port")
+            env[field.upper()] = value
+    if "http_proxy" in answers and "https_proxy" not in answers:
+        env["HTTPS_PROXY"] = env.get("HTTP_PROXY", "")
+    bypass = str(answers.get("no_proxy", env.get("NO_PROXY", "")))
+    if CONTROL_RE.search(bypass):
+        fail("no_proxy contains control characters")
+    env["NO_PROXY"] = ",".join(dict.fromkeys([
+        "127.0.0.1", "localhost", "napcat", "maibot",
+        *(item.strip() for item in bypass.split(",") if item.strip()),
+    ]))
 
 
 def clean_answer_value(value: Any) -> Any:
@@ -504,7 +532,7 @@ def command_install(args: argparse.Namespace) -> None:
             "PACKAGE_VERSION": package_version,
             "MAIBOT_BASE_IMAGE": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
             "NAPCAT_BASE_IMAGE": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e",
-            "MAIBOT_IMAGE": f"qqbridge-maibot:{package_version}",
+            "MAIBOT_IMAGE": f"ghcr.io/zuo-yan/qqbridge-maibot:v{package_version}",
         }
     )
     if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", env["COMPOSE_PROJECT_NAME"]):
@@ -552,6 +580,7 @@ def command_install(args: argparse.Namespace) -> None:
 
     config = instance / "config"
     config.mkdir(parents=True, exist_ok=True)
+    configure_proxies(answers, env)
     save_env(env_path, env)
     render_model(config, package, env)
     render_bot_config(config, package, env)
@@ -582,7 +611,7 @@ def command_configure(args: argparse.Namespace) -> None:
             "PACKAGE_VERSION": package_version,
             "MAIBOT_BASE_IMAGE": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
             "NAPCAT_BASE_IMAGE": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e",
-            "MAIBOT_IMAGE": f"qqbridge-maibot:{package_version}",
+            "MAIBOT_IMAGE": f"ghcr.io/zuo-yan/qqbridge-maibot:v{package_version}",
         }
     )
     previous_owner_name = env.get("OWNER_NAME", "群主")
@@ -614,6 +643,7 @@ def command_configure(args: argparse.Namespace) -> None:
         "no",
     }:
         fail("RESTART_POLICY must be unless-stopped, always, on-failure or no")
+    configure_proxies(answers, env)
     save_env(env_path, env)
     config = instance / "config"
     if any(key in answers for key in ("llm_base_url", "llm_api_key", "llm_model", "llm_client_type")):

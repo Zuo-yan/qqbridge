@@ -10,6 +10,7 @@ import os
 import platform
 import pwd
 import re
+import shlex
 import shutil
 import socket
 import subprocess
@@ -19,6 +20,7 @@ import urllib.request
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
+from urllib.parse import urlsplit
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +30,94 @@ STATE_FILE = Path(
 DOCKER_INSTALL_URL = "https://get.docker.com"
 QQ_RE = re.compile(r"^\d{5,12}$")
 BACKUP_ID_RE = re.compile(r"^[0-9TZ-]+$")
+NON_INTERACTIVE = False
+INSTALL_FIELDS = {
+    "install_root", "llm_base_url", "llm_model", "llm_client_type",
+    "owner_qq", "owner_name", "bot_qq", "maibot_port", "napcat_port",
+    "onebot_port", "timezone", "http_proxy", "https_proxy", "all_proxy",
+    "no_proxy", "allowed_groups", "allowed_users", "maibot_memory_limit",
+    "napcat_memory_limit", "compose_project_name",
+}
+
+
+def load_install_settings(args: argparse.Namespace) -> dict[str, object]:
+    settings: dict[str, object] = {}
+    if args.config_file:
+        try:
+            settings = json.loads(Path(args.config_file).read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            fail("cannot read --config-file as a JSON object")
+        if not isinstance(settings, dict) or set(settings) - INSTALL_FIELDS:
+            fail("unsupported config fields; supply API Key through QQBRIDGE_LLM_API_KEY, not JSON")
+    for field in INSTALL_FIELDS | {"llm_api_key"}:
+        name = "QQBRIDGE_" + field.upper()
+        if name in os.environ:
+            value = os.environ[name]
+            if field in {"allowed_groups", "allowed_users"}:
+                try:
+                    settings[field] = json.loads(value)
+                except ValueError:
+                    fail(f"{name} must be a JSON array")
+            else:
+                settings[field] = value
+    for field, value in settings.items():
+        if isinstance(value, str) and any(ord(char) < 32 or ord(char) == 127 for char in value):
+            fail(f"{field} contains control characters")
+        if field not in {"allowed_groups", "allowed_users"} and not isinstance(value, (str, int)):
+            fail(f"{field} must be text or a number")
+        if isinstance(value, str):
+            settings[field] = value.strip()
+    return settings
+
+
+def configured_core_answers(settings: dict[str, object], bind_address: str) -> dict[str, object]:
+    answers = {"llm_client_type": "openai", "owner_qq": "", "bot_qq": "",
+               "owner_name": "接入者", "timezone": "Asia/Shanghai", **settings}
+    answers.pop("install_root", None)
+    for field in ("llm_base_url", "llm_model"):
+        if not str(answers.get(field, "")).strip():
+            fail(f"{field} is required in config or environment")
+    try:
+        base = urlsplit(str(answers["llm_base_url"]))
+        valid_url = (
+            base.scheme in {"http", "https"} and base.hostname
+            and not base.username and not base.password
+            and not base.query and not base.fragment
+        )
+    except ValueError:
+        valid_url = False
+    if not valid_url:
+        fail("llm_base_url must be an HTTP(S) URL without credentials or query")
+    if answers["llm_model"] == "replace-with-your-provider-model-id":
+        fail("replace the example model ID before installing")
+    if answers["llm_client_type"] not in {"openai", "openai_responses", "gemini"}:
+        fail("invalid llm_client_type")
+    for field in ("owner_qq", "bot_qq"):
+        value = str(answers[field]).strip()
+        if value and not QQ_RE.fullmatch(value):
+            fail(f"{field} must contain 5-12 digits")
+        answers[field] = value
+    for field in ("allowed_groups", "allowed_users"):
+        values = answers.setdefault(field, [answers["owner_qq"]] if field == "allowed_users" and answers["owner_qq"] else [])
+        if not isinstance(values, list) or any(not QQ_RE.fullmatch(str(value)) for value in values):
+            fail(f"{field} must be an array of QQ identifiers")
+    ports = []
+    for field, default in (("maibot_port", 18001), ("napcat_port", 6099), ("onebot_port", 3001)):
+        try:
+            port = int(str(answers.get(field, default)))
+        except ValueError:
+            fail(f"{field} must be a port number")
+        address = "127.0.0.1" if field == "onebot_port" else bind_address
+        if not 1024 <= port <= 65535 or port in ports or not port_available(port, address):
+            fail(f"{field} is invalid, duplicated or unavailable")
+        ports.append(port)
+        answers[field] = port
+    answers["maibot_bind"] = answers["napcat_bind"] = bind_address
+    if not answers.get("llm_api_key"):
+        if NON_INTERACTIVE:
+            fail("QQBRIDGE_LLM_API_KEY is required in non-interactive mode")
+        answers["llm_api_key"] = ask("API Key（输入不会回显）", required=True, secret=True)
+    return answers
 
 
 def log(message: str) -> None:
@@ -80,7 +170,20 @@ def elevate_if_needed(args: argparse.Namespace) -> None:
     sudo = shutil.which("sudo")
     if not sudo:
         fail("this operation needs root privileges and sudo is not installed")
-    command = [sudo, sys.executable, str(Path(__file__).resolve())] + sys.argv[1:]
+    preserved = sorted(name for name in os.environ if name in {
+        "QQBRIDGE_" + field.upper() for field in INSTALL_FIELDS | {"llm_api_key"}
+    })
+    options = (["-n"] if getattr(args, "non_interactive", False) else [])
+    if preserved:
+        options.append("--preserve-env=" + ",".join(preserved))
+    arguments = sys.argv[1:]
+    if getattr(args, "config_file", None):
+        index = arguments.index("--config-file") if "--config-file" in arguments else -1
+        if index >= 0:
+            arguments[index + 1] = str(Path(args.config_file).resolve())
+        else:
+            arguments = [arg if not arg.startswith("--config-file=") else "--config-file=" + str(Path(args.config_file).resolve()) for arg in arguments]
+    command = [sudo, *options, sys.executable, str(Path(__file__).resolve()), *arguments]
     if getattr(args, "target_user", None):
         log(f"requesting sudo for target user {args.target_user}")
     os.execvp(sudo, command)
@@ -210,6 +313,8 @@ def ask(
     required: bool = False,
     secret: bool = False,
 ) -> str:
+    if NON_INTERACTIVE:
+        fail("interactive input is disabled; supply configuration and install Docker beforehand")
     prompt = f"{label}"
     if default:
         prompt += f" [{default}]"
@@ -583,6 +688,8 @@ def prompt_core_answers(
 
 
 def command_install(args: argparse.Namespace) -> None:
+    global NON_INTERACTIVE
+    NON_INTERACTIVE = bool(args.non_interactive)
     verify_package(PACKAGE_ROOT)
     log(f"Linux: {distro_name()} ({platform.machine()})")
     if args.local_only and args.lan:
@@ -640,22 +747,24 @@ def command_install(args: argparse.Namespace) -> None:
         log("installation complete")
         print_urls(state)
         return
+    settings = load_install_settings(args)
+    configured = bool(args.config_file or args.non_interactive or any(
+        field in settings for field in ("llm_base_url", "llm_model", "llm_api_key")
+    ))
     user = target_user_name(args.target_user)
-    install_root = resolve_install_root(args.install_root, user)
+    install_root = resolve_install_root(args.install_root or str(settings.get("install_root", "")), user)
     if install_root.exists() and any(install_root.iterdir()):
         fail(f"install root is not empty: {install_root}")
     if args.install_root is None:
         default = str(target_home(user) / "qqbridge")
     else:
         default = str(install_root)
-    install_root = resolve_install_root(
-        ask("安装目录", default=default, required=True), user
-    )
+    if not configured:
+        install_root = resolve_install_root(
+            ask("安装目录", default=default, required=True), user
+        )
     if install_root.exists() and any(install_root.iterdir()):
         fail(f"install root is not empty: {install_root}")
-
-    ensure_docker_installed()
-    ensure_docker_access(user)
 
     local_only = not args.lan
     bind_address = "127.0.0.1"
@@ -666,11 +775,13 @@ def command_install(args: argparse.Namespace) -> None:
         log(f"LAN 绑定地址：{bind_address}")
         log(f"LAN 来源网段：{', '.join(lan_cidrs) if lan_cidrs else '未检测到'}")
 
-    answers = prompt_core_answers(bind_address=bind_address)
+    answers = (configured_core_answers(settings, bind_address) if configured
+               else {**prompt_core_answers(bind_address=bind_address), **settings})
+    answers.pop("install_root", None)
+    ensure_docker_installed()
+    ensure_docker_access(user)
     answers["restart_policy"] = "no" if args.disable_autostart else "unless-stopped"
-    answers["compose_project_name"] = os.environ.get(
-        "QQBRIDGE_COMPOSE_PROJECT_NAME", "qqbridge"
-    )
+    answers.setdefault("compose_project_name", "qqbridge")
     for env_name, answer_name in (
         ("QQBRIDGE_MAIBOT_MEMORY_LIMIT", "maibot_memory_limit"),
         ("QQBRIDGE_NAPCAT_MEMORY_LIMIT", "napcat_memory_limit"),
@@ -741,6 +852,30 @@ def print_urls(state: dict[str, object]) -> None:
     bind = "127.0.0.1" if state.get("local_only") else str(state.get("lan_bind_ip"))
     print(f"NapCat WebUI: http://{bind}:{state.get('napcat_port')}")
     print(f"MaiBot WebUI: http://{bind}:{state.get('maibot_port')}")
+    mai, nap = int(state['maibot_port']), int(state['napcat_port'])
+    print("在客户端执行 SSH 转发（将 SERVER 替换为服务器地址）：")
+    destination = str(state.get('target_user', 'user')) + '@SERVER'
+    print(f"ssh -N -L {mai}:{bind}:{mai} -L {nap}:{bind}:{nap} {shlex.quote(destination)}")
+    print("在服务器本机运行 bash ./access-linux.sh 查看 WebUI 凭据（不要交给 Agent 执行）。")
+
+
+def command_access(args: argparse.Namespace) -> None:
+    # Never write credentials to stdout, pipes, files or automation logs.
+    try:
+        with open('/dev/tty', 'r+', encoding='utf-8') as terminal:
+            if not terminal.isatty() or not sys.stdin.isatty() or not sys.stdout.isatty():
+                fail("access requires a local interactive terminal")
+            state = context_from_state()
+            instance = Path(str(state['install_root'])) / 'instances/default'
+            env = read_env(instance / '.env')
+            data = json.loads((instance / 'data/webui.json').read_text(encoding='utf-8'))
+            token = data.get('access_token')
+            if not token or not env.get('WEBUI_TOKEN'):
+                fail("WebUI credentials are not ready; start containers first")
+            terminal.write(f"NapCat WebUI Token: {env['WEBUI_TOKEN']}\nMaiBot WebUI Token: {token}\n")
+            terminal.flush()
+    except (OSError, ValueError):
+        fail("cannot read local WebUI credentials or terminal")
 
 
 def prompt_basic_updates(
@@ -1167,6 +1302,8 @@ def build_parser() -> argparse.ArgumentParser:
     install = subparsers.add_parser("install", help="install a new instance")
     add_target_user(install)
     install.add_argument("--install-root")
+    install.add_argument("--config-file", help="local JSON with nonsecret deployment settings")
+    install.add_argument("--non-interactive", action="store_true", help="never prompt; requires configuration, Key environment and installed Docker")
     install.add_argument("--resume", action="store_true", help="resume the saved interrupted installation")
     install.add_argument(
         "--local-only",
@@ -1196,13 +1333,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     rollback = subparsers.add_parser("rollback", help="restore the newest backup")
     rollback.add_argument("--backup-id")
+    subparsers.add_parser("access", help="show WebUI tokens only in the user's local terminal")
     return parser
 
 
 def main() -> None:
+    global NON_INTERACTIVE
     ensure_linux()
     parser = build_parser()
     args = parser.parse_args()
+    NON_INTERACTIVE = bool(getattr(args, "non_interactive", False))
+    if args.command == "access" and (not sys.stdin.isatty() or not sys.stdout.isatty()):
+        fail("access requires a local interactive terminal")
     elevate_if_needed(args)
     commands = {
         "install": command_install,
@@ -1210,6 +1352,7 @@ def main() -> None:
         "verify": command_verify,
         "upgrade": command_upgrade,
         "rollback": command_rollback,
+        "access": command_access,
     }
     commands[args.command](args)
 

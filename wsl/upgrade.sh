@@ -102,7 +102,7 @@ ln -sfn "releases/$NEW_VERSION" "$INSTALL_ROOT/current"
 chown -R "$TARGET_USER:$TARGET_GROUP" "$INSTANCE" "$NEW_RELEASE"
 secure_instance_files "$INSTANCE"
 
-if ! compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d --build; then
+if ! start_containers "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env"; then
   die "upgrade failed while starting containers"
 fi
 

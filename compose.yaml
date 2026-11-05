@@ -2,7 +2,7 @@ name: ${COMPOSE_PROJECT_NAME:-qqbridge}
 
 services:
   maibot:
-    image: ${MAIBOT_IMAGE:-qqbridge-maibot:1.2.0}
+    image: ${MAIBOT_IMAGE:-ghcr.io/zuo-yan/qqbridge-maibot:v1.3.0}
     build:
       context: ./image
       dockerfile: Dockerfile
@@ -25,6 +25,14 @@ services:
       QQBRIDGE_OWNER_QQ: ${OWNER_QQ:-}
       QQBRIDGE_BOT_QQ: ${BOT_QQ:-}
       QQBRIDGE_ONEBOT_TOKEN: ${ONEBOT_TOKEN}
+      HTTP_PROXY: ${HTTP_PROXY:-}
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      ALL_PROXY: ${ALL_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-127.0.0.1,localhost,napcat,maibot}
+      http_proxy: ${HTTP_PROXY:-}
+      https_proxy: ${HTTPS_PROXY:-}
+      all_proxy: ${ALL_PROXY:-}
+      no_proxy: ${NO_PROXY:-127.0.0.1,localhost,napcat,maibot}
     ports:
       - "${MAIBOT_BIND:-127.0.0.1}:${MAIBOT_PORT:-18001}:8001"
     volumes:

@@ -28,8 +28,18 @@ jobs:
         with:
           python-version: '3.12'
       - name: Isolated deployment and recovery regressions
-        run: python -I tests/test_shared.py
+        run: |
+          python -I tests/test_shared.py
+          python -I tests/test_deployment.py
       - name: Package validation
         run: python -I tools/release.py --root .
       - name: Compose validation with example values only
         run: docker compose --env-file .env.example -f compose.yaml config --quiet
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image and verify proxy dependencies
+        uses: docker/build-push-action@v6
+        with:
+          context: ./image
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

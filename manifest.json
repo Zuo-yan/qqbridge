@@ -1,6 +1,6 @@
 {
   "package": "qqbridge",
-  "package_version": "1.2.0",
+  "package_version": "1.3.0",
   "created_at_utc": "2026-10-31T10:48:11Z",
   "platform": "Windows 11 x64 / Linux x86_64",
   "runtime": "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
@@ -9,7 +9,7 @@
     "maibot": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
     "napcat": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e"
   },
-  "local_image": "qqbridge-maibot:1.2.0",
+  "local_image": "ghcr.io/zuo-yan/qqbridge-maibot:v1.3.0",
   "entrypoints": [
     "install.cmd",
     "install-local.ps1",
@@ -26,7 +26,8 @@
     "configure-linux.sh",
     "verify-linux.sh",
     "upgrade-linux.sh",
-    "rollback-linux.sh"
+    "rollback-linux.sh",
+    "access-linux.sh"
   ],
   "plugins": [
     {
@@ -276,48 +277,52 @@
   ],
   "files": {
     ".env.example": {
-      "sha256": "556060e7c289a815d407cca81569f2a283172aa5cb8c78ea4a971f95d27d1fe2",
-      "size": 713
+      "sha256": "be3a72ef8987e4f72eed35330ae6cf9182c635de85d73768e4dbaea36b717055",
+      "size": 809
     },
     ".gitattributes": {
       "sha256": "25b53f925ee3295ea898c160adee1ba5c0f37fd6849ab5a5607e6fa6cd5dc752",
       "size": 100
     },
     ".gitignore": {
-      "sha256": "d40ee7190d094f37078c79e6aad24fd4e2082bba826befea6411255273e2d7fa",
-      "size": 185
+      "sha256": "13573cc4516f8dd8f4184932b777fe1a23978210baa2b8f944078c05295bb0eb",
+      "size": 285
     },
     "AGENT-DEPLOY.md": {
-      "sha256": "396dd345cc19f148263448b2f31014046acb30f1ba0dd9771f8af36f2306ef71",
-      "size": 6365
+      "sha256": "f8b4da2a6a9a1c0634f3abcd81de0c0375edc9bdeae1e7bcfd60cd07cd80183f",
+      "size": 7352
     },
     "AGENTS.md": {
-      "sha256": "7c1320cce0d5d61ffa497af518dc8bc9bf4ffa2978c78e6952c66f85303e250e",
-      "size": 4553
+      "sha256": "097effb6615546a9a1f545a3c10a312612f34e5be4ee343ba7751fbddfa79219",
+      "size": 4600
     },
     "CHANGELOG.md": {
-      "sha256": "bf6639a49d38e7863b0de21f3dc43bdbb3e17de374b1294ba2c087661c39acae",
-      "size": 2073
+      "sha256": "5f8c031f6723d39e6ec3832a09f3b8864a4b5a7dc8993890c425a6e136096d7f",
+      "size": 2760
     },
     "LICENSE": {
       "sha256": "cd5c4838ffc620c6c6f0e37cb4201f0f5bb0a904099eb177b3d1bd5c196414bf",
       "size": 1078
     },
     "README.md": {
-      "sha256": "abaf5e93893bc90a98f6f726a8744df51750d76caf0d2d713e5112970a08c889",
-      "size": 11681
+      "sha256": "a349622c01d0b2e8aac75099d193e6ba1e36b4d7af1f0160737cf77cf0eb7704",
+      "size": 16099
     },
     "SECURITY.md": {
-      "sha256": "f6b7e7b307e6d619b3190d873436e6073bc569d375fe17788161545cf9cfbac0",
-      "size": 3029
+      "sha256": "b602101c76ae27e5a4394fad5bcb44eebf23d9ec77a48b5e98dcdb228c3c8913",
+      "size": 3884
     },
     "THIRD_PARTY_NOTICES.md": {
       "sha256": "02fa0870870bdac31a848be55702e7fe53071fcdd252f5779ec22078ef6ce35f",
       "size": 3127
     },
     "VERSION": {
-      "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+      "sha256": "64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663",
       "size": 6
+    },
+    "access-linux.sh": {
+      "sha256": "b1f163469b545b46df00c9604e60561f08e7ebda2069e6e4858a020dc54acb55",
+      "size": 160
     },
     "access.cmd": {
       "sha256": "8f7e0b3996e7fb3465e05552f098848db2124eb2c2cb57260872d03515b3be82",
@@ -328,8 +333,8 @@
       "size": 2026
     },
     "compose.yaml": {
-      "sha256": "2f483d661049cc1077cf95e553bd74e1a850a5be6fcc892a3a88e9d896f48829",
-      "size": 2628
+      "sha256": "782d72cae6931117ef094cab366830328e609d42718c6c3a939bb4af5ed40850",
+      "size": 2975
     },
     "configure-linux.sh": {
       "sha256": "fddf0076dd00e307fe3d0aeca2e205b26bb18025eff9d49d6420072ca91d8dca",
@@ -344,12 +349,12 @@
       "size": 11203
     },
     "deploy.example.json": {
-      "sha256": "30e3632f6867fa7ec62cd52bffdf83017bdb8c0107cfaf47d51f37ba1bd13f1d",
-      "size": 302
+      "sha256": "f861875bfb2ef9f60efd413990dc4dff690a4dc0703d3872a6bc6522d43ab87e",
+      "size": 341
     },
     "image/Dockerfile": {
-      "sha256": "13876820bda61c899f1e0ac8c0ddd8852c00877a2233a150ac61a96ee28bb68a",
-      "size": 1344
+      "sha256": "77e1e42e9876c0852a7a44bc2dbc3d50987d629b2e85474b2b6b87dbeab3d98d",
+      "size": 1731
     },
     "image/patches/chat_loop_service.py": {
       "sha256": "7efdf141eea568a1d00a68be5350b2d0e964de274f275e70455f1547549e695f",
@@ -407,6 +412,10 @@
       "sha256": "2fc0fa62e5b4e0bdb148d8d968db5be3ccdfa4be3402225b530aedb8eec0504f",
       "size": 37851
     },
+    "image/proxy-requirements.txt": {
+      "sha256": "d800d5d68a28d7693457399d6c945978e2eceaea0f70191c08acfbd626161d68",
+      "size": 104
+    },
     "install-linux.sh": {
       "sha256": "69a40f915f78e2e4f315f5c9a0626aafd052c1bc06eca41fd0924536918e9e40",
       "size": 271
@@ -420,12 +429,12 @@
       "size": 403
     },
     "install.ps1": {
-      "sha256": "daf8264528bef0d7af030ac53510cc4c08c2872523b1c5150bb8835554a44f61",
-      "size": 11582
+      "sha256": "1f6f6ef20f1d2e48c7cf8102b8a720a8e591c95d8103ff15bdc013aec5b1d7f6",
+      "size": 11836
     },
     "linux/qqbridge_linux.py": {
-      "sha256": "010aa95e369fbb6c884b384559c409557e8b1a04611a02e73e121b3ccc04bcc9",
-      "size": 44204
+      "sha256": "9f74b0ae8213530ecb26e1679fc40d152a4ce34fd28a447ef402ce3bf7e9d2cf",
+      "size": 52017
     },
     "payload/config/adapter_policy.toml.template": {
       "sha256": "c9ea524622fc0b79cf5674643c7115cbc5a659998b5cde71817d49901c25a3ff",
@@ -5316,7 +5325,7 @@
       "size": 8903
     },
     "plugin-metadata.json": {
-      "sha256": "d3b26e74f2922ce89e91f639a51bebb5619c405eb8c08c6ce4c942a5ceb171f1",
+      "sha256": "aa415c13b39e1d01f84deaebe945d577a9b7a4441afc6dc3066f4bcc88dbdf77",
       "size": 7774
     },
     "qqbridge-lib.ps1": {
@@ -5331,13 +5340,17 @@
       "sha256": "21d7967bee96e39ec92db0a8c6909c8b839fc025e4cd52c70bb9357c0f607539",
       "size": 1229
     },
+    "tests/test_deployment.py": {
+      "sha256": "1efeb9730174bc8055e33f0393d5f16e9ea3eb6e673aa0765cfa6d77b56d722a",
+      "size": 10997
+    },
     "tests/test_shared.py": {
-      "sha256": "b9d0f11b140a35e496cd11c107e41cc4f83368dabb13451ac1dc74c41fac1166",
-      "size": 14017
+      "sha256": "804497470d35749c6aa54baaf0de8aec9bcaff449a38b8b2a1668e916af4acd0",
+      "size": 14286
     },
     "tests/windows.ps1": {
-      "sha256": "98b9defa4e406dce98b7ea5011a4ed0a6ecef73a5149b32a79d84e52df41361a",
-      "size": 6152
+      "sha256": "9c25e1ad332c7ebbfcb8af0a49bca94d7f1f52b3e772ec27e92f9afe09154a6a",
+      "size": 6420
     },
     "tools/release.py": {
       "sha256": "4ec25b74f5b10e3d7d9d8bf617dcb646dc619251e6516cdde5b788c7afe5477f",
@@ -5364,12 +5377,12 @@
       "size": 1717
     },
     "wsl/common.sh": {
-      "sha256": "09ddcaca8fa3322389c2005e1522ecba6458fefe6eb13e9cb9832114a4521124",
-      "size": 2945
+      "sha256": "f606157490a22eae162924d24972b62096f3f9d3f797588039aa8b7c145be550",
+      "size": 3943
     },
     "wsl/config_tool.py": {
-      "sha256": "0cdc5cf70ff301ea421c64e2b5f3c67bcd505a96a017a761684b541f90238569",
-      "size": 25665
+      "sha256": "2b262d67363ee3aa323cd8dba90ab7e85cb153fe781e60077ef88da941e451e5",
+      "size": 27010
     },
     "wsl/configure.sh": {
       "sha256": "94cf0157d4722ef8a3b2f06a5d48f66732a848d8160a829d2b4b708c89f474cf",
@@ -5380,8 +5393,8 @@
       "size": 1119
     },
     "wsl/install.sh": {
-      "sha256": "f4ae1f774f9b5eb3d56f631f007080e7091a4fa6e23c5859c2b5540a48c4e456",
-      "size": 7981
+      "sha256": "10fd25e0bb65f5817e8c65264d876ce36c79c41e8ed45733a99cbddca4b09660",
+      "size": 7916
     },
     "wsl/onebot.py": {
       "sha256": "0f647fc1394a24fa0ff9a9d5db14dbd54707110f204ac9774d3cb7b21666b4d2",
@@ -5396,12 +5409,12 @@
       "size": 1953
     },
     "wsl/rollback.sh": {
-      "sha256": "9d6b67e63ab31686dc6c9f124e90dd6ac9e10b154f155e842b6f01c691481b42",
-      "size": 3076
+      "sha256": "b667958c656f6b74c5ffeacb4ef9765cead0e614bb8e87ef22b2169497dabce5",
+      "size": 3071
     },
     "wsl/upgrade.sh": {
-      "sha256": "62f8aadb924b2aeaf4de8f8b77eea033f21d72e1680a73603fd162bde5bf59b6",
-      "size": 4769
+      "sha256": "0dece195e6876c37c3525c608a60dec6da507edfa6becf5c9befc713695f79ce",
+      "size": 4764
     },
     "wsl/verify.sh": {
       "sha256": "576f99bbc6342439474d6a8e051e6ec66b9483ddc9e48537ec4c38ffcd18a31c",

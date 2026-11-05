@@ -60,11 +60,17 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install-local.ps1 -Res
 
 ```bash
 bash ./install-linux.sh
+# Agent 准备非敏感 JSON；普通模式由使用者隐藏输入 Key
+bash ./install-linux.sh --config-file /path/to/qqbridge-config.json
+# CI 由秘密变量提供 QQBRIDGE_LLM_API_KEY，且预先安装 Docker / 配置提权
+bash ./install-linux.sh --config-file /path/to/qqbridge-config.json --non-interactive
 # 构建失败且已有安装状态时
 bash ./install-linux.sh --resume
 ```
 
-Linux 使用交互终端隐藏输入 Key，Agent 不能把 Key 放进命令行、聊天或答案报告。在 Agent 无法提供交互终端的环境，让使用者在本机运行安装入口，Agent 负责前置检查与后续验证。服务器上的 QQ 扫码仍由使用者完成。WebUI 推荐使用 SSH 端口转发，不建议把管理端口直接公开到互联网。
+Linux 普通模式使用交互终端隐藏输入 Key；无人值守模式从 `QQBRIDGE_LLM_API_KEY` 环境接收，其他 `QQBRIDGE_*` 配置覆盖 JSON。Agent 不能把 Key 放进命令行、聊天或答案报告。缺少秘密变量时让使用者在本机运行普通安装入口。`--non-interactive` 不会安装需要确认的缺失依赖或等待密码输入。服务器上的 QQ 扫码仍由使用者完成。安装完成显示按实际端口生成的 SSH 转发命令。使用者主动在交互终端运行 `access-linux.sh` 查看 WebUI Token；Agent 不得执行或采集此命令输出。
+
+代理字段 `http_proxy`、`https_proxy`、`all_proxy`、`no_proxy` 可用于两平台的安装配置；容器内的代理地址必须可达。实例的 Compose 扩展放在 `instances/default/compose.override.yml`，不要编辑已校验的发布文件。管理入口会在安装、配置、验证、升级和回滚时合并扩展；备份包括该文件。镜像优先从 GHCR 拉取，失败回退本地构建，具体耗时不能保证。
 
 ## 4. 安装完成不等于已经能聊天
 

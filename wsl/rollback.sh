@@ -60,7 +60,7 @@ TARGET_GROUP="$(id -gn "$TARGET_USER")"
 chown -R "$TARGET_USER:$TARGET_GROUP" "$INSTANCE"
 secure_instance_files "$INSTANCE"
 
-compose "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env" up -d --build
+start_containers "$TARGET_USER" "$INSTALL_ROOT" "$INSTANCE/.env"
 wait_for_health qqbridge-maibot 240 || die "MaiBot did not become healthy after rollback"
 wait_for_health qqbridge-napcat 180 || die "NapCat did not become healthy after rollback"
 secure_instance_files "$INSTANCE"

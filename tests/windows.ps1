@@ -45,7 +45,7 @@ if ($WithWsl) {
 $fixture = Join-Path ([IO.Path]::GetTempPath()) ('qqbridge-windows-test-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory $fixture | Out-Null
 Copy-Item (Join-Path $Repo 'install.ps1') (Join-Path $fixture 'install.ps1')
-[IO.File]::WriteAllText((Join-Path $fixture 'VERSION'), '1.2.0')
+[IO.File]::WriteAllText((Join-Path $fixture 'VERSION'), '1.3.0')
 $mock = @'
 $script:PackageRoot = $PSScriptRoot
 $script:DistroName = 'Ubuntu'
@@ -80,7 +80,7 @@ function Read-Host { throw 'Unexpected nonsecret prompt in configured deployment
 '@
 [IO.File]::WriteAllText((Join-Path $fixture 'qqbridge-lib.ps1'), $mock, (New-Object Text.UTF8Encoding($true)))
 $config = Join-Path $fixture 'config.json'
-[IO.File]::WriteAllText($config, '{"llm_base_url":"https://api.deepseek.com/v1","llm_model":"dummy-model","llm_client_type":"openai"}')
+[IO.File]::WriteAllText($config, '{"llm_base_url":"https://api.deepseek.com/v1","llm_model":"dummy-model","llm_client_type":"openai","http_proxy":"http://proxy.invalid:7890","all_proxy":"socks5://proxy.invalid:1080"}')
 $global:TestState = $null
 $global:SecretPrompts = 0
 $global:SimulateFailure = $true
@@ -90,6 +90,7 @@ Check $failed 'interrupted install reported'
 Check ($global:TestState.phase -eq 'installing') 'context saved before deployment'
 Check ($global:SavedAnswers.maibot_bind -eq '127.0.0.1' -and $global:SavedAnswers.restart_policy -eq 'unless-stopped') 'friend defaults local and autostart'
 Check ($global:SecretPrompts -eq 1) 'only local secret prompt'
+Check ($global:SavedAnswers.http_proxy -eq 'http://proxy.invalid:7890' -and $global:SavedAnswers.all_proxy -eq 'socks5://proxy.invalid:1080') 'configured proxies forwarded to renderer'
 $global:SimulateFailure = $false
 & (Join-Path $fixture 'install.ps1') -Resume -NoBrowser
 Check ($global:TestState.phase -eq 'installed') 'resume completes state'
