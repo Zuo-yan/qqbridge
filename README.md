@@ -1,6 +1,6 @@
 # QQBridge 一键部署包
 
-版本：`1.3.3`
+版本：`1.3.5`
 
 线上扩展源码与部署边界见 [optional/README.md](optional/README.md)。默认安装不会自动启用这些扩展。
 
@@ -68,8 +68,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 要求 Linux x86_64、Python 3.10+、`systemd`、`sudo`、Docker Engine 和 Docker Compose v2。默认按 rootful Docker 管理；已测试目标为常见 Ubuntu/Debian 系发行版。
 
 ```bash
-unzip qqbridge-v1.3.3.zip
-cd qqbridge-v1.3.3
+unzip qqbridge-v1.3.5.zip
+cd qqbridge-v1.3.5
 bash ./install-linux.sh
 ```
 
@@ -207,8 +207,8 @@ bash ./configure-linux.sh --advanced
 
 ```text
 ~/qqbridge/                       # Linux 默认；Windows 位于 WSL 用户主目录
-├── releases/1.3.3/
-├── current -> releases/1.3.3/
+├── releases/1.3.5/
+├── current -> releases/1.3.5/
 ├── backups/
 └── instances/default/
     ├── .env
@@ -237,13 +237,13 @@ Windows 局域网模式只创建“专用网络”和 `LocalSubnet` 入站规则
 
 ```powershell
 # Windows
-.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.3.3.zip'
+.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.3.5.zip'
 .\rollback.ps1
 ```
 
 ```bash
 # Linux
-bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.3.3.zip
+bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.3.5.zip
 bash ./rollback-linux.sh
 bash ./rollback-linux.sh --backup-id 20261031T120000Z
 ```

@@ -414,6 +414,15 @@ class MaisakaHeartFlowChatting(MaisakaRuntimeDisplayMixin):
                         limit_mode="latest",
                         filter_bot=True,
                     )
+                    recent_messages = [
+                        message
+                        for message in recent_messages
+                        if not (
+                            message.message_info
+                            and message.message_info.group_info
+                            and str(message.message_info.group_info.group_id or "").strip()
+                        )
+                    ]
         except Exception as exc:
             logger.warning(f"{self.log_prefix} 主动回合回填用户消息失败: {exc}", exc_info=True)
             return 0
@@ -428,6 +437,7 @@ class MaisakaHeartFlowChatting(MaisakaRuntimeDisplayMixin):
         for message in recent_messages:
             if message.is_notify or message.message_id in existing_message_ids:
                 continue
+            message.session_id = self.session_id
             history_message = await self._reasoning_engine._build_history_message(message, source_kind="user")
             if history_message is not None:
                 restored_history.append(history_message)
@@ -1112,6 +1122,18 @@ class MaisakaHeartFlowChatting(MaisakaRuntimeDisplayMixin):
         for history_message in reversed(self._chat_history):
             if isinstance(history_message, SessionBackedMessage) and history_message.message_id == normalized_message_id:
                 return history_message.original_message
+            if (
+                isinstance(history_message, InternalContextMessage)
+                and history_message.message_id == normalized_message_id
+                and normalized_message_id.startswith("proactive:")
+            ):
+                return self._build_proactive_trigger_message(normalized_message_id)
+
+        if (
+            self._proactive_trigger_message is not None
+            and self._proactive_trigger_message.message_id == normalized_message_id
+        ):
+            return self._proactive_trigger_message
 
         return None
 

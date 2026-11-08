@@ -31,5 +31,5 @@ COPY patches/component_query.py /MaiMBot/src/plugin_runtime/component_query.py
 COPY patches/maisaka_chat.prompt /MaiMBot/prompts/zh-CN/maisaka_chat.prompt
 
 LABEL org.opencontainers.image.title="QQBridge MaiBot"
-LABEL org.opencontainers.image.version="1.3.3"
+LABEL org.opencontainers.image.version="1.3.5"
 LABEL org.opencontainers.image.source="https://github.com/Zuo-yan/qqbridge"

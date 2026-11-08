@@ -1512,6 +1512,8 @@ class MaiLifePlugin(MaiBotPlugin):
                 retry_count=int(kwargs.get("retry_count") or 0)
                 if retry_count>0:
                     await self._store.release_reply_turn(turn_scope,turn_anchor)
+                    if active:
+                        await self._active_tasks.release_reply(session,active.task_id,active.reply_anchor or anchor)
                     turn_reserved=await self._store.reserve_reply_turn(
                         turn_scope,turn_anchor,time.time(),time.time()+int(self.config.debounce.turn_expire_seconds),
                     )
@@ -1592,7 +1594,7 @@ class MaiLifePlugin(MaiBotPlugin):
             elif disabled and status=="pending":
                 await self._store.set_proactive_event_status(str(proactive_task["id"]),"cancelled")
                 await self._store.release_opportunity(str(proactive_task["opportunity_id"]))
-            if expired or disabled or status in {"failed","expired","cancelled"}:return {"action":"abort"}
+            if expired or disabled or status in {"failed","cancelled"} or (status=="expired" and not late_ok):return {"action":"abort"}
         relay_task=await self._relay_for_session(session,task_id) if task_id else {}
         if anchor.startswith(HOST_TASK_PREFIX) and not proactive_task and not relay_task:
             return {"action":"abort"}
@@ -1644,6 +1646,8 @@ class MaiLifePlugin(MaiBotPlugin):
         if tagged_task_id:
             await self._active_tasks.finish_send(session,tagged_task_id,anchor,sent,now_ts)
         confirmation=self._reply_confirmations.pop((session,anchor),None)
+        if not confirmation and additional.get("mai_life_fallback_after_send"):
+            return
         if not confirmation and not anchor:
             # 兼容少数不回传 reply_message_id 的 Host，只在会话中恰有一个候选时降级关联。
             matches=[key for key in self._reply_confirmations if key[0]==session]
@@ -1702,7 +1706,7 @@ class MaiLifePlugin(MaiBotPlugin):
             active_task_id=str(confirmation.get("task_id") or tagged_task_id)
             if active_task_id:await self._active_tasks.release_reply(session,active_task_id,anchor)
             event_id=str(confirmation.get("proactive_event_id") or "")
-            if self._store and event_id:
+            if self._store and event_id and not additional.get("mai_life_pre_send_aborted"):
                 await self._store.set_proactive_event_status(event_id,"failed")
                 opportunity_id=str(confirmation.get("proactive_opportunity_id") or "")
                 if opportunity_id:await self._store.release_opportunity(opportunity_id)

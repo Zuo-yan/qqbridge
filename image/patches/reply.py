@@ -79,6 +79,37 @@ def _require_hook_bool(raw_value: Any, option_name: str) -> bool:
     raise TypeError(f"Hook 返回的 {option_name} 必须是布尔值，实际为 {type(raw_value).__name__}")
 
 
+async def _release_unsent_reply_turn(
+    tool_ctx: BuiltinToolRuntimeContext,
+    target_message_id: str,
+    *,
+    pre_send: bool,
+) -> None:
+    """在生成回复后但未真正送达平台前失败时，通知插件释放本轮未发送预留。"""
+
+    try:
+        await tool_ctx.get_runtime_manager().invoke_hook(
+            "send_service.after_send",
+            message={
+                "session_id": tool_ctx.runtime.session_id,
+                "message_info": {
+                    "additional_config": {
+                        "mai_life_pre_send_aborted": pre_send,
+                        "mai_life_fallback_after_send": True,
+                    }
+                },
+            },
+            sent=False,
+            typing=False,
+            set_reply=False,
+            reply_message_id=target_message_id,
+            storage_message=False,
+            show_log=False,
+        )
+    except Exception as exc:
+        logger.warning(f"{tool_ctx.runtime.log_prefix} 释放未发送回复轮次锁失败: {exc}")
+
+
 async def _invoke_before_post_process_hook(
     tool_ctx: BuiltinToolRuntimeContext,
     reply_text: str,
@@ -308,9 +339,11 @@ async def _resolve_reply_quote(
     """群聊和私聊分别按固定公式及频率决定引用。"""
     # Plugin task notifications are virtual targets with no QQ message to quote.
     # They must remain replyable without entering the ordinary-message counter.
-    if target_message.is_notify:
+    if target_message.is_notify or str(target_message.message_id or "").startswith("proactive:"):
         return False, 0.0
     stream = tool_ctx.runtime.chat_stream
+    if str(getattr(target_message, "session_id", "") or tool_ctx.runtime.session_id) != tool_ctx.runtime.session_id:
+        return False, 0.0
     frequency = (
         config_module.global_config.chat.reply_style.group_quote_frequency if stream.is_group_session
         else config_module.global_config.chat.reply_style.private_quote_frequency
@@ -599,6 +632,7 @@ async def execute_reply(
         }
 
     if not reply_text:
+        await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=True)
         reply_result.completion.response_text = ""
         reply_result.monitor_detail = build_reply_monitor_detail(reply_result)
         return tool_ctx.build_failure_result(
@@ -614,6 +648,7 @@ async def execute_reply(
             **post_process_options,
         )
     except Exception as exc:
+        await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=True)
         reply_result.completion.response_text = reply_text
         reply_result.monitor_detail = build_reply_monitor_detail(reply_result)
         reply_metadata = _build_monitor_metadata(reply_result, extension_execution.reply_id)
@@ -647,6 +682,7 @@ async def execute_reply(
             )
             extension_execution.ensure_active()
         except Exception as exc:
+            await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=True)
             logger.exception(f"{tool_ctx.runtime.log_prefix} 插件回复扩展处理失败: {exc}")
             return tool_ctx.build_failure_result(
                 "reply", f"插件回复扩展处理失败：{exc}",
@@ -666,11 +702,20 @@ async def execute_reply(
         "".join(c.text for c in reply_sequences[0].components if isinstance(c, TextComponent))
         if reply_sequences else ""
     )
-    set_quote, quote_probability = await _resolve_reply_quote(tool_ctx, first_text, target_message)
+    try:
+        set_quote, quote_probability = await _resolve_reply_quote(tool_ctx, first_text, target_message)
+    except Exception as exc:
+        await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=True)
+        logger.exception(f"{tool_ctx.runtime.log_prefix} 计算回复引用策略失败: {exc}")
+        return tool_ctx.build_failure_result(
+            "reply",
+            f"计算回复引用策略失败：{exc}",
+            metadata=reply_metadata,
+        )
     # Prefer quoting the actual target when explicitly addressing that person.
     stream = tool_ctx.runtime.chat_stream
     target_id = str(target_message.message_info.user_info.user_id or "")
-    if (stream.is_group_session and not target_message.is_notify and stream.platform != CLI_PLATFORM_NAME
+    if (stream.is_group_session and not target_message.is_notify and not str(target_message.message_id or "").startswith("proactive:") and stream.platform != CLI_PLATFORM_NAME
             and config_module.global_config.chat.reply_style.group_quote_frequency != "never"
             and target_id and not is_bot_self(stream.platform, target_id)
             and reply_sequences and any(
@@ -767,6 +812,7 @@ async def execute_reply(
                 )
                 previous_sent_message = sent_message
     except Exception:
+        await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=False)
         logger.exception(f"{tool_ctx.runtime.log_prefix} 发送文字消息时发生异常，目标消息编号={target_message_id}")
         return tool_ctx.build_failure_result(
             "reply",
@@ -775,6 +821,7 @@ async def execute_reply(
         )
 
     if not sent:
+        await _release_unsent_reply_turn(tool_ctx, target_message_id, pre_send=False)
         return tool_ctx.build_failure_result(
             "reply",
             "可见回复生成成功，但发送失败。",
