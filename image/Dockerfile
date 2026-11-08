@@ -13,6 +13,8 @@ COPY patches/reasoning_engine.py /MaiMBot/src/maisaka/reasoning_engine.py
 COPY patches/compaction.py /MaiMBot/src/maisaka/context/compaction.py
 COPY patches/reliability.py /MaiMBot/src/maisaka/reliability.py
 COPY patches/reply.py /MaiMBot/src/maisaka/builtin_tool/reply.py
+COPY patches/data.py /MaiMBot/src/plugin_runtime/capabilities/data.py
+COPY patches/session_route.py /MaiMBot/src/platform_io/session_route.py
 COPY patches/chat_loop_service.py /MaiMBot/src/maisaka/chat_loop_service.py
 COPY patches/maisaka_generator_base.py /MaiMBot/src/chat/replyer/maisaka_generator_base.py
 COPY patches/utils.py /MaiMBot/src/chat/utils/utils.py
@@ -29,5 +31,5 @@ COPY patches/component_query.py /MaiMBot/src/plugin_runtime/component_query.py
 COPY patches/maisaka_chat.prompt /MaiMBot/prompts/zh-CN/maisaka_chat.prompt
 
 LABEL org.opencontainers.image.title="QQBridge MaiBot"
-LABEL org.opencontainers.image.version="1.3.1"
+LABEL org.opencontainers.image.version="1.3.3"
 LABEL org.opencontainers.image.source="https://github.com/Zuo-yan/qqbridge"

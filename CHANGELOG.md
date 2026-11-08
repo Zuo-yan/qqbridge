@@ -1,5 +1,12 @@
 # 更新记录
 
+## 1.3.3
+
+- 帕累托最优加固：释放 `host_bridge.py` 与 `vertex_responses_gateway.py` (v1.2.0) 在网络 I/O 期间的全局锁，支持并发请求、将 `MAX_TOKENS` 映射为 `incomplete` 终态并提升最大输出上限至 32768。
+- 规划器回退加速：将 `planner` 设为 `deepseek_flash -> vertex_flash` 顺序回退，并在 `utils_model.py` (v1.3.0) 为 `planner` 的主模型 `deepseek_flash` 配置 20s 单次尝试超时上限。
+- 路由与通知修复：修复 `chat.open_session` 唯一账号解析（`session_route.py`）与插件虚拟通知引用跳过逻辑（`reply.py`）。
+- 插件与元数据同步：同步 `chartyr_maiwork` v0.16.8、对齐 `maibot-community_mai-life` v1.23.8 版本常量、放宽 `com_0-hz_impression-card` v0.3.7 SDK 版本上限至 `2.99.99`。
+
 ## 1.3.1
 
 - 同步线上最终回复、视觉、规划方向、表情和媒体任务路由补丁；镜像直接复制最终源文件，不重复执行一次性修改脚本。

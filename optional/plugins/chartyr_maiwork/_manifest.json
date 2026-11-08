@@ -1,0 +1,73 @@
+{
+  "manifest_version": 2,
+  "id": "chartyr.maiwork",
+  "version": "0.16.8",
+  "name": "MaiWork",
+  "description": "补全MaiBot群聊常驻Agent能力，理解一个群，主动找资讯、提构想、追目标，交付任何工作。包含完整且美观的插件自身WebUI",
+  "plugin_type": "extension",
+  "author": {
+    "name": "CharTyr",
+    "url": "https://github.com/CharTyr"
+  },
+  "license": "AGPL-3.0-or-later",
+  "host_application": {
+    "min_version": "1.0.0",
+    "max_version": "1.4.99"
+  },
+  "sdk": {
+    "min_version": "2.8.1",
+    "max_version": "2.21.0"
+  },
+  "dependencies": [
+    {
+      "type": "python_package",
+      "name": "httpx",
+      "version_spec": ">=0.24"
+    },
+    {
+      "type": "python_package",
+      "name": "tomlkit",
+      "version_spec": ">=0.12"
+    },
+    {
+      "type": "python_package",
+      "name": "aiohttp",
+      "version_spec": ">=3.9"
+    }
+  ],
+  "capabilities": [
+    "config.get",
+    "component.enable",
+    "component.disable",
+    "message.get_by_time_in_chat",
+    "message.get_by_id",
+    "knowledge.search",
+    "person.get_id",
+    "person.get_value",
+    "chat.get_stream_by_group_id",
+    "chat.get_group_streams",
+    "api.call",
+    "api.list",
+    "send.hybrid",
+    "maisaka.proactive.trigger"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  },
+  "display": {
+    "icon": {
+      "type": "local",
+      "value": "maiwork/console/static/assets/logo.png",
+      "fallback": "briefcase"
+    }
+  },
+  "urls": {
+    "repository": "https://github.com/CharTyr/MaiWork",
+    "homepage": "https://github.com/CharTyr/MaiWork",
+    "documentation": "https://github.com/CharTyr/MaiWork/blob/main/README.md",
+    "issues": "https://github.com/CharTyr/MaiWork/issues"
+  }
+}

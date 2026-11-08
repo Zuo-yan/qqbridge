@@ -306,6 +306,10 @@ async def _resolve_reply_quote(
     target_message: SessionMessage,
 ) -> Tuple[bool, Optional[float]]:
     """群聊和私聊分别按固定公式及频率决定引用。"""
+    # Plugin task notifications are virtual targets with no QQ message to quote.
+    # They must remain replyable without entering the ordinary-message counter.
+    if target_message.is_notify:
+        return False, 0.0
     stream = tool_ctx.runtime.chat_stream
     frequency = (
         config_module.global_config.chat.reply_style.group_quote_frequency if stream.is_group_session
@@ -666,7 +670,7 @@ async def execute_reply(
     # Prefer quoting the actual target when explicitly addressing that person.
     stream = tool_ctx.runtime.chat_stream
     target_id = str(target_message.message_info.user_info.user_id or "")
-    if (stream.is_group_session and stream.platform != CLI_PLATFORM_NAME
+    if (stream.is_group_session and not target_message.is_notify and stream.platform != CLI_PLATFORM_NAME
             and config_module.global_config.chat.reply_style.group_quote_frequency != "never"
             and target_id and not is_bot_self(stream.platform, target_id)
             and reply_sequences and any(

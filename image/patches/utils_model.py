@@ -1293,11 +1293,12 @@ class LLMOrchestrator:
         )
 
     def _model_attempt_timeout(self, request: ClientRequest) -> float:
-        """Reply fallback overlay 1.2.0: Argon 6s -> Flash MEDIUM 15s -> DeepSeek 8s.
+        """Reply and Planner fallback overlay 1.3.0:
+        - replyer: Argon 6s -> Flash MEDIUM 15s -> DeepSeek 8s.
+        - planner: DeepSeek 20s -> Flash fallback keeps task hard_timeout.
 
-        Only replyer requests use these limits. Once Flash emits visible reply
-        text or a tool call, that attempt is allowed to finish. Other tasks keep
-        their own deadlines.
+        Once Flash emits visible reply text or a tool call in replyer, that attempt
+        is allowed to finish. Other tasks keep their own deadlines.
         """
         timeout_s = self.model_for_task.hard_timeout
         if self.task_name == "replyer":
@@ -1305,6 +1306,12 @@ class LLMOrchestrator:
                 "gemini-4-argon": 6.0,
                 "gemini-3.8-flash": 15.0,
                 "deepseek-flash": 8.0,
+            }.get(request.model_info.model_identifier)
+            if deadline is not None:
+                return min(timeout_s, deadline)
+        elif self.task_name == "planner":
+            deadline = {
+                "deepseek-flash": 20.0,
             }.get(request.model_info.model_identifier)
             if deadline is not None:
                 return min(timeout_s, deadline)
