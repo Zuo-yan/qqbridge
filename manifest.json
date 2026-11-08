@@ -1,6 +1,6 @@
 {
   "package": "qqbridge",
-  "package_version": "1.3.0",
+  "package_version": "1.3.1",
   "created_at_utc": "2026-10-31T10:48:11Z",
   "platform": "Windows 11 x64 / Linux x86_64",
   "runtime": "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
@@ -9,7 +9,7 @@
     "maibot": "sengokucola/maibot@sha256:02d2d9bdd7b3f22f73c63d0ca7a415a9f4c9d16b3f269ca63d62cedfa01edfda",
     "napcat": "mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d8226ed9f7ddfcec55f1b7e"
   },
-  "local_image": "ghcr.io/zuo-yan/qqbridge-maibot:v1.3.0",
+  "local_image": "ghcr.io/zuo-yan/qqbridge-maibot:v1.3.1",
   "entrypoints": [
     "install.cmd",
     "install-local.ps1",
@@ -31,105 +31,12 @@
   ],
   "plugins": [
     {
-      "name": "codex-draw",
-      "upstream": "",
-      "source_commit": "",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "694aaa35b446033537a3b7817018a1261e0236c8ea56edc56d6e12a5985ee911",
-      "packaged_tree_sha256": "d332ceaf804f68768e09286a460f054f3214b0d2780cf4db25997a9109707e9e",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
       "name": "Color2333_maibot-multi-platform-parser",
       "upstream": "https://cnb.cool/Mai-with-u/p-color2333--maibot-multi-platform-parser-3a856f96d7dc.git",
       "source_commit": "282054fedaca4fd885f73419643ddd4ab7af31ad",
       "source_had_local_changes": true,
       "source_tree_sha256": "224d2cd9a846a8b8d6eb4b9a4b6ea18f1551e60acabe09cbdc8fb3fe45238622",
-      "packaged_tree_sha256": "f3c1123e32e17f1f10c77660598a85abefc8aa7345b27f565efc6e3dffebd9e1",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "com_maibot_link-parser",
-      "upstream": "https://cnb.cool/Mai-with-u/p-jh-mmm--maibot-link-parser-03604d2e4213.git",
-      "source_commit": "1f63b2a127de41a1b0f673add536ca9255155691",
-      "source_had_local_changes": true,
-      "source_tree_sha256": "cc27f55c607e4a76b9f0e535aa2f2e64e5a14d63cc3772a32cddd881d33b05af",
-      "packaged_tree_sha256": "42bfe57924e7b8c9174bef3d93cd3ee56de9ccc0dc3095a50552038c8394467c",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "deepseek-v4-pro_private-humanizer",
-      "upstream": "https://cnb.cool/Mai-with-u/p-deepseek-v4-pro--private-humanizer-c190a8589778.git",
-      "source_commit": "543d3ee0ef9102701590357c7e306dbed31377d7",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "249ef2293b4042c8f7c39da47aeada3af797f309698a6d0c255ccd9213a90213",
-      "packaged_tree_sha256": "a55a93500708101d6576ef276e8dd0c5e7bc69c62b86f32f1f4835c898ec2a7f",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "gemini_web_search",
-      "upstream": "",
-      "source_commit": "",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "108cc7479165e62264315c4c0a7757042a21895a083259aa923af90ba7866d51",
-      "packaged_tree_sha256": "7c3bdf34ea2afd028bb2daac73007eba1cebb531a02fe288d1573adf9b47c04b",
-      "license_files": []
-    },
-    {
-      "name": "github_erhan111119_mai-repost-shit",
-      "upstream": "https://cnb.cool/Mai-with-u/p-erhan111119--mai-repost-shit-cba0ab5ef271.git",
-      "source_commit": "c0b9e0d06ee1ffc9331bf093469793536be0fcb1",
-      "source_had_local_changes": true,
-      "source_tree_sha256": "3d3186722d20b88c0f590b6b8bca3c7e2c3d1ff63af61b60a0994427345219f2",
-      "packaged_tree_sha256": "87ffbacbb0a59cb75e72be51ed1e1a93fcb578dc7be32c794a00632e6889e02f",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "hajimi-file-download",
-      "upstream": "",
-      "source_commit": "",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "c750e4e5b0baa4999492c1c8d6382fdeeba5eb84671a9cfb48129d990be70fd8",
-      "packaged_tree_sha256": "de207519b22d8b722a74a710c6ef77ef728fff2acd420c964c248437ee8671f2",
-      "license_files": []
-    },
-    {
-      "name": "juzi865_emoji2face",
-      "upstream": "https://cnb.cool/Mai-with-u/p-juzi865--emoji2face-c5f38f3f6076.git",
-      "source_commit": "696ec97ea4c307b38185aec59e204e8c2d427187",
-      "source_had_local_changes": true,
-      "source_tree_sha256": "e8cc9f7fb6707103c879a0d16cd646af0d0322412ebf1dba1d97fbd41d408d3c",
-      "packaged_tree_sha256": "b480fa5f2b57b2e67369e0415ac3b56f644d1fb9dc7e5b898e3d5c1c4b783bd0",
-      "license_files": []
-    },
-    {
-      "name": "maibot-community_mai-repeater",
-      "upstream": "https://cnb.cool/Mai-with-u/p-octmicy--mai-repeater-17be6267dfab.git",
-      "source_commit": "2b7ad6d0725f0aacd466e79e59ad80a87f55edaf",
-      "source_had_local_changes": true,
-      "source_tree_sha256": "2a97821840795415bfcfb0c74804ac0598c32eadab0896ecde0354c1463acf17",
-      "packaged_tree_sha256": "f8b511a2b0890ed0f6019791b1914aa0e57bec2faf59de61e0ba7d556b19c955",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "maibot-moepix",
-      "upstream": "",
-      "source_commit": "",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "b1db028e8e498d09afbda3f15b8774e3f62195ba6fd6c14d7ee55ba2b0595402",
-      "packaged_tree_sha256": "ad525cbef9ecdafd1ad942153fab6db593938d45a2a7bb9e71e2a3aeb566d58f",
+      "packaged_tree_sha256": "baf11a88639f0efb4e2109292ddd069e5d77aa1f4681c9d8b7bf1e2e67a67bab",
       "license_files": [
         "LICENSE"
       ]
@@ -140,27 +47,7 @@
       "source_commit": "54fcc7fcc4072983a1283d99fa0edd559125e1d7",
       "source_had_local_changes": true,
       "source_tree_sha256": "1d1bb42e18bf09d61e5031581dbc30fa3187f5e39f237ef75d87d32db8b84dfc",
-      "packaged_tree_sha256": "de1407b39930577a08285321d049348803e4edf3154a188fce881b57c61e6ffe",
-      "license_files": []
-    },
-    {
-      "name": "mizuku003_tieba-share",
-      "upstream": "https://cnb.cool/Mai-with-u/p-mizuku003--maibot-tieba-share-5d4112c35f27.git",
-      "source_commit": "69d93dee4f2d1a816e21f9883bcccc38bf6b01fa",
-      "source_had_local_changes": true,
-      "source_tree_sha256": "4c9661159626236217d21be483dbded324b64f48836a85a7708d3f74d4d3361d",
-      "packaged_tree_sha256": "246b28cfdbd5ac8ec8d5c2b9e06c58a07092d1f31ce3a5215f0fbc8ae9a3bec6",
-      "license_files": [
-        "LICENSE"
-      ]
-    },
-    {
-      "name": "persona-manager",
-      "upstream": "",
-      "source_commit": "",
-      "source_had_local_changes": false,
-      "source_tree_sha256": "175231839005adaf8b01099c7f4439a219c6ec3e9bcee677ea6ad55bd9ccfe84",
-      "packaged_tree_sha256": "ac9df4ab891533f554372d1fd2b9be7d7930a05b39080ac3f693e52ad9862d71",
+      "packaged_tree_sha256": "f31bdebe57361229bff5b52c958064bc16cae5c4e99ea0536ef6bc59446e58a9",
       "license_files": []
     },
     {
@@ -169,18 +56,120 @@
       "source_commit": "59ff292b4d912a5cbe5d09cce32381e8497d350f",
       "source_had_local_changes": true,
       "source_tree_sha256": "ab32b7f2767a07c3b9e8d1dab5c9023057892b8719532e57b4ac8006094e878a",
-      "packaged_tree_sha256": "f4dbc1a0c0cd294e7fb4089063fd33253296ce257c57672314def6b456ee04d5",
+      "packaged_tree_sha256": "e8f389be21724725443f6166cc4f1e2fabe462f9c72b74157e0e977fce903f89",
       "license_files": [
         "LICENSE"
       ]
     },
     {
+      "name": "codex-draw",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "694aaa35b446033537a3b7817018a1261e0236c8ea56edc56d6e12a5985ee911",
+      "packaged_tree_sha256": "6d601d38f1b7f77a035ea38ae7b4e51cd38eea5e7060013265a02f6decdc9998",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "com_maibot_link-parser",
+      "upstream": "https://cnb.cool/Mai-with-u/p-jh-mmm--maibot-link-parser-03604d2e4213.git",
+      "source_commit": "1f63b2a127de41a1b0f673add536ca9255155691",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "cc27f55c607e4a76b9f0e535aa2f2e64e5a14d63cc3772a32cddd881d33b05af",
+      "packaged_tree_sha256": "760d31932af86d8ad20b7db8f5b56dbf855b89b690fe262121d720132e3e58be",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "deepseek-v4-pro_private-humanizer",
+      "upstream": "https://cnb.cool/Mai-with-u/p-deepseek-v4-pro--private-humanizer-c190a8589778.git",
+      "source_commit": "543d3ee0ef9102701590357c7e306dbed31377d7",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "249ef2293b4042c8f7c39da47aeada3af797f309698a6d0c255ccd9213a90213",
+      "packaged_tree_sha256": "5c7aa84e5f307c424fa263a582ca5c65222c04e2fb25e39c1bef16fecae46203",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "gemini_web_search",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "108cc7479165e62264315c4c0a7757042a21895a083259aa923af90ba7866d51",
+      "packaged_tree_sha256": "8c20965fd1901638cfd2944efb350f35219b7f640e6200b9064c4b80deac28ca",
+      "license_files": []
+    },
+    {
+      "name": "github_erhan111119_mai-repost-shit",
+      "upstream": "https://cnb.cool/Mai-with-u/p-erhan111119--mai-repost-shit-cba0ab5ef271.git",
+      "source_commit": "c0b9e0d06ee1ffc9331bf093469793536be0fcb1",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "3d3186722d20b88c0f590b6b8bca3c7e2c3d1ff63af61b60a0994427345219f2",
+      "packaged_tree_sha256": "d1a7e1a51e9f9fbebf166e1c0a8ebfede0820c9709a0c7e7ef9100724e22db7f",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "hajimi-file-download",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "c750e4e5b0baa4999492c1c8d6382fdeeba5eb84671a9cfb48129d990be70fd8",
+      "packaged_tree_sha256": "057da1090ccc8c9402fe111ffd99ea6283db891bd09fb7dff6c0cf9378eb3b72",
+      "license_files": []
+    },
+    {
+      "name": "juzi865_emoji2face",
+      "upstream": "https://cnb.cool/Mai-with-u/p-juzi865--emoji2face-c5f38f3f6076.git",
+      "source_commit": "696ec97ea4c307b38185aec59e204e8c2d427187",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "e8cc9f7fb6707103c879a0d16cd646af0d0322412ebf1dba1d97fbd41d408d3c",
+      "packaged_tree_sha256": "741eb97ffa92d44206863b84d2473921534ec2e420461b7713a69b7ef8509493",
+      "license_files": []
+    },
+    {
+      "name": "maibot-community_mai-repeater",
+      "upstream": "https://cnb.cool/Mai-with-u/p-octmicy--mai-repeater-17be6267dfab.git",
+      "source_commit": "2b7ad6d0725f0aacd466e79e59ad80a87f55edaf",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "2a97821840795415bfcfb0c74804ac0598c32eadab0896ecde0354c1463acf17",
+      "packaged_tree_sha256": "8c71e372077d7aff9eb4d83f3ad731eecddf0daf69b30f434be6726dfa9fd749",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "mizuku003_tieba-share",
+      "upstream": "https://cnb.cool/Mai-with-u/p-mizuku003--maibot-tieba-share-5d4112c35f27.git",
+      "source_commit": "69d93dee4f2d1a816e21f9883bcccc38bf6b01fa",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "4c9661159626236217d21be483dbded324b64f48836a85a7708d3f74d4d3361d",
+      "packaged_tree_sha256": "4ce7ec9030fb1953808fad147ba486f13bb0cfdb769e09631455459b959c26d1",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "name": "persona-manager",
+      "upstream": "",
+      "source_commit": "",
+      "source_had_local_changes": true,
+      "source_tree_sha256": "175231839005adaf8b01099c7f4439a219c6ec3e9bcee677ea6ad55bd9ccfe84",
+      "packaged_tree_sha256": "bc8662e1cd9e11e8eb89d904aca89f0fca7256221c793f64505233a1cad80051",
+      "license_files": []
+    },
+    {
       "name": "token_usage_report",
       "upstream": "https://github.com/CSSQY/token_usage_report.git",
       "source_commit": "3da19a52917cc8216eb9a9e3a0594d219091e7b3",
-      "source_had_local_changes": false,
+      "source_had_local_changes": true,
       "source_tree_sha256": "d2838cad73e20d53e0694a302a04cef3325891dfe8a243b95f35bf9737ec277a",
-      "packaged_tree_sha256": "996487f1f8f22a65fde12d200b9fdeedd47be654abdd357b24f9fb71dde3ad4f",
+      "packaged_tree_sha256": "95ebbb892d1f6c92519a06dc7c15272c001b4ec49b3d40c59065796497633345",
       "license_files": [
         "LICENSE"
       ]
@@ -202,7 +191,7 @@
       "source_commit": "24a7e870afb1900bae7f85a14f9b0af8e34b951b",
       "source_had_local_changes": true,
       "source_tree_sha256": "63e1fe7b36fbb280811168cb96889e23c50dfff079086d2fae6a567e93571f51",
-      "packaged_tree_sha256": "2497ffd42455751a2087f93063883ff9b6bfe905816a65e63dee7c7aba800ee4",
+      "packaged_tree_sha256": "69397114f7a96a01d56676a8344e8f5da8f8d779739ce36743eb924b7bf8ac5d",
       "license_files": [
         "LICENSE"
       ]
@@ -211,23 +200,47 @@
   "patches": [
     {
       "name": "chat_loop_service.py",
-      "sha256": "7efdf141eea568a1d00a68be5350b2d0e964de274f275e70455f1547549e695f"
+      "sha256": "e5fe307ea83e30acce2c029f359a42022dc4f954bd54f5d2ea5a595945781bed"
     },
     {
       "name": "compaction.py",
-      "sha256": "c27493f82f6eecbf954e54604c82646b622b8ad2d6d81f9747088f36192b8718"
+      "sha256": "901b9b19c5cb604ac23a543b8ee6413dde57388453dbdd39fe8d0a5869099ff7"
+    },
+    {
+      "name": "component_query.py",
+      "sha256": "1eb6d3b33afef5fb45e40542d5ca8057ec9f98ac800609ced08fea3885101078"
     },
     {
       "name": "dfy_continuity.py",
       "sha256": "9303775c83659d1594087404e3b39834af89f6fc1f49dba4bbb85cb6d89156d8"
     },
     {
+      "name": "dfy_reply_policy.py",
+      "sha256": "5e77ede7ac6b06c00331d323d6104b9d5db8b3bceec30a1cd60082d035aa5f3f"
+    },
+    {
+      "name": "dfy_visual_evidence.py",
+      "sha256": "0b1e190b8781fb0048c3edaafec16f641cc6be5afd6ae8eb6490378c73bc900d"
+    },
+    {
       "name": "emoji_manager.py",
       "sha256": "5c92b6729255297d7a9104ef4839290566d6e7a682165222e9a90d1e5713ddb5"
     },
     {
+      "name": "gemini_client.py",
+      "sha256": "650eb92aded54caa21af58a082c2ad5d6dca52c38261a2d34fe9ba3b41ffa847"
+    },
+    {
+      "name": "image_manager.py",
+      "sha256": "485551a1be5cfde1f2c5aa2a986a9b39d067fb6e05dc6d63c16099c046b0ad9e"
+    },
+    {
+      "name": "maisaka_chat.prompt",
+      "sha256": "cb36f975e2235f54da878f8d5e98f124e871909aa824c16eab118d77a741f38d"
+    },
+    {
       "name": "maisaka_generator_base.py",
-      "sha256": "326db80501ca9816a963fe82b002b6e70bc122e4690fd9c89e61f1f4ac64e3db"
+      "sha256": "c835f8912551c347b72e3c5540f8d8410d94d00c9411eade4e00e11762c4ae45"
     },
     {
       "name": "openai_client.py",
@@ -235,15 +248,15 @@
     },
     {
       "name": "reasoning_engine.py",
-      "sha256": "a69e2261128f61c3cedd8fd17945dd3adeeada7b817412bd499e6fdb3d6917ed"
+      "sha256": "cae7ba74fd5409f5dde6b35ea2895f05680a973e765a6fe4d328d128a945b7a4"
     },
     {
       "name": "reliability.py",
-      "sha256": "7abea816c5c1a2ebfc981414b80d388a9bd2b4dc09dcc8f686826ee0177f0ce9"
+      "sha256": "857de64f32cdf7f639db048a923eb48d67fbe73d60812ea9c2d200b5f46dccc9"
     },
     {
       "name": "reply.py",
-      "sha256": "e2bd46e05d33b2c5a447ec5a1f3146c45b3e6b4185bfa711b9d975edf5318925"
+      "sha256": "24392d987ae3145ddd0a1b61083e0adcc6f5d6e6aa48e36fd4e92f57d962eca4"
     },
     {
       "name": "runtime.py",
@@ -255,7 +268,7 @@
     },
     {
       "name": "send_emoji.py",
-      "sha256": "09c719bb748198235d7e93ce790143c544f4d744a9fb2f5b156eef6ce589c08f"
+      "sha256": "45a6dea84a9b9b345e8f81b622a439942e81ca2c060d6d61cc1aad08a1d6a689"
     },
     {
       "name": "show_emoji_list.py",
@@ -263,7 +276,11 @@
     },
     {
       "name": "utils.py",
-      "sha256": "2fc0fa62e5b4e0bdb148d8d968db5be3ccdfa4be3402225b530aedb8eec0504f"
+      "sha256": "95c5f1f997c89f068d14946fcc64565702801e3aa87505f309b971e4aea3dacd"
+    },
+    {
+      "name": "utils_model.py",
+      "sha256": "00aa229a1544a7bf7861f6feaf38a2727ea19ed63dddae02015fd52ec3d73e02"
     }
   ],
   "excluded_sensitive_or_runtime_data": [
@@ -277,7 +294,7 @@
   ],
   "files": {
     ".env.example": {
-      "sha256": "be3a72ef8987e4f72eed35330ae6cf9182c635de85d73768e4dbaea36b717055",
+      "sha256": "eb91270e403281a6d180f9870147b6f115fc3491c01342f1bca5a52ddb19d256",
       "size": 809
     },
     ".gitattributes": {
@@ -297,27 +314,27 @@
       "size": 4600
     },
     "CHANGELOG.md": {
-      "sha256": "5f8c031f6723d39e6ec3832a09f3b8864a4b5a7dc8993890c425a6e136096d7f",
-      "size": 2760
+      "sha256": "28f47bf29c125844bb8089e7ffb6bc176fb824ddd1d12b325ce26723beda2912",
+      "size": 3397
     },
     "LICENSE": {
       "sha256": "cd5c4838ffc620c6c6f0e37cb4201f0f5bb0a904099eb177b3d1bd5c196414bf",
       "size": 1078
     },
     "README.md": {
-      "sha256": "a349622c01d0b2e8aac75099d193e6ba1e36b4d7af1f0160737cf77cf0eb7704",
-      "size": 16099
+      "sha256": "84d6a0ad71ac955d2f719c12d353e752605821cf722780b8038a09237760db3c",
+      "size": 16220
     },
     "SECURITY.md": {
       "sha256": "b602101c76ae27e5a4394fad5bcb44eebf23d9ec77a48b5e98dcdb228c3c8913",
       "size": 3884
     },
     "THIRD_PARTY_NOTICES.md": {
-      "sha256": "02fa0870870bdac31a848be55702e7fe53071fcdd252f5779ec22078ef6ce35f",
-      "size": 3127
+      "sha256": "48655d0525387d7bbe36cf474c94fddf8fc3ad7eae9e10af6dc5a020a8910071",
+      "size": 3049
     },
     "VERSION": {
-      "sha256": "64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663",
+      "sha256": "10e2e117b01523891ca271a615ae36e9d5e52348fd7d642f66727602c1b8dcbe",
       "size": 6
     },
     "access-linux.sh": {
@@ -333,7 +350,7 @@
       "size": 2026
     },
     "compose.yaml": {
-      "sha256": "782d72cae6931117ef094cab366830328e609d42718c6c3a939bb4af5ed40850",
+      "sha256": "379c3c184c322ecf790ed810c658690f658c12cfacfb067443c4711ac6b63ed1",
       "size": 2975
     },
     "configure-linux.sh": {
@@ -353,44 +370,68 @@
       "size": 341
     },
     "image/Dockerfile": {
-      "sha256": "77e1e42e9876c0852a7a44bc2dbc3d50987d629b2e85474b2b6b87dbeab3d98d",
-      "size": 1731
+      "sha256": "ddff56f333101f9973b3e10a83c99d6fc2c5cdb8b57e260f783075ef9329afc3",
+      "size": 2165
     },
     "image/patches/chat_loop_service.py": {
-      "sha256": "7efdf141eea568a1d00a68be5350b2d0e964de274f275e70455f1547549e695f",
-      "size": 81283
+      "sha256": "e5fe307ea83e30acce2c029f359a42022dc4f954bd54f5d2ea5a595945781bed",
+      "size": 80302
     },
     "image/patches/compaction.py": {
-      "sha256": "c27493f82f6eecbf954e54604c82646b622b8ad2d6d81f9747088f36192b8718",
-      "size": 11297
+      "sha256": "901b9b19c5cb604ac23a543b8ee6413dde57388453dbdd39fe8d0a5869099ff7",
+      "size": 12265
+    },
+    "image/patches/component_query.py": {
+      "sha256": "1eb6d3b33afef5fb45e40542d5ca8057ec9f98ac800609ced08fea3885101078",
+      "size": 42687
     },
     "image/patches/dfy_continuity.py": {
       "sha256": "9303775c83659d1594087404e3b39834af89f6fc1f49dba4bbb85cb6d89156d8",
       "size": 4971
     },
+    "image/patches/dfy_reply_policy.py": {
+      "sha256": "5e77ede7ac6b06c00331d323d6104b9d5db8b3bceec30a1cd60082d035aa5f3f",
+      "size": 6285
+    },
+    "image/patches/dfy_visual_evidence.py": {
+      "sha256": "0b1e190b8781fb0048c3edaafec16f641cc6be5afd6ae8eb6490378c73bc900d",
+      "size": 7010
+    },
     "image/patches/emoji_manager.py": {
       "sha256": "5c92b6729255297d7a9104ef4839290566d6e7a682165222e9a90d1e5713ddb5",
       "size": 65407
     },
+    "image/patches/gemini_client.py": {
+      "sha256": "650eb92aded54caa21af58a082c2ad5d6dca52c38261a2d34fe9ba3b41ffa847",
+      "size": 63197
+    },
+    "image/patches/image_manager.py": {
+      "sha256": "485551a1be5cfde1f2c5aa2a986a9b39d067fb6e05dc6d63c16099c046b0ad9e",
+      "size": 22835
+    },
+    "image/patches/maisaka_chat.prompt": {
+      "sha256": "cb36f975e2235f54da878f8d5e98f124e871909aa824c16eab118d77a741f38d",
+      "size": 2844
+    },
     "image/patches/maisaka_generator_base.py": {
-      "sha256": "326db80501ca9816a963fe82b002b6e70bc122e4690fd9c89e61f1f4ac64e3db",
-      "size": 73106
+      "sha256": "c835f8912551c347b72e3c5540f8d8410d94d00c9411eade4e00e11762c4ae45",
+      "size": 73758
     },
     "image/patches/openai_client.py": {
       "sha256": "0ab5e2a70caa1475c330cf38462e921b265b2f14c6ccbe3fce46e38b10cf0300",
       "size": 91825
     },
     "image/patches/reasoning_engine.py": {
-      "sha256": "a69e2261128f61c3cedd8fd17945dd3adeeada7b817412bd499e6fdb3d6917ed",
-      "size": 111367
+      "sha256": "cae7ba74fd5409f5dde6b35ea2895f05680a973e765a6fe4d328d128a945b7a4",
+      "size": 112462
     },
     "image/patches/reliability.py": {
-      "sha256": "7abea816c5c1a2ebfc981414b80d388a9bd2b4dc09dcc8f686826ee0177f0ce9",
-      "size": 10440
+      "sha256": "857de64f32cdf7f639db048a923eb48d67fbe73d60812ea9c2d200b5f46dccc9",
+      "size": 13488
     },
     "image/patches/reply.py": {
-      "sha256": "e2bd46e05d33b2c5a447ec5a1f3146c45b3e6b4185bfa711b9d975edf5318925",
-      "size": 36052
+      "sha256": "24392d987ae3145ddd0a1b61083e0adcc6f5d6e6aa48e36fd4e92f57d962eca4",
+      "size": 37737
     },
     "image/patches/runtime.py": {
       "sha256": "2b922ff7461ec14fc8278c2c67ab59201b33b32e59e9e9ea3f6886ab5392c602",
@@ -401,16 +442,20 @@
       "size": 4748
     },
     "image/patches/send_emoji.py": {
-      "sha256": "09c719bb748198235d7e93ce790143c544f4d744a9fb2f5b156eef6ce589c08f",
-      "size": 23292
+      "sha256": "45a6dea84a9b9b345e8f81b622a439942e81ca2c060d6d61cc1aad08a1d6a689",
+      "size": 24646
     },
     "image/patches/show_emoji_list.py": {
       "sha256": "20638aa983cd996e287063227faab083cc8a2a5104d5bb1fef7ca4bc466e0c4f",
       "size": 3724
     },
     "image/patches/utils.py": {
-      "sha256": "2fc0fa62e5b4e0bdb148d8d968db5be3ccdfa4be3402225b530aedb8eec0504f",
-      "size": 37851
+      "sha256": "95c5f1f997c89f068d14946fcc64565702801e3aa87505f309b971e4aea3dacd",
+      "size": 38468
+    },
+    "image/patches/utils_model.py": {
+      "sha256": "00aa229a1544a7bf7861f6feaf38a2727ea19ed63dddae02015fd52ec3d73e02",
+      "size": 77615
     },
     "image/proxy-requirements.txt": {
       "sha256": "d800d5d68a28d7693457399d6c945978e2eceaea0f70191c08acfbd626161d68",
@@ -435,6 +480,806 @@
     "linux/qqbridge_linux.py": {
       "sha256": "9f74b0ae8213530ecb26e1679fc40d152a4ce34fd28a447ef402ce3bf7e9d2cf",
       "size": 52017
+    },
+    "optional/README.md": {
+      "sha256": "95bed6322da050b4aafc0e12cde578597a7222cd9c40cd3cc24c53d3f9861ab3",
+      "size": 3468
+    },
+    "optional/maintenance/qqbridge_recovery.py": {
+      "sha256": "7a85f79153d2b98d3512648183460974eb4426498116fd5924bbfd9ae6f4b263",
+      "size": 9617
+    },
+    "optional/napcat/Dockerfile": {
+      "sha256": "45b8c7631faea9cede944faae55a43e8b6e32ad9aefbfda134686f0904e38adf",
+      "size": 241
+    },
+    "optional/napcat/napcat-runtime/conout-wiJ7YKRd.js": {
+      "sha256": "4f1afebbc3a653f1d47bc787f37acc8b15d8d15a2e9bee7a4c3ba54344566564",
+      "size": 146
+    },
+    "optional/napcat/napcat-runtime/loadNapCat.js": {
+      "sha256": "3d272756b14175c1e603261da6d8180e69f3435cbbd73baaf0542ea52f12330f",
+      "size": 224
+    },
+    "optional/napcat/napcat-runtime/napcat.mjs": {
+      "sha256": "65665db67c604e8ac1f5ea52ec57597b340de3a9c5b1745fcc39d594bad6a085",
+      "size": 3135623
+    },
+    "optional/plugins/DeepSeek-V4-pro_life-behavior-reference/README.md": {
+      "sha256": "ece6fbb37f149e3b7cb0de03da0bf5fde04df79d787b4dafaa8335184dc9a5f5",
+      "size": 33855
+    },
+    "optional/plugins/DeepSeek-V4-pro_life-behavior-reference/_manifest.json": {
+      "sha256": "e44cbe18827cd1ee0860f1e8eaea108a7e88222ee2f9731f836c9e858c7591d5",
+      "size": 1216
+    },
+    "optional/plugins/DeepSeek-V4-pro_life-behavior-reference/plugin.py": {
+      "sha256": "44f55d42da98bf664b433dd27aa74533c7b4f6c6b465149336bfc25cca719d56",
+      "size": 144305
+    },
+    "optional/plugins/always-reply-private/CHANGELOG.qqbridge.md": {
+      "sha256": "4dbd93913e5157f8eda30a987acd6ee7a52ad12e2470a6be799c427ff1bb4882",
+      "size": 334
+    },
+    "optional/plugins/always-reply-private/README.md": {
+      "sha256": "9c7977d8816173656631431fc0a308a406382b004983da77696f1f57e1ce3a7f",
+      "size": 13921
+    },
+    "optional/plugins/always-reply-private/_manifest.json": {
+      "sha256": "2afb7f06b5d548d1603b559aa7f5fc12ee8edee98de0401a43ac019c30889214",
+      "size": 1122
+    },
+    "optional/plugins/always-reply-private/plugin.py": {
+      "sha256": "daced753a64cc22c9db8693b8de21450aa1270fb2a66847978cff45915933332",
+      "size": 12405
+    },
+    "optional/plugins/code-tasks/_manifest.json": {
+      "sha256": "b6a65e898d51e850c8da884a829ab7c0075ed7521ce2828095fdc5fd3a025b6c",
+      "size": 877
+    },
+    "optional/plugins/code-tasks/outbound_guard.py": {
+      "sha256": "be692a14c91b8b65146f20fc8335f5a3dc244a9f723626da27342493f4876ec3",
+      "size": 3798
+    },
+    "optional/plugins/code-tasks/plugin.py": {
+      "sha256": "62332fd4985e087a83f37d1c3bbf06271593744b49375c37e7f6ba24311c2e0d",
+      "size": 19997
+    },
+    "optional/plugins/code-tasks/task_core.py": {
+      "sha256": "068e292cd9733df59745975b6186e912f29e0c2373f8ce27caf46734c458da23",
+      "size": 7716
+    },
+    "optional/plugins/com_0-hz_impression-card/CHANGELOG.md": {
+      "sha256": "44f60756a117f9e05cfc4390059b966070d6fcaca347f24dcb8bfb4c8a59f0c7",
+      "size": 4679
+    },
+    "optional/plugins/com_0-hz_impression-card/LICENSE": {
+      "sha256": "d0b5a178e831b54428efbab3cf654d438547995d1c49539bca03b4cba5954a99",
+      "size": 1060
+    },
+    "optional/plugins/com_0-hz_impression-card/README.md": {
+      "sha256": "108c4ff970483a95643b2fb16bca7ba0177673c3493fc191465866fc2c29e74a",
+      "size": 12788
+    },
+    "optional/plugins/com_0-hz_impression-card/_manifest.json": {
+      "sha256": "066f7eedf63a5bda22bdeb6459dd1b9e847fc01a64506a03c7461fca94c008b1",
+      "size": 2311
+    },
+    "optional/plugins/com_0-hz_impression-card/assets/cute.html": {
+      "sha256": "7ebeff4b165ad43a3cc5f18875b22d2214812997defab387c635bd07ae130f9d",
+      "size": 5494
+    },
+    "optional/plugins/com_0-hz_impression-card/assets/holo.html": {
+      "sha256": "fab042933752024c362be7ae50b1e7b96272674c45b18fd80796ba9427715c27",
+      "size": 5783
+    },
+    "optional/plugins/com_0-hz_impression-card/assets/parchment.html": {
+      "sha256": "c0cf0ea04ff31148bbbf1cdb8e1080b1a50f7b9f2fa792b359e7691c904a82b7",
+      "size": 6211
+    },
+    "optional/plugins/com_0-hz_impression-card/config.default.toml": {
+      "sha256": "61eac8d2d46bece4c54db8801da4de2e8f54220c63cf9ab64b394481879b9ab8",
+      "size": 7940
+    },
+    "optional/plugins/com_0-hz_impression-card/docs/superpowers/plans/2026-08-13-impression-card-light-nudge-and-proactive.md": {
+      "sha256": "ad4edeb7f8359c64d16c18e5345b1af183f0edda28ed6a4d50c14c3275006aea",
+      "size": 52250
+    },
+    "optional/plugins/com_0-hz_impression-card/docs/superpowers/specs/2026-08-13-impression-card-light-nudge-and-proactive-design.md": {
+      "sha256": "254b7db2962c81370b03be16cf13891077f36799bc5cb86fa0414c6aad5efab3",
+      "size": 16381
+    },
+    "optional/plugins/com_0-hz_impression-card/plugin.py": {
+      "sha256": "786275c6660b276a6b30c446af7be55fcd3a5d76e86e5153e1680dfa2c430607",
+      "size": 185648
+    },
+    "optional/plugins/com_0-hz_impression-card/tests/smoke_test.py": {
+      "sha256": "433b8bfe97df8fec06bd903895ab393ba5d8fe1238f6544384fb3487aec5f8af",
+      "size": 50198
+    },
+    "optional/plugins/com_claw_pixiv-crawler/CHANGELOG.md": {
+      "sha256": "472df45837c540d7bcd4a841f7f4d284977281d25db3ec033d8fb2d845011975",
+      "size": 15123
+    },
+    "optional/plugins/com_claw_pixiv-crawler/LICENSE": {
+      "sha256": "f28d85e5ebedfea13ed44208771f7759360164784e234d1be6814f015c4e96d2",
+      "size": 1064
+    },
+    "optional/plugins/com_claw_pixiv-crawler/README.md": {
+      "sha256": "81cd2d8466cde2642ff5cce4f296b37d8a4660ab851c2f0d2b6f0283f4fc68c5",
+      "size": 6635
+    },
+    "optional/plugins/com_claw_pixiv-crawler/_manifest.json": {
+      "sha256": "0927dce8cf4b262f290fd8c064880df7ab4448c83d68b9a971a39a160167b24e",
+      "size": 1205
+    },
+    "optional/plugins/com_claw_pixiv-crawler/config.py": {
+      "sha256": "c9b18a62e8a582229875a4709012ab918ca51f2074056bc6da29613be6b0fc46",
+      "size": 33295
+    },
+    "optional/plugins/com_claw_pixiv-crawler/media_intent.py": {
+      "sha256": "35d9bf71ce10d73254c2c1eb7a4cd60a735aab63169c08c4e8349dd6ae643c49",
+      "size": 2893
+    },
+    "optional/plugins/com_claw_pixiv-crawler/plugin.py": {
+      "sha256": "042689ee10f21ff0030d7e10783a0566a68c85a246cd84285078ab0fafba43d0",
+      "size": 22229
+    },
+    "optional/plugins/com_claw_pixiv-crawler/random_request_guard.py": {
+      "sha256": "73918cc088afb0c63320d74771b3601c2ece89c030ea0a89238ecf5dac9917b4",
+      "size": 1673
+    },
+    "optional/plugins/github_beichen24a1_memewiki/LICENSE": {
+      "sha256": "26ed37842daedf1167b66b01d5d3e48f7e6fe07e56cffed765e4f908221fa803",
+      "size": 1160
+    },
+    "optional/plugins/github_beichen24a1_memewiki/README.md": {
+      "sha256": "2ec41371e1cf2bb6775188edf8510d8e712108a27f01c448d3b756089f9be3ee",
+      "size": 3531
+    },
+    "optional/plugins/github_beichen24a1_memewiki/_manifest.json": {
+      "sha256": "e2eee7f848ebc8b56510439b853a73175b87780c351bcd92f19ff764fc549932",
+      "size": 1054
+    },
+    "optional/plugins/github_beichen24a1_memewiki/plugin.py": {
+      "sha256": "64e1fd863e6be59266c3296a590a596c4028cd594c36a59c6ffb938da7fb5765",
+      "size": 6055
+    },
+    "optional/plugins/github_fabiocsa_read-gif/CHANGELOG.md": {
+      "sha256": "b617333ae581d25ff936e4c4cf7a20fd7cb169a547f21edf2ce46ed209748d5e",
+      "size": 1676
+    },
+    "optional/plugins/github_fabiocsa_read-gif/LICENSE": {
+      "sha256": "2bbfdbf7d53ba027e3198ae8108f2e864809053b799dc9e727a91db424b0a405",
+      "size": 1065
+    },
+    "optional/plugins/github_fabiocsa_read-gif/README.md": {
+      "sha256": "e2e897e909f7c74a56ca6490080a43deb9823e31345f9d9ed567383dc8dd13d3",
+      "size": 5743
+    },
+    "optional/plugins/github_fabiocsa_read-gif/_manifest.json": {
+      "sha256": "5ea2790bb003c8d54aeb05f26329bbdd332f95e628831a5ad1ed4c2cae753175",
+      "size": 1340
+    },
+    "optional/plugins/github_fabiocsa_read-gif/plugin.py": {
+      "sha256": "390acf3e55903d167d76352938ae159c9f29cd0acad4898ceee0fe53e4fbc9fc",
+      "size": 3756
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/__init__.py": {
+      "sha256": "30fe66fdc3d9dd264c7be1baa87bed6111a8c1118f411893b27e2007a3f8b246",
+      "size": 158
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/cache.py": {
+      "sha256": "b2c1427cda5b5b8a359bb0f5aaa4bd779c3e4ba8f468843a653517787b7df8be",
+      "size": 5349
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/config.py": {
+      "sha256": "627cf55a89cef7f45492d32cfa53fb455273525357affd4d082ff4923f61f684",
+      "size": 8139
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/frames.py": {
+      "sha256": "1f6007841cac0895cd836d2c0e83b8609b049b3b7f2c410209500b2a57890a30",
+      "size": 7411
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/pipeline.py": {
+      "sha256": "618d2cfc9f43efe7a7c731812d011849450e3c6808cfcec74408c80efb7e45b0",
+      "size": 20927
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/sheet.py": {
+      "sha256": "d81250ea72d7217103f96cdfbd8178c1e8414e7a9fb2c338752559151556946d",
+      "size": 6093
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/sniff.py": {
+      "sha256": "d15948f8a6ff48d04577909d5ab3a87dcf059f69a9116cc1c147098adf1b11e4",
+      "size": 2172
+    },
+    "optional/plugins/github_fabiocsa_read-gif/read_animation/vlm.py": {
+      "sha256": "4fd2c774e31a218113be01aa0a7913d88464605413945f6eb0b8e68f9e9b3031",
+      "size": 5691
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/__init__.py": {
+      "sha256": "0ff874b153b42f16e0628bf2ed875194883873896f84a9e0a8c5e983532cc04b",
+      "size": 43
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/fakes.py": {
+      "sha256": "eb633864df9fbb024606215a73fc090ea9cc6c12e724570bf533093024cd91ea",
+      "size": 1483
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/image_fixtures.py": {
+      "sha256": "07a4fcc932cc78e902a0211c22c335479a80c2882b4186724bbd77a33e22f5d6",
+      "size": 3836
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/temp_utils.py": {
+      "sha256": "8795b6c4b0b16a8e5ce656fa01e683a66744c1c85fe4a529085266fe0e7e9686",
+      "size": 1066
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/test_frames.py": {
+      "sha256": "2568bd0d21e830aa1dc0c8d6a7df45d3708fe1da11e551533b3b755449fec013",
+      "size": 4023
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/test_pipeline.py": {
+      "sha256": "99d39f293a3b822c994b0fb80eb43b3d6b71dff95326f85e460bcd1abe487ff0",
+      "size": 12126
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/test_plugin_contract.py": {
+      "sha256": "e9759559229c9ad83eba46ebea46da1c2938dc7176f05942d792620adc513a18",
+      "size": 5960
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/test_sheet.py": {
+      "sha256": "d50551be4902d488d2b30b53e4ad56b0fb5d3026c552b1b3f0aaf5ab58fed489",
+      "size": 4097
+    },
+    "optional/plugins/github_fabiocsa_read-gif/tests/test_sniff.py": {
+      "sha256": "a4bfbabdd85b613c241298790a3b58af29a3d612069fe98795d2fa7619780e3e",
+      "size": 1594
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/CHANGELOG.md": {
+      "sha256": "31926e3250fceea1d53ba14a9e4ba020c9ab9be1b193d231bd185a645c2436e5",
+      "size": 16061
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/CHANGELOG.qqbridge.md": {
+      "sha256": "484fd3a37f05e46f0de0516f2634ae0be9c4a9de5f89057d3833d4bc6111d39a",
+      "size": 358
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/LICENSE": {
+      "sha256": "2167f361e31f6c66de18bb4fee0ac209dcb13a2ffcfcc874f658849915ccc6ed",
+      "size": 1060
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/README.md": {
+      "sha256": "c50fb4a7daa108cf6f068c8e32520a515a9e783054bcbcde6b069bf94c10dc51",
+      "size": 34423
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/_manifest.json": {
+      "sha256": "5c7733c51588676057f03d7779cf8e5782b131732afa715d6bac71475669ba16",
+      "size": 1398
+    },
+    "optional/plugins/github_jiakeju_maibot-curator/plugin.py": {
+      "sha256": "2d6bf23e098d4ee522bc7177456734f90c732c504c44274230910cea6f74c411",
+      "size": 207095
+    },
+    "optional/plugins/hsd221_emoji-text-selector/CHANGELOG.qqbridge.md": {
+      "sha256": "7d5b5851d36ab00a85b49cca8cd408e839ce9979f34a050afe20112117474557",
+      "size": 432
+    },
+    "optional/plugins/hsd221_emoji-text-selector/README.md": {
+      "sha256": "9ebdfabde51cfc1cd95cfa6927624cc10ea5bcfcc9b97ec75144838a4377c6bf",
+      "size": 2651
+    },
+    "optional/plugins/hsd221_emoji-text-selector/_manifest.json": {
+      "sha256": "dcec817d53c341c6f3f6ddee72015319579b6a4a8679fbcb1db1cc81ece4b69c",
+      "size": 1163
+    },
+    "optional/plugins/hsd221_emoji-text-selector/plugin.py": {
+      "sha256": "c796764f575d793020e404aa415fee39ba351bf92785d7a8ce84d747f2d1ac8d",
+      "size": 49696
+    },
+    "optional/plugins/local_message-debounce-rebuild/LICENSE": {
+      "sha256": "70f8e402936bdeb1b409a16c8d556251b55a2035c6685201d374a81c96deb2ab",
+      "size": 1071
+    },
+    "optional/plugins/local_message-debounce-rebuild/README.md": {
+      "sha256": "f0db53b248a2e50c2edbf7564c9ab7a3567ff44e92a3de45100fa0f57178a8e0",
+      "size": 3280
+    },
+    "optional/plugins/local_message-debounce-rebuild/_manifest.json": {
+      "sha256": "fd80e879d602bc14b4bbe02d8e9ed9cc7bdbaa28fee9cd861a8e8c26cefd685b",
+      "size": 909
+    },
+    "optional/plugins/local_message-debounce-rebuild/config_models.py": {
+      "sha256": "e38fa09748dfdec5d49814afe6c89dfd1f6af0e8d323f13e6a021d3115becc7e",
+      "size": 3421
+    },
+    "optional/plugins/local_message-debounce-rebuild/plugin.py": {
+      "sha256": "0cd2ad8354fbdeb7ec2ff1c6aa37db89e92db2b98781475ccd6addb8ed716899",
+      "size": 12119
+    },
+    "optional/plugins/maibot-community_mai-life/CHANGELOG.md": {
+      "sha256": "4adfb41c17cdd3ef78d4c06f711fb9a2c23aad896788e89febbca25abbca6877",
+      "size": 87090
+    },
+    "optional/plugins/maibot-community_mai-life/LICENSE": {
+      "sha256": "91696435dc2c8cb4582133e7f1d5289c8e9358132f33195550b2a3c81891f1bf",
+      "size": 1063
+    },
+    "optional/plugins/maibot-community_mai-life/README.md": {
+      "sha256": "c8883d93a36c1c3c50a5d0df8e324074e677bc05f4d3959511f92c163c480fc3",
+      "size": 15183
+    },
+    "optional/plugins/maibot-community_mai-life/__init__.py": {
+      "sha256": "a684750d89d709cdabcd6a2a491af7c841932adf11c1ca4d8fd703e0abad01c7",
+      "size": 125
+    },
+    "optional/plugins/maibot-community_mai-life/_manifest.json": {
+      "sha256": "5bd2125612d41e504c72df452c2c0b23ebc076f0d1f855056d49aca2dadd89f5",
+      "size": 1500
+    },
+    "optional/plugins/maibot-community_mai-life/config.py": {
+      "sha256": "573e278cd3547605eaeb3fed12bb6f41aafb40401e7ee94e22cb5becb02b2f24",
+      "size": 92790
+    },
+    "optional/plugins/maibot-community_mai-life/core/__init__.py": {
+      "sha256": "c8c0e0e2bb97c845195f13342ad569ad0489e553aa6d11eca8fff0f44213e031",
+      "size": 64
+    },
+    "optional/plugins/maibot-community_mai-life/core/environment.py": {
+      "sha256": "0220399b6b25db8779203d92d2f5184b43f768d90febddd67a4abd3ba87f97c8",
+      "size": 16804
+    },
+    "optional/plugins/maibot-community_mai-life/core/llm_service.py": {
+      "sha256": "11fc0ca0351d3efb8bc5a29d0d989786ca0e228f60c773b354ddd117e8df01c7",
+      "size": 13772
+    },
+    "optional/plugins/maibot-community_mai-life/core/storage.py": {
+      "sha256": "12c37790b533133ef682892c26c9b1bc119d2adaaed038ad5a45e9b26bcc15a6",
+      "size": 154104
+    },
+    "optional/plugins/maibot-community_mai-life/creation/__init__.py": {
+      "sha256": "b7360fdfb16fa38c0953585112567b664a06ebd6d80b3f2e287b99902631a6cd",
+      "size": 265
+    },
+    "optional/plugins/maibot-community_mai-life/creation/bookshelf_service.py": {
+      "sha256": "098d4a778a22028cb6281bfee5be40502c01425acfd7627d6056a5bfcc40b883",
+      "size": 2620
+    },
+    "optional/plugins/maibot-community_mai-life/creation/creation_service.py": {
+      "sha256": "4fa4e0defdbabd1a3d136dda59e661de75abef09150473939c4f3a2bee44a685",
+      "size": 27259
+    },
+    "optional/plugins/maibot-community_mai-life/creation/inspiration_service.py": {
+      "sha256": "cddaa95adeb1d0b1a7c2493e38a3d5c555280319aee939c52ebb225daa81b433",
+      "size": 6674
+    },
+    "optional/plugins/maibot-community_mai-life/docs/_plan_schedule_provider.md": {
+      "sha256": "ebd425b84ef1d2effb3be6c94569c4e03f3b79765b26525cb45b425abb32f935",
+      "size": 9825
+    },
+    "optional/plugins/maibot-community_mai-life/docs/schedule-provider-api.md": {
+      "sha256": "f2466cdeb75613859607b565fa2e7d204f297cd76e655f3405311e9fc3678144",
+      "size": 9202
+    },
+    "optional/plugins/maibot-community_mai-life/findings.md": {
+      "sha256": "df077439a194b5a7ea2614ababdb96b6d590775f242382b8e609494c36ceb4ec",
+      "size": 655
+    },
+    "optional/plugins/maibot-community_mai-life/information/__init__.py": {
+      "sha256": "da81d0742ef798c9829e06bd1c2eea209448f87cd7eb33a9bb4397b4e8d65dd7",
+      "size": 58
+    },
+    "optional/plugins/maibot-community_mai-life/information/feed_parser.py": {
+      "sha256": "84006994d7941a6c74552dcc2e2a22840e4805a4730b7b52fafee623b91d38e1",
+      "size": 1398
+    },
+    "optional/plugins/maibot-community_mai-life/information/http_client.py": {
+      "sha256": "16c59742f7495a9aecd9b53d407448504cb58cc637708fab8432a011dfddf8ba",
+      "size": 12369
+    },
+    "optional/plugins/maibot-community_mai-life/information/information_service.py": {
+      "sha256": "9695012c0844486b46a1e23c16938d8262ecb290a0e64a46aff7297dde156e6a",
+      "size": 20720
+    },
+    "optional/plugins/maibot-community_mai-life/information/news_service.py": {
+      "sha256": "7094037fb8fd65d4ef04808c83e376851e0b926165fcca3b895cb7da99e97adb",
+      "size": 6352
+    },
+    "optional/plugins/maibot-community_mai-life/information/playwright_search.py": {
+      "sha256": "0f174f22246643958409d909d498dfecdf829267a30b51d5b086dc0fe8785d60",
+      "size": 16761
+    },
+    "optional/plugins/maibot-community_mai-life/information/search_models.py": {
+      "sha256": "eecbe761d3a43249a8ced0f693fd43150ac9c624164f15295e548e11e615ebce",
+      "size": 1077
+    },
+    "optional/plugins/maibot-community_mai-life/information/search_parsing.py": {
+      "sha256": "4318251b37e9d820c37c44141b9681d4ee01d2d694cb46e66bf0f4e6e4f3c0cc",
+      "size": 13798
+    },
+    "optional/plugins/maibot-community_mai-life/information/search_providers.py": {
+      "sha256": "d320a3567487deb75886e698e49ec5347ddfbe68c90a9e9deab716e8e091f43d",
+      "size": 7753
+    },
+    "optional/plugins/maibot-community_mai-life/information/search_service.py": {
+      "sha256": "2f2da1ca0c9a081d3815dcfebfd785301c8cc14b0e68c47bd7ef3e9c942e0b05",
+      "size": 25633
+    },
+    "optional/plugins/maibot-community_mai-life/life/__init__.py": {
+      "sha256": "06d0b6ac04d4e492575120c927bb46cd92ff37d9acf1c9cb592601a25741a841",
+      "size": 64
+    },
+    "optional/plugins/maibot-community_mai-life/life/bedtime.py": {
+      "sha256": "0958d3ee736fd62e6fb680318f85ca3be285ff11731342f0d1880961fa5725bd",
+      "size": 8254
+    },
+    "optional/plugins/maibot-community_mai-life/life/continuity.py": {
+      "sha256": "dbac2772ce4ac43468bd71c3d920c6061583702a36a8584e3a9cb544eaf16b22",
+      "size": 2417
+    },
+    "optional/plugins/maibot-community_mai-life/life/life_state.py": {
+      "sha256": "780409c1b0d3c218358a9fd30190c5a0f44c38d6e50bdccd2bb523bce36929f4",
+      "size": 18824
+    },
+    "optional/plugins/maibot-community_mai-life/life/memory_service.py": {
+      "sha256": "f1b0740c46677555f4b7b6f131cf6f6765da1fb86e61d52bd369fa2207f006f0",
+      "size": 16932
+    },
+    "optional/plugins/maibot-community_mai-life/life/proactive.py": {
+      "sha256": "cf579ed7278a666e2235c29d87a01183e6ad140f552185bf77f04323a6bdd7e9",
+      "size": 8866
+    },
+    "optional/plugins/maibot-community_mai-life/life/rest_gate.py": {
+      "sha256": "dd1226a97ba410e4dc3194aa1c2e9cc243c733ff232102fa698ac2e045dbec8a",
+      "size": 13458
+    },
+    "optional/plugins/maibot-community_mai-life/life/schedule_service.py": {
+      "sha256": "9c4d01a832f17c26efd346fdcd7bd6ab8bda9af208ab71764780c952742fe89b",
+      "size": 24916
+    },
+    "optional/plugins/maibot-community_mai-life/mai_template.json": {
+      "sha256": "3477f947d3b24c735c7962e5fa44ab3afd5d5960ba1c48a909a9c57c8203c30c",
+      "size": 2467
+    },
+    "optional/plugins/maibot-community_mai-life/management/__init__.py": {
+      "sha256": "77442ddce1849c0eea6c42b3cb6338c97f94e127e7d4da6b6b477361d6427499",
+      "size": 98
+    },
+    "optional/plugins/maibot-community_mai-life/management/admin_service.py": {
+      "sha256": "fd8f32afa4363aa51db4b5f8e5c2b475e35b451b1f58c852314b97500184cb9c",
+      "size": 13122
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/__init__.py": {
+      "sha256": "f3055707fa8bc8b6fa38ab343ca7ca9a11e08c6716dde1e103566a574a0e9a62",
+      "size": 61
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/adapter_compat.py": {
+      "sha256": "7da1f1164bf9bfce5ec620fcbfc1e791d258eda8403772ef15857edd595450f4",
+      "size": 6636
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/command_catalog.py": {
+      "sha256": "ee034b8d2b847d91ce85e5941f91bb8f4db5e9848b3fa1cef5063e7b513d31a6",
+      "size": 2153
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/command_reply.py": {
+      "sha256": "73aa67848ef2c78a2d5a69b3369b1c72eac672878f548d34679f96cd4f295563",
+      "size": 6460
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/message_pipeline.py": {
+      "sha256": "9f18d86377372fd0e353ea0df23c4bc00e71ac7274b25975f06a428c66c9fc65",
+      "size": 21027
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/prompt_builder.py": {
+      "sha256": "890511228786481d8c69251e6ccb6014135045c382282d2eec4e507aae2dfc7c",
+      "size": 15294
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/recall_service.py": {
+      "sha256": "03d5a29803c4e97e7ff741bbc882421abbec5ae3e161e1950216f9ce17a1adaf",
+      "size": 14319
+    },
+    "optional/plugins/maibot-community_mai-life/messaging/task_context.py": {
+      "sha256": "dfccb6de9c4911e28085c6325cb559a1e4f28cdcb36d5df556caf148fc74eb39",
+      "size": 14325
+    },
+    "optional/plugins/maibot-community_mai-life/plugin.py": {
+      "sha256": "73a18a2df973d02cd8d204c0c4374452eb28afb6e144f8a24202b687f56a6289",
+      "size": 205854
+    },
+    "optional/plugins/maibot-community_mai-life/requirements.txt": {
+      "sha256": "78630f4bccbb641b33e31deaa2342440539151e4eadeda02084ef13c57cd702c",
+      "size": 314
+    },
+    "optional/plugins/maibot-community_mai-life/social/__init__.py": {
+      "sha256": "4b071d9a28d9dfce7d150e538e8239f22a3f0aabc2e323e39b7553c88a15d10b",
+      "size": 183
+    },
+    "optional/plugins/maibot-community_mai-life/social/group_observer.py": {
+      "sha256": "7e82d1586d6ac179fe2c26d006f0d975852b7067dfc9a1e06c48470846a8e9a4",
+      "size": 16049
+    },
+    "optional/plugins/maibot-community_mai-life/social/relay_service.py": {
+      "sha256": "cd79abcef0945ae7751d9301b5954b502ab0453a98a7cbb6b52e342ba9725110",
+      "size": 10898
+    },
+    "optional/plugins/maibot-community_mai-life/tests/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    "optional/plugins/maibot-community_mai-life/tests/fixtures/bing_search.html": {
+      "sha256": "02718137a5efb68de526db2de5eeabebef0a42ab83ecb32628831aa3f4c7563a",
+      "size": 915
+    },
+    "optional/plugins/maibot-community_mai-life/tests/fixtures/duckduckgo_search.html": {
+      "sha256": "36bd559661a1dc25eb9f2241c15d42a554f60a36220cb10ef00f9ec5c5010dec",
+      "size": 757
+    },
+    "optional/plugins/maibot-community_mai-life/tests/support.py": {
+      "sha256": "b8d70d4170456ffae9203b77809e6bcc026c96b7776a5690b1624e545cea38c9",
+      "size": 7929
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_command_menu.py": {
+      "sha256": "1e52950aa84627328a12b58acd05f5d0fb1686ffecc4e4e5f849100c5ce4ee4b",
+      "size": 11002
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_contract.py": {
+      "sha256": "ca585196cdbb3b42d048693e988ee0e7e64669f2b5f5709bf5101240632d5ffa",
+      "size": 41034
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_core.py": {
+      "sha256": "3ee2c287a46912b6da4099f68790afda38548a132bfb56a952cfdf8febb57440",
+      "size": 74514
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_creation.py": {
+      "sha256": "02cf64e12f63b38b2ecbbf52b8983e65c7a8ad7e7899036fbfcaac634cade9c9",
+      "size": 37539
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_fixes.py": {
+      "sha256": "1d0732387953e25ac7ee19a67e5cc3cde8b85385c00bc3a8eff485da46bb0d5a",
+      "size": 323183
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_information.py": {
+      "sha256": "e2475e4aef824b5f2d17873034161843329f813ebfa4a03c8e874898997ea4ae",
+      "size": 57729
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_life_memory.py": {
+      "sha256": "91fb95344df26ff8fbdb8f500e0036aa79ae197625d261043413e7030ad1b0a0",
+      "size": 7467
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_management.py": {
+      "sha256": "85c0fb0fc778cb18be796df578ea11e278b9c69cbbfd05b376ad1ab3ee0000f4",
+      "size": 7133
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_message_experience.py": {
+      "sha256": "5c54b1ea6932c47e6216e727bdeac7153027c9debe3affb575473919d06ac58b",
+      "size": 27233
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_playwright_search.py": {
+      "sha256": "f7ef5a58d868981b1ca529437bbd0a93714141bc979398653352ecdf4b99d0de",
+      "size": 33321
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_recall.py": {
+      "sha256": "5bc1194d83a6711e01c81531bd74353f34e3be4c4b9f60759b5427d9146448d7",
+      "size": 19518
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_social.py": {
+      "sha256": "7f3c6dc6c8f1cff4c0f15378716e40759f03c7d2e995ddbf031bf0969ed00dab",
+      "size": 11424
+    },
+    "optional/plugins/maibot-community_mai-life/tests/test_task_context.py": {
+      "sha256": "4069880891de3c49b8c7a0e0a7b968494f4520af3505552ea5bdaec6684c8229",
+      "size": 22991
+    },
+    "optional/plugins/maibot-community_mai-life/tools/state_stats.py": {
+      "sha256": "53c892f5c24df8cd9c5da2d353ec690ba55a9709b9aa11b5c920ac26829ba0f6",
+      "size": 6648
+    },
+    "optional/plugins/maibot-community_mai-life/webui.json": {
+      "sha256": "2c7324a6b648c8807696e811199426fbf7fbb9b664b606f0d01dee8005a37585",
+      "size": 116925
+    },
+    "optional/plugins/vertex-media/_manifest.json": {
+      "sha256": "540551c31dd4737fc135d4dce77fd0a11075659edc43b8f1be6d0c464e5e964a",
+      "size": 1275
+    },
+    "optional/plugins/vertex-media/completion_notifications.py": {
+      "sha256": "5dd92f37b572d41ad6e84cf0af2c093385d08a9e44f938a2377a7d3b76c0fe3a",
+      "size": 5077
+    },
+    "optional/plugins/vertex-media/delivery_evidence.py": {
+      "sha256": "e6510af46c0fd7310ca1b3590a82c59e5cfe0ff7748961c464125ada539d40c7",
+      "size": 4862
+    },
+    "optional/plugins/vertex-media/delivery_history.py": {
+      "sha256": "02a12fa99b72b82e8f1abdecb43be0781a3f7aa5b2cdd957b0d7956138e3c198",
+      "size": 156
+    },
+    "optional/plugins/vertex-media/image_delivery.py": {
+      "sha256": "6036451eb1940d667f25bc52d95b04d3a42a550a527f265690ee06eac01b5001",
+      "size": 9272
+    },
+    "optional/plugins/vertex-media/media_intent.py": {
+      "sha256": "d6df27bf76da9d313da7fb81003e5f80ba4072484315cf8ce82699075c0900e1",
+      "size": 2957
+    },
+    "optional/plugins/vertex-media/plugin.py": {
+      "sha256": "70a1d73d052623b770b7804c1445d2eea1828f41e497d1daae4b6b398794116e",
+      "size": 21482
+    },
+    "optional/plugins/vertex-media/test_image_recovery.py": {
+      "sha256": "3c70082e2fd08e5d921c0e7317ae61adddd88581f00d4e3db2cd1ea2aebea3df",
+      "size": 7298
+    },
+    "optional/plugins/vertex-media/test_sdk_contract.py": {
+      "sha256": "82fe50549fd6e48b18fb1910c72344d3c9b0c912436e767f9133a1ec5efb3283",
+      "size": 2068
+    },
+    "optional/plugins/vertex-media/test_vertex_media.py": {
+      "sha256": "6db880138bc1e06ec5ddf5d7f0b03aa3353e213a8a1b29198e3d8f8980cfe7d5",
+      "size": 25822
+    },
+    "optional/plugins/vertex-media/vertex_media_client.py": {
+      "sha256": "451acf892b745f1f77705d314c102830a320fa961d0f30d25d8a17beec0bce97",
+      "size": 8188
+    },
+    "optional/plugins/vertex-media/vertex_media_core.py": {
+      "sha256": "d70a3f695a9160ff66b244cefdfd6ba0af2a535bd0abb559f872c15ef781056c",
+      "size": 22087
+    },
+    "optional/plugins/whitefox_friend-request-handler/CHANGELOG.qqbridge.md": {
+      "sha256": "e10010247cb2b582906e86ed08917bb481cf7893c4500e96eeb5d66d9921f22d",
+      "size": 195
+    },
+    "optional/plugins/whitefox_friend-request-handler/LICENSE": {
+      "sha256": "ee314873d064e17bed1da0e2223390e82cbb307abf01de81c032bd5177814d5d",
+      "size": 1063
+    },
+    "optional/plugins/whitefox_friend-request-handler/README.md": {
+      "sha256": "9ffaaec2dd708d0a6102d7232dc2452fc7837df731382a4eee444b397df5efe2",
+      "size": 6424
+    },
+    "optional/plugins/whitefox_friend-request-handler/__init__.py": {
+      "sha256": "60b70d0c4206c6ae370780973c1c051bb53a91205f6898d32b2c33cea786864a",
+      "size": 34
+    },
+    "optional/plugins/whitefox_friend-request-handler/_manifest.json": {
+      "sha256": "1ab192a1cd1b47f69ea84a038e911072ba5280bad48457d16c7be53f1174da85",
+      "size": 1141
+    },
+    "optional/plugins/whitefox_friend-request-handler/assets/icon.svg": {
+      "sha256": "403da07dfe18b17ea5cc7ccaf5d5efdd9c886a620f57dc185ade37a6ba387080",
+      "size": 548
+    },
+    "optional/plugins/whitefox_friend-request-handler/config.py": {
+      "sha256": "eaa2275201c1e13e6e0997831468faf081f343e2565ef2fa36e825e3d4bc21bd",
+      "size": 5352
+    },
+    "optional/plugins/whitefox_friend-request-handler/handlers.py": {
+      "sha256": "244e4475338007c8ee3ebfb7327cd8533f240cefdcbe5cb07aad142c1d82c550",
+      "size": 10854
+    },
+    "optional/plugins/whitefox_friend-request-handler/plugin.py": {
+      "sha256": "987091598058cd77964214f5e57de536fb97175aeedfd1e9694a29ff939994bb",
+      "size": 14711
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/.gitignore": {
+      "sha256": "87eb66ddc4a12e330ac5227edc1099229f502aae72f2a02a563c057baafc5267",
+      "size": 378
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/LICENSE": {
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "size": 34523
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/README.md": {
+      "sha256": "c473bad1195b5b0b06bffc740e17a92afa695b27275100b6eea7b1c08f199bb8",
+      "size": 12489
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/_manifest.json": {
+      "sha256": "c8e0c54963e978c807c473e30aea6f69abb3a42e12caf8b2c8d6b0005b00635a",
+      "size": 1331
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/assets/test.wav": {
+      "sha256": "6258894ff13d2f462bb2abaa6b57f514fde1517f6888d2e98eb3e7f742140098",
+      "size": 889100
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/__init__.py": {
+      "sha256": "a31b095c4d3a9ef0031bff4efcecf518b32aeb08fc38fdabd15597c62fa50a7a",
+      "size": 1013
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/ai_voice.py": {
+      "sha256": "c4daf062c1fb4b60caf62ab0e4ec2c1051e0a7841e107a0a91531fb42a672829",
+      "size": 4242
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/base.py": {
+      "sha256": "86ff90abe85f07b9ad0cc1d99f6f2a9e2a289eff83b304e9140fe46c1257981c",
+      "size": 7667
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/cosyvoice.py": {
+      "sha256": "2a404150867bed1f1ee01d57cbf53a618f41401bf9e6445a0eee77e0a024a9d6",
+      "size": 12510
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/doubao.py": {
+      "sha256": "76bba3f79db4851968409f2203d3f02b59c06e52a46565b246652fbe3786b97f",
+      "size": 11344
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/doubao_stream_parser.py": {
+      "sha256": "94ef268f9dbd2bfe9b0b8ea55d3d92b1c181b01fbf553fc44fca38e2e27ce99f",
+      "size": 18028
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/gpt_sovits.py": {
+      "sha256": "7b864bf9800c1d05a9f48916171ee62e00244504d2328708c3a704a7e6528420",
+      "size": 9530
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/gsv2p.py": {
+      "sha256": "860505eb863f02c26a4e995377be5c40bc53b4651e690b9c385b6bae7d8e6caf",
+      "size": 7039
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/mimo.py": {
+      "sha256": "642844c537d3c190ca946e463a3d299455e68a6a0ea4c3a4410c62033f7be07a",
+      "size": 8249
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/backends/minimax.py": {
+      "sha256": "9d5d4425a287222ef6d158d035f2211af75e86b8587b9ae99b4f3c970b5f6be0",
+      "size": 11771
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/config_keys.py": {
+      "sha256": "e4c465de98efe13114d9c4e316266f20c4deffd8cd4cfbde15b681d8d4f80418",
+      "size": 3933
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/plugin.py": {
+      "sha256": "5954ff5ff0ffdf799b6de822a42db91f304dcd17ae05a942bc3c2531b3f07289",
+      "size": 50233
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/utils/__init__.py": {
+      "sha256": "543283087bc0cfd16725da1940443a3237e263de2a0ba25598b5e000925b3f45",
+      "size": 238
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/utils/file.py": {
+      "sha256": "73f506e0799685ee174f80ce10b67f405b959f1d6214dfdfaecef248cb95aba5",
+      "size": 8241
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/utils/session.py": {
+      "sha256": "837b4bde19262dcd35d09a23382a58e7e86ed4e9b0a1d2a857ca9e4b14c892e5",
+      "size": 5250
+    },
+    "optional/plugins/xuqian13_tts_voice_plugin/utils/text.py": {
+      "sha256": "33a8abab985fc38914cb54e99a6bdab83ad373d57a67e0dad7205968f7059b8b",
+      "size": 4892
+    },
+    "optional/task-runtime/README.md": {
+      "sha256": "fa4a1fb6929791cb72fcd331c29ef979577b9413c68271340d918c1f1b58e39f",
+      "size": 1910
+    },
+    "optional/task-runtime/Worker.Dockerfile": {
+      "sha256": "e9c6813a3c225b19d90e89d636dd527a089401530ac448424096cdf894a70f43",
+      "size": 268
+    },
+    "optional/task-runtime/launch-codex.sh": {
+      "sha256": "832f9cb96128d7fffe77509eadfed8336c4a0d54c7cff79e739d5682e0ff06ba",
+      "size": 565
+    },
+    "optional/task-runtime/outbound_guard.py": {
+      "sha256": "be692a14c91b8b65146f20fc8335f5a3dc244a9f723626da27342493f4876ec3",
+      "size": 3798
+    },
+    "optional/task-runtime/requirements.txt": {
+      "sha256": "ddc896c11e49401021bd00bf7c51a5a3b216d6eb1563ec9b9e8f8f3f44b025ee",
+      "size": 181
+    },
+    "optional/task-runtime/run_task.py": {
+      "sha256": "f6f6ccd8c7b3532e9d2273929a5a3a43bbfddb846939aaf12d58f97d93c9df1b",
+      "size": 4373
+    },
+    "optional/task-runtime/task_broker.py": {
+      "sha256": "fc692079c8eadd6fb7e4218ba4eaf92d1fd96b335e36bb9d85f1ee29150f4aeb",
+      "size": 9434
+    },
+    "optional/task-runtime/task_core.py": {
+      "sha256": "068e292cd9733df59745975b6186e912f29e0c2373f8ce27caf46734c458da23",
+      "size": 7716
+    },
+    "optional/task-runtime/test_task_channel.py": {
+      "sha256": "27d1adf900cb76b9aeefffed1e1b9e5b017c172f49d3a7fb45c35feca2812d46",
+      "size": 12108
+    },
+    "optional/task-runtime/vertex_responses_gateway.py": {
+      "sha256": "78d98b51e9400d23aedca4586665d16768f47272a02b3193d226dc3c2a1cddf3",
+      "size": 14163
     },
     "payload/config/adapter_policy.toml.template": {
       "sha256": "c9ea524622fc0b79cf5674643c7115cbc5a659998b5cde71817d49901c25a3ff",
@@ -4273,16 +5118,16 @@
       "size": 160
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/CHANGELOG.md": {
-      "sha256": "e2cf7ff2640f19db65fbc26b42c9a867dde142bebc115a3df089025d95a16f94",
-      "size": 7738
+      "sha256": "0482227e41ab3531235376a15cf0278b44677244e8516dd0beafa3f5bc423c70",
+      "size": 8071
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/README.md": {
       "sha256": "fac4fb004144847ca8774b5a78a07fb92d88270c09aa263eda3495fa589b560c",
       "size": 3716
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/_manifest.json": {
-      "sha256": "b7f7bfc963532e874d1b16d537f58eab4b202d4e32bd633890c572e5a390b910",
-      "size": 1357
+      "sha256": "97af0a93fb08200125eeff36462f28fa91f6a0a8e850287e08147bf0607cc98d",
+      "size": 1410
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/apis/__init__.py": {
       "sha256": "ecd886b0495390e720ce33ccfa9c71b2fa7c2fe0401eb5dd80df19da6cbd8575",
@@ -4337,8 +5182,8 @@
       "size": 21747
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/codecs/inbound/message_codec.py": {
-      "sha256": "3c3fc24d0f53069f196246228fe14b7a315f93908f77605815d7f3463ca92224",
-      "size": 38293
+      "sha256": "55e978dadc7047cb7c3bbe48fe4fffa326262bf008d50c6fb46caad6886303a8",
+      "size": 39725
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/codecs/inbound/text.py": {
       "sha256": "4ebdb64549775bf9887992c5ef6cf310ff586332e7007bf68716891cd8ef9c75",
@@ -4384,6 +5229,10 @@
       "sha256": "f4284c9f473f2c9dd7a01f8e02fb35b82040908eeba3368bdc9902bab38dd034",
       "size": 21045
     },
+    "payload/plugins/MaiBot-SnowLuma-Adapter/codecs/outbound/temp_session.py": {
+      "sha256": "2e516f18a83e672a64dbbf01fda79699aecbecbd575f64ed59b095e64cea2c08",
+      "size": 1801
+    },
     "payload/plugins/MaiBot-SnowLuma-Adapter/config.py": {
       "sha256": "9e1de40441b9219f7554f474b5d09df547d81eed8c637fd5034f58d7218cc3d6",
       "size": 47826
@@ -4409,8 +5258,8 @@
       "size": 5199
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/plugin.py": {
-      "sha256": "613bfa0f9b46924a07b8b1d3821373f7563ff0902d1c77c56070b9969056250a",
-      "size": 48039
+      "sha256": "fa4d7122f12a18a8cc794183e9bc8cf9c6c5f93b7928a19492ac673e39ae8333",
+      "size": 53303
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/profile.py": {
       "sha256": "a8358b161c09133c71100bb2e2e7c51966620ae56874c19680a6d929c015b76b",
@@ -4437,12 +5286,12 @@
       "size": 1416
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/runtime/router.py": {
-      "sha256": "b7c31b3d6c00be9195cb81815f7fa27937da39fd9093f9ecb566e580db4742e8",
-      "size": 14382
+      "sha256": "5bb3c3f8e8bde68c783291eab9815a284c5b4c4c841e6fb4de3d6c2bfa70c88f",
+      "size": 16848
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/runtime_state.py": {
-      "sha256": "bd5f39905a89859e1fc84f8b1098a4d16981b38649a377026df9ff33b087c3d8",
-      "size": 4312
+      "sha256": "2487558b1573600dc1450942a480b5f3c52d919b9148663aeffc26b50cf11d5f",
+      "size": 5025
     },
     "payload/plugins/MaiBot-SnowLuma-Adapter/services/__init__.py": {
       "sha256": "92784d91a46422228d49873d87f9556557e56dc115c793208d83397aceb9ffcc",
@@ -4725,8 +5574,8 @@
       "size": 3473
     },
     "payload/plugins/deepseek-v4-pro_private-humanizer/plugin.py": {
-      "sha256": "828907ca9e5656c507e38b6ebd73e65998dabc4855b30798c0d7c360ceedff8d",
-      "size": 27100
+      "sha256": "a82f38fe5d83193eef201dd4acdaf51ad1fb7613100710b13c7db48017b88340",
+      "size": 27097
     },
     "payload/plugins/deepseek-v4-pro_private-humanizer/private_humanizer/__init__.py": {
       "sha256": "ea9ac33d42093b309485fc9f5895a23d7dfa06291f39ad393c7e8f3223dc5b5d",
@@ -4777,32 +5626,44 @@
       "size": 32292
     },
     "payload/plugins/gemini_web_search/CHANGELOG.md": {
-      "sha256": "37405389a9a3934a30668cdcc9c48c29d76ea577f335e0b70db3cd2291aaa139",
-      "size": 568
+      "sha256": "41607fb922f3f23143de6a0b7805c7edd453af48ca99cfddb6373a0142cd085f",
+      "size": 998
     },
     "payload/plugins/gemini_web_search/README.md": {
-      "sha256": "5ce9c64a3acfb3b5983ae2bf4a896073ba681b119d70cf9379f04a064cc0f559",
-      "size": 885
+      "sha256": "7f99c411bb4f24ebbf9ca440d00a19f38904cc2286236a58e42369a62d21c99b",
+      "size": 7865
     },
     "payload/plugins/gemini_web_search/_manifest.json": {
-      "sha256": "992fa6df0b9e11274fa1552674f29f0bfdf8fbc0daa4960d7373251da5e450c3",
-      "size": 1135
+      "sha256": "e8b5b6ad36eb37e0eeb45601b874c836228a7f474b0660a58028b245958c5a81",
+      "size": 1171
     },
     "payload/plugins/gemini_web_search/config.toml": {
       "sha256": "9b10fd8d37852e5d8e5d0dc3c37a95944ffc3de054572c275a312ce0581bfda6",
       "size": 406
     },
+    "payload/plugins/gemini_web_search/deepseek_search_client.py": {
+      "sha256": "90877f885b1336cbb9e2a4a48eab3e8e375aea5721dc5511cfec3363474ca7ec",
+      "size": 4808
+    },
     "payload/plugins/gemini_web_search/fetch_client.py": {
-      "sha256": "200b626f3a6b6e2049904e3908f73f092afa0a24f3e6e19ec1784f4294ef07be",
-      "size": 8793
+      "sha256": "2e9e38781824b3c26b0fc44a6321e303017e734a6fc733091f2f30fd9103bad9",
+      "size": 8932
     },
     "payload/plugins/gemini_web_search/gemini_client.py": {
-      "sha256": "c3c7ce5d95251af94c94e2d47f8781ecdfa5e578c6a45448ffc0697834acf141",
-      "size": 5908
+      "sha256": "7febdb3b17dd76ed91a6a000fe47f8f847e73ef994c342235a15aec9f8f54b5c",
+      "size": 6429
     },
     "payload/plugins/gemini_web_search/plugin.py": {
-      "sha256": "06bc9666c29937b3b20c059409d4b478f2f6f25c53fb93529cd28d2ba458e376",
-      "size": 13647
+      "sha256": "cd2b45c298ff36003e20169ee9c6b46c4cf2d276831109fe4cc5c06de7f87804",
+      "size": 17000
+    },
+    "payload/plugins/gemini_web_search/vertex_search_client.py": {
+      "sha256": "a8b7ea9455f1587b7f14a475583c4a0dd5c560bb6b711a53ae42361576256cd9",
+      "size": 11497
+    },
+    "payload/plugins/gemini_web_search/vertex_search_privacy.py": {
+      "sha256": "6da0450e11138d25683e2d068b49e00550da4076166c3ecc204948cb4a52b292",
+      "size": 2686
     },
     "payload/plugins/github_erhan111119_mai-repost-shit/.gitignore": {
       "sha256": "da24ad48d2933d0516e977a9be2262b2bed3a88147039f9151a696ead6a993ee",
@@ -4976,34 +5837,6 @@
       "sha256": "9fbb3e85475a516c963453bd5f89931708fae8222d54dd97a90c88872e12368a",
       "size": 24716
     },
-    "payload/plugins/maibot-moepix/LICENSE": {
-      "sha256": "f59a72a77bb1026b58a25af8cae118357ff5519cdcc851a261773a83de9d7b5d",
-      "size": 1180
-    },
-    "payload/plugins/maibot-moepix/README.md": {
-      "sha256": "c9f93ee92890cb14f94b3fe87b32042e7c2cf9e774b864a06c40ed98dce8e05d",
-      "size": 7013
-    },
-    "payload/plugins/maibot-moepix/_locales/zh-CN.json": {
-      "sha256": "711cd8e2df315ba72515ff4c8d8f5132ad3c9a73765653bcc8121a4ceee04a64",
-      "size": 1696
-    },
-    "payload/plugins/maibot-moepix/_manifest.json": {
-      "sha256": "d6f98d0c388b73f104d2bacf2e3f36343ec116e9ad7019e1f8948e1b4df8bb95",
-      "size": 1017
-    },
-    "payload/plugins/maibot-moepix/config.example.toml": {
-      "sha256": "59843157037651da4c21aa6a293c1e378cd0ce1ad593b386cf5db69116c16882",
-      "size": 2955
-    },
-    "payload/plugins/maibot-moepix/config.toml": {
-      "sha256": "64fb3acadae23d4c763f5531912fec85c162160fdf29a25f13bf3db94ff1eb52",
-      "size": 309
-    },
-    "payload/plugins/maibot-moepix/plugin.py": {
-      "sha256": "d7bdbd984deef8ccfd5a012bde719a0120b7c23aaddb76b8546abfa69c95f9bf",
-      "size": 35827
-    },
     "payload/plugins/mizuku003_tieba-share/.gitignore": {
       "sha256": "a7af2d7679d90650d73d8c6e099f32cd2c5578ce7063e7be900f05012870aae6",
       "size": 44
@@ -5089,7 +5922,7 @@
       "size": 67
     },
     "payload/plugins/persona-manager/manager.html": {
-      "sha256": "270044b5e18c2194c5af4099749d1342bfedfbb8af7ed33a7e7a42f5305abc28",
+      "sha256": "c5a9afde5a78d6ac32c374e2b646a1075ab05713a807a7868a8403234e3f9918",
       "size": 17485
     },
     "payload/plugins/persona-manager/plugin.py": {
@@ -5101,7 +5934,7 @@
       "size": 73369
     },
     "payload/plugins/persona-manager/store.py": {
-      "sha256": "b2bd1c2ffe90e4fb5706564835790af37aca2086d53d359477c33cc506e8639f",
+      "sha256": "fb1d62119a0cfba1c3ec4465e6e9689be28981b32b1a183a9e54eae92986081b",
       "size": 8035
     },
     "payload/plugins/persona-manager/webui.json": {
@@ -5325,8 +6158,8 @@
       "size": 8903
     },
     "plugin-metadata.json": {
-      "sha256": "aa415c13b39e1d01f84deaebe945d577a9b7a4441afc6dc3066f4bcc88dbdf77",
-      "size": 7774
+      "sha256": "7fc5ee34d2cad6ca89efd93b87a3347f07468cb4457fc2c2ae9566293ed32957",
+      "size": 7389
     },
     "qqbridge-lib.ps1": {
       "sha256": "82b42d7ecde8933cfdd9fb1cf13806226062bc80b42014a1b2567b04d9193026",
@@ -5353,8 +6186,8 @@
       "size": 6420
     },
     "tools/release.py": {
-      "sha256": "4ec25b74f5b10e3d7d9d8bf617dcb646dc619251e6516cdde5b788c7afe5477f",
-      "size": 3751
+      "sha256": "582084f634cd9ac6a0a4f89cdc0eb1db0af87831e6929a5086926ce2372f0c04",
+      "size": 3768
     },
     "upgrade-linux.sh": {
       "sha256": "707b15bd21528f7fc4d029ff02606bda4f88b41cb25e20cd2a67b8de28b8430d",
@@ -5401,8 +6234,8 @@
       "size": 4975
     },
     "wsl/package_verify.py": {
-      "sha256": "deb0200040fe6726149eb51b843de21aa58d5c06ef7db235895d53314669662e",
-      "size": 3739
+      "sha256": "9a350d81ab19022e7e3ad5824d566b12b82de7594c71ecb74f633a8191599cdb",
+      "size": 3703
     },
     "wsl/payload_merge.py": {
       "sha256": "d41a1e8bfdb8f96c771a06f41f4468befb2a23308696016bd71f808d23aa8703",

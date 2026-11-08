@@ -96,9 +96,9 @@ CONTEXT_SELECTION_CACHE_STABILITY_RATIO = 2.0
 FOCUS_PLANNER_FINAL_USER_REMINDER_TEMPLATE = (
     "你需要输出对{bot_name}发言的分析，视情况输出文本内容的分析，思考是否进行工具调用"
 )
-PLANNER_FINAL_USER_REMINDER = "请你进行分析，是不调用工具，进行思考和等待\n还是使用工具搜集处理信息或使用reply回复"
+PLANNER_FINAL_USER_REMINDER = "请你进行分析。需要回复时调用 reply，reply_reference 只写一句回复方向和必要事实，不要写可直接发送的正文。若不调用工具，也不要输出完整回复，最多写一句回复方向；不发言用 stop，稍后判断用 wait。对方正在和你说话，且主要是表情、打招呼、接梗或情绪、没有实质问题时，优先调用 send_emoji，hint 只能从肥鱼晚安、肥鱼开饭、肥鱼无语、肥鱼收到、肥鱼生气、肥鱼委屈、肥鱼道歉、肥鱼求饶、肥鱼心虚、肥鱼先养着、肥鱼又饿了、肥鱼收到示爱、肥鱼累瘫、肥鱼蠕动里选贴切的一个，成功后 stop。实质问题仍调用 reply。不要每次都发表情，一轮最多一张。"
 PASSIVE_PLANNER_FINAL_USER_REMINDERS = {
-    "zh-CN": "需要信息或操作时调用工具；决定发言时直接输出指导正文，不附带工具调用；不发言用 stop，需要稍后判断用 wait。",
+    "zh-CN": "需要信息或操作时调用工具；决定发言时只输出一句回复方向和必要事实，不要写可直接发送的正文，也不要附带工具调用；不发言用 stop，需要稍后判断用 wait。",
     "en-US": "Use tools for information or actions. To speak, output guidance without tool calls. Use stop to stay silent, or wait to reconsider later.",
     "ja-JP": "情報や操作が必要ならツールを使い、発言する場合はツール呼び出しを伴わない指針本文を出力してください。発言しない場合は stop、後で再判断する場合は wait を使ってください。",
 }

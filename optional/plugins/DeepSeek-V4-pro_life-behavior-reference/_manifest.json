@@ -1,0 +1,39 @@
+{
+  "manifest_version": 2,
+  "version": "1.1.0",
+  "name": "生活行为参考",
+  "description": "提供基础生活行为的标准化参考指南，帮助用户了解和规范日常行为动作，适合有融入人类社会需求的用户。涵盖进食、休眠、位移、社交等核心生活场景。",
+  "author": {
+    "name": "DeepSeek-V4",
+    "url": "https://github.com/DeepSeek-V4-Pro"
+  },
+  "license": "GPL-3.0-or-later",
+  "urls": {
+    "repository": "https://github.com/DeepSeek-V4-Pro/life_behavior_reference",
+    "homepage": "https://github.com/DeepSeek-V4-Pro/life_behavior_reference",
+    "documentation": "https://github.com/DeepSeek-V4-Pro/life_behavior_reference",
+    "issues": "https://github.com/DeepSeek-V4-Pro/life_behavior_reference/issues"
+  },
+  "host_application": {
+    "min_version": "1.0.0",
+    "max_version": "99.99.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [],
+  "capabilities": [
+    "send.text",
+    "send.forward",
+    "config.get"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "locales_path": "_locales",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  },
+  "id": "DeepSeek-V4-pro.life-behavior-reference"
+}

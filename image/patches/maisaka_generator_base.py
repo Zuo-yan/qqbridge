@@ -3,6 +3,9 @@ from datetime import datetime
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
 
 import asyncio
+import os
+from src.maisaka.dfy_reply_policy import reply_context_note
+from src.maisaka.dfy_visual_evidence import (select_reply_image_sources, load_reply_image_sources, append_reply_visual_evidence)
 import random
 import re
 import time
@@ -585,6 +588,13 @@ class BaseMaisakaReplyGenerator(RetroReplyPromptMixin):
         target_message_block = self._build_target_message_block(reply_message)
         if target_message_block:
             sections.append(target_message_block)
+        scoped_context_note = reply_context_note(
+            reply_message, chat_history,
+            bot_id=str(global_config.bot.qq_account),
+            owner_id=os.environ.get("QQBRIDGE_OWNER_QQ", "").strip(),
+        )
+        if scoped_context_note:
+            sections.append(scoped_context_note)
         duplicate_target_reply_reminder = str(
             (reply_tool_args or {}).get(DUPLICATE_TARGET_REPLY_REMINDER_ARG) or ""
         ).strip()
@@ -1186,17 +1196,16 @@ class BaseMaisakaReplyGenerator(RetroReplyPromptMixin):
                 active_client_type = str(getattr(api_provider, "client_type", "") or "")
                 prompt_started_at = time.perf_counter()
                 enable_visual_message = self._resolve_enable_visual_message(model_info)
-                # 视觉 planner 不等待识图；纯文本 replyer 在实际模型选定后补做相同的刷新和等待。
-                if (
-                    not enable_visual_message
-                    and resolve_enable_visual_planner()
-                    and image_recognition_refresher is not None
-                ):
+                # Overlay 1.0.0: raw current/quoted image evidence, not every history thumbnail.
+                sources = select_reply_image_sources(filtered_history, reply_message)
+                if enable_visual_message:
+                    await load_reply_image_sources(sources)
+                elif image_recognition_refresher is not None:
+                    # Refresh cached captions for text fallback regardless of planner visual mode.
                     await image_recognition_refresher(chat_history)
                     filtered_history[:] = [
                         message for message in chat_history if self._should_keep_replyer_history_message(message)
                     ]
-                # 视觉请求构建会解码、缩放和编码图片，在工作线程中执行，避免阻塞聊天事件循环。
                 built_request_messages = await asyncio.to_thread(
                     self._build_request_messages,
                     chat_history=filtered_history,
@@ -1205,9 +1214,12 @@ class BaseMaisakaReplyGenerator(RetroReplyPromptMixin):
                     expression_habits=merged_expression_habits,
                     reply_requirements=reply_requirements_for_attempt,
                     stream_id=stream_id,
-                    enable_visual_message=enable_visual_message,
+                    enable_visual_message=False,
                     reply_tool_args=dict(reply_tool_args_for_attempt),
                     think_level=think_level,
+                )
+                built_request_messages = await asyncio.to_thread(
+                    append_reply_visual_evidence, built_request_messages, sources, visual=enable_visual_message,
                 )
                 request_messages = await self._invoke_before_model_request_hook(
                     request_messages=built_request_messages,

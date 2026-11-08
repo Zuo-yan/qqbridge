@@ -15,7 +15,6 @@ Each plugin remains subject to its own upstream license. The MIT license in
 | `hajimi-file-download` | Local/community bundle; upstream not recorded | No license file detected |
 | `juzi865_emoji2face` | https://cnb.cool/Mai-with-u/p-juzi865--emoji2face-c5f38f3f6076.git<br>`696ec97ea4c307b38185aec59e204e8c2d427187` | No license file detected |
 | `maibot-community_mai-repeater` | https://cnb.cool/Mai-with-u/p-octmicy--mai-repeater-17be6267dfab.git<br>`2b7ad6d0725f0aacd466e79e59ad80a87f55edaf` | LICENSE |
-| `maibot-moepix` | Local/community bundle; upstream not recorded | LICENSE |
 | `MaiBot-SnowLuma-Adapter` | https://github.com/Mai-with-u/MaiBot-SnowLuma-Adapter.git<br>`54fcc7fcc4072983a1283d99fa0edd559125e1d7` | No license file detected |
 | `mizuku003_tieba-share` | https://cnb.cool/Mai-with-u/p-mizuku003--maibot-tieba-share-5d4112c35f27.git<br>`69d93dee4f2d1a816e21f9883bcccc38bf6b01fa` | LICENSE |
 | `persona-manager` | Local/community bundle; upstream not recorded | No license file detected |

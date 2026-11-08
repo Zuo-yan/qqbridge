@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 import zipfile
 from pathlib import Path
 
@@ -51,7 +52,7 @@ def main():
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
     elif manifest['files'] != files:
         raise SystemExit('Manifest differs from tracked package. Review source then use --refresh-manifest before packaging.')
-    subprocess.run(['python', '-I', str(root / 'wsl/package_verify.py'), '--root', str(root)], check=True)
+    subprocess.run([sys.executable, '-I', str(root / 'wsl/package_verify.py'), '--root', str(root)], check=True)
     print('PASS syntax/encoding/credential-pattern checks:', len(files), 'tracked package files')
     if args.output is None:
         return

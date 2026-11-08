@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 from time import monotonic
 from typing import Any
+from typing import Literal
 
 from maibot_sdk import Field, MaiBotPlugin, PluginConfigBase, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
@@ -22,6 +23,9 @@ from gemini_client import (
     GeminiSearchError,
     SearchOutcome,
 )
+from vertex_search_client import VertexSearchClient
+from deepseek_search_client import DeepSeekSearchClient
+from vertex_search_privacy import validate_query, validate_fetch_url
 
 
 class PluginSectionConfig(PluginConfigBase):
@@ -34,16 +38,40 @@ class PluginSectionConfig(PluginConfigBase):
         description="是否启用 Gemini 联网搜索与网页抓取工具",
     )
     config_version: str = Field(
-        default="1.0.0",
+        default="1.3.0",
         description="配置文件版本号",
         json_schema_extra={"disabled": True},
     )
 
 
 class ProviderConfig(PluginConfigBase):
-    __ui_label__ = "Gemini / Magpie"
+    __ui_label__ = "Vertex / Magpie"
     __ui_icon__ = "sparkles"
     __ui_order__ = 1
+
+    backend: Literal["deepseek", "vertex", "magpie"] = Field(
+        default="vertex", description="DeepSeek 独立搜索优先，失败时限时回退到 Vertex",
+    )
+    deepseek_credential_path: str = Field(default="/MaiMBot/config/deepseek-search.key", description="DeepSeek 密钥文件路径")
+    model_config_path: str = Field(
+        default="/MaiMBot/config/model_config.toml",
+        description="运行时只读 PrimaryProvider 的凭据和 Vertex 地址；不保存密钥副本",
+    )
+    region: str = Field(
+        default="global",
+        description="仅搜索使用的 Vertex 区域；从 PrimaryProvider 保留 project/key 派生，不修改主模型区域",
+    )
+    auth_mode: Literal["api_key", "oauth"] = Field(
+        default="api_key",
+        description="默认遵循 GeminiClient：api_key 使用 x-goog-api-key，忽略遗留 auth_type；仅明确提供 OAuth token 时选择 oauth",
+    )
+    thinking_level: Literal["MEDIUM", "HIGH", "LOW", "OFF"] = Field(
+        default="MEDIUM",
+        description="Flash 搜索模型的思考档位，默认 MEDIUM，不使用最低档；不影响 Argon LOW",
+    )
+    magpie_model: str = Field(
+        default="antigravity/gemini-3.8-flash", description="仅 Magpie 后端使用的模型标识",
+    )
 
     base_url: str = Field(
         default="http://magpie-dfy:3425/v1",
@@ -52,11 +80,12 @@ class ProviderConfig(PluginConfigBase):
     api_key: str = Field(
         default="",
         description="Magpie gateway key",
+        repr=False,
         json_schema_extra={"x-widget": "password"},
     )
     model: str = Field(
-        default="antigravity/gemini-3.8-flash",
-        description="执行 Google Search 的 Gemini 模型标识",
+        default="gemini-3.8-flash",
+        description="Vertex 搜索模型 ID，可独立替换为主线程实测 ID",
     )
     timeout_seconds: float = Field(
         default=90.0,
@@ -105,7 +134,7 @@ class SearchConfig(PluginConfigBase):
         default=3,
         ge=1,
         le=5,
-        description="Gemini 单次回答最多执行几次 Google Search",
+        description="仅 Magpie：单次回答最多执行几次 Google Search；Vertex API 无对应硬限制",
     )
 
 
@@ -152,7 +181,7 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
 
     def __init__(self) -> None:
         super().__init__()
-        self._search_client: GeminiSearchClient | None = None
+        self._search_client: GeminiSearchClient | VertexSearchClient | None = None
         self._fetcher: SafePageFetcher | None = None
         self._rebuild_lock = asyncio.Lock()
         self._cache: OrderedDict[
@@ -162,13 +191,13 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
 
     async def on_load(self) -> None:
         await self._rebuild_clients()
-        if not self.config.provider.api_key.strip():
+        if self.config.provider.backend == "magpie" and not self.config.provider.api_key.strip():
             self.ctx.logger.warning(
                 "Gemini 联网搜索未配置 Magpie gateway key，工具调用会返回错误"
             )
         else:
             self.ctx.logger.info(
-                "Gemini 联网搜索已加载：gemini_search 使用 Google Search grounding，"
+                "联网搜索已加载：gemini_search 使用配置的搜索后端（DeepSeek 优先、Vertex 备用），"
                 "gemini_fetch 使用安全网页抓取"
             )
 
@@ -191,14 +220,27 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
         async with self._rebuild_lock:
             await self._close_clients()
             provider = self.config.provider
-            self._search_client = GeminiSearchClient(
-                base_url=provider.base_url,
-                api_key=provider.api_key,
-                model=provider.model,
-                timeout_seconds=provider.timeout_seconds,
-                max_output_tokens=self.config.search.max_output_tokens,
-                max_uses=self.config.search.max_uses,
-            )
+            if provider.backend in {"vertex", "deepseek"}:
+                self._search_client = VertexSearchClient(
+                    model_config_path=provider.model_config_path,
+                    model=provider.model,
+                    timeout_seconds=provider.timeout_seconds,
+                    max_output_tokens=self.config.search.max_output_tokens,
+                    thinking_level=provider.thinking_level,
+                    region=provider.region,
+                    auth_mode=provider.auth_mode,
+                )
+                if provider.backend == "deepseek":
+                    self._search_client = DeepSeekSearchClient(fallback=self._search_client, credential_path=provider.deepseek_credential_path)
+            else:
+                self._search_client = GeminiSearchClient(
+                    base_url=provider.base_url,
+                    api_key=provider.api_key,
+                    model=provider.magpie_model,
+                    timeout_seconds=provider.timeout_seconds,
+                    max_output_tokens=self.config.search.max_output_tokens,
+                    max_uses=self.config.search.max_uses,
+                )
             fetch = self.config.fetch
             self._fetcher = SafePageFetcher(
                 timeout_seconds=fetch.timeout_seconds,
@@ -220,7 +262,7 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
 
     def _normalize_sources(self, count: int | None) -> int:
         if type(count) is not int:
-            return self.config.search.default_sources
+            count = self.config.search.default_sources
         return max(1, min(count, self.config.search.max_sources))
 
     def _cache_get(
@@ -256,7 +298,7 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
     @staticmethod
     def _format_search(outcome: SearchOutcome, max_chars: int) -> str:
         lines = [
-            "Gemini 联网搜索（Google Search grounding）",
+            "联网搜索结果（实际后端见下文）",
             "检索到的资料：",
             outcome.text.strip(),
         ]
@@ -279,22 +321,31 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
     @Tool(
         "gemini_search",
         description=(
-            "调用 Gemini 的 Google Search grounding 联网检索实时网页。"
-            "资料库、长期记忆或当前上下文没有明确答案，或者知识可能过时、"
+            "联网检索实时公开网页：DeepSeek 独立搜索优先，Gemini 备用。"
+            "仅在问题需要外部公开资料时显式调用，普通闲聊不调用。"
+            "先提炼不含私人信息的公开关键词并设置 public_query=true；"
+            "禁止发送非公开聊天、身份信息、凭据、群号或原始聊天上下文。"
+            "知识可能过时、"
             "信息不完整、需要最新新闻/版本/价格/人物近况/作品资料/事实核查时优先使用。"
             "query 应写成具体搜索关键词；返回检索摘要和 Google Search 实际找到的来源。"
         ),
         parameters=[
             ToolParameterInfo(
+                name="public_query",
+                param_type=ToolParamType.BOOLEAN,
+                description="仅当 query 已去除所有私人聊天与身份上下文、只含公开检索关键词时设为 true。",
+                required=True,
+            ),
+            ToolParameterInfo(
                 name="query",
                 param_type=ToolParamType.STRING,
-                description="搜索关键词，1-256 字符；应尽量具体。",
+                description="搜索关键词，1-128 字符；应尽量具体。",
                 required=True,
             ),
             ToolParameterInfo(
                 name="ori_question",
                 param_type=ToolParamType.STRING,
-                description="触发搜索的原始问题，可选，最多 256 字符。",
+                description="旧接口兼容字段；忽略此字段，绝不外发或缓存原始问题。",
                 required=False,
             ),
             ToolParameterInfo(
@@ -311,21 +362,21 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
         query: str = "",
         ori_question: str = "",
         count: int | None = None,
+        public_query: bool = False,
         **kwargs: Any,
     ) -> dict[str, Any]:
-        del kwargs
+        del kwargs, ori_question
         if not self.config.plugin.enabled:
             return self._error("联网搜索", "插件已在配置中停用")
-        normalized_query = " ".join(query.split()).strip()
-        if not normalized_query:
-            return self._error("联网搜索", "query 不能为空")
-        if len(normalized_query) > 256:
-            return self._error("联网搜索", "query 超过 256 字符")
-        normalized_question = " ".join(ori_question.split()).strip()
-        if len(normalized_question) > 256:
-            normalized_question = normalized_question[:256]
+        if public_query is not True:
+            return self._error("联网搜索", "须显式确认 public_query=true，且只提交公开检索关键词")
+        try:
+            normalized_query = validate_query(query)
+        except GeminiSearchError as exc:
+            return self._error("联网搜索", str(exc))
         max_sources = self._normalize_sources(count)
-        key = (normalized_query, normalized_question, max_sources)
+        provider = self.config.provider
+        key = (normalized_query, f"{provider.backend}:{provider.model}:{provider.region}:{provider.auth_mode}:{provider.thinking_level}:{provider.magpie_model}", max_sources)
         outcome = self._cache_get(key)
         cache_hit = outcome is not None
         if outcome is None:
@@ -334,11 +385,10 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
             try:
                 outcome = await self._search_client.search(
                     normalized_query,
-                    original_question=normalized_question,
                     max_sources=max_sources,
                 )
             except GeminiSearchError as exc:
-                return self._error("联网搜索", str(exc))
+                return {**self._error("联网搜索", str(exc)), "must_reply": True, "user_notice": "这次联网搜索超时或服务暂不可用，暂时没查到可靠结果，请稍后再试。"}
             self._cache_put(key, outcome)
         return {
             "success": True,
@@ -351,6 +401,11 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
                 for source in outcome.sources
             ],
             "cache_hit": cache_hit,
+            "grounded": bool(outcome.sources),
+            "citations": [
+                {"text": citation.text, "source_indices": list(citation.source_indices)}
+                for citation in outcome.citations
+            ],
         }
 
     @Tool(
@@ -374,9 +429,10 @@ class GeminiWebSearchPlugin(MaiBotPlugin):
         del kwargs
         if not self.config.plugin.enabled:
             return self._error("网页抓取", "插件已在配置中停用")
-        normalized_url = url.strip()
-        if not normalized_url or len(normalized_url) > 8192:
-            return self._error("网页抓取", "url 为空或过长")
+        try:
+            normalized_url = validate_fetch_url(url)
+        except GeminiSearchError as exc:
+            return self._error("网页抓取", str(exc))
         if self._fetcher is None:
             return self._error("网页抓取", "网页抓取客户端尚未初始化")
         try:

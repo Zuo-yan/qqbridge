@@ -1,6 +1,8 @@
 """reply 工具适配与共用回复执行服务。"""
 
 from copy import deepcopy
+import os
+from src.maisaka.dfy_reply_policy import first_reply_mentions
 from typing import Any, Dict, Optional, Tuple
 
 import asyncio
@@ -541,10 +543,10 @@ async def execute_reply(
                 ),
                 log_reply=False,
             )
-        success, reply_result = await retry_transient(generate_once)
+        success, reply_result = await asyncio.wait_for(retry_transient(generate_once), timeout=80.0)
     except Exception as exc:
         tool_ctx.runtime._dfy_provider_failure_turn = tool_ctx.engine.active_logical_turn_id
-        await notify_failure(tool_ctx.runtime, target_message, exception_failure_kind(exc))
+        await notify_failure(tool_ctx.runtime, target_message, 'timeout' if isinstance(exc, TimeoutError) else exception_failure_kind(exc), selected_reply=True)
         logger.exception(
             f"{tool_ctx.runtime.log_prefix} 回复生成器执行异常: 目标消息编号={target_message_id} 异常={exc}"
         )
@@ -558,13 +560,13 @@ async def execute_reply(
     failure_kind = response_failure_kind(reply_text or getattr(reply_result, "error_message", ""))
     if failure_kind:
         tool_ctx.runtime._dfy_provider_failure_turn = tool_ctx.engine.active_logical_turn_id
-        notice_sent = await notify_failure(tool_ctx.runtime, target_message, failure_kind)
+        notice_sent = await notify_failure(tool_ctx.runtime, target_message, failure_kind, selected_reply=True)
         return tool_ctx.build_failure_result("reply", "模型服务拒绝或请求失败，未发送生成内容。",
                                             metadata={"provider_failure": failure_kind, "notice_sent": notice_sent})
 
     if not reply_text:
         tool_ctx.runtime._dfy_provider_failure_turn = tool_ctx.engine.active_logical_turn_id
-        await notify_failure(tool_ctx.runtime, target_message, "empty")
+        await notify_failure(tool_ctx.runtime, target_message, "empty", selected_reply=True)
         reply_result.monitor_detail = build_reply_monitor_detail(reply_result)
         reply_metadata = _build_monitor_metadata(reply_result, extension_execution.reply_id)
         logger.warning(
@@ -675,6 +677,17 @@ async def execute_reply(
         set_quote = random.random() < quote_probability
     # 群聊与私聊均由各自的三档频率控制。
     effective_set_quote = set_quote
+    first_reply_mentions(
+        reply_sequences, target_message=target_message, set_quote=set_quote,
+        is_qq_group=(stream.platform == "qq" and stream.is_group_session),
+        enabled=config_module.global_config.chat.enable_reply_at,
+        owner_id=os.environ.get("QQBRIDGE_OWNER_QQ", "").strip(),
+    )
+    reply_segments = [build_visible_text_from_sequence(sequence) for sequence in reply_sequences]
+    combined_reply_text = "".join(reply_segments)
+    reply_result.completion.response_text = combined_reply_text
+    reply_result.text_fragments = reply_segments
+    reply_result.monitor_detail = build_reply_monitor_detail(reply_result)
     if quote_probability is not None:
         reply_metadata["quote_probability"] = quote_probability
     sent_message_ids: list[str] = []

@@ -8,6 +8,8 @@ from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 from uuid import uuid4
 
 import base64
+import asyncio
+import os
 import hashlib
 import time
 
@@ -44,10 +46,12 @@ class QQInboundCodec(QQInboundCardMixin, QQInboundTextMixin):
         self._profile_state = profile_state
         self._load_settings = load_settings
         self._group_name_cache: Dict[str, str] = {}
+        self._at_info_cache = {}
 
     def clear_cache(self) -> None:
         """清空群名缓存（断连时调用，避免跨连接脏数据）。"""
         self._group_name_cache.clear()
+        self._at_info_cache.clear()
 
     async def build_message_dict(
         self,
@@ -291,7 +295,9 @@ class QQInboundCodec(QQInboundCardMixin, QQInboundTextMixin):
 
             if segment_type == "at":
                 if target_user_id := str(segment_data.get("qq") or "").strip():
-                    if target_user_id in at_target_cache:
+                    if self_id and target_user_id == self_id:
+                        target_user_nickname, target_user_cardname = None, None
+                    elif target_user_id in at_target_cache:
                         target_user_nickname, target_user_cardname = at_target_cache[target_user_id]
                     else:
                         target_user_nickname, target_user_cardname = await self._resolve_at_target_info(
@@ -360,40 +366,36 @@ class QQInboundCodec(QQInboundCardMixin, QQInboundTextMixin):
 
         return converted_segments, is_at
 
-    async def _resolve_at_target_info(
-        self,
-        group_id: str,
-        target_user_id: str,
-    ) -> Tuple[Optional[str], Optional[str]]:
-        """解析 ``at`` 目标的展示信息。
-
-        Args:
-            group_id: 当前消息所在群号；私聊消息为空字符串。
-            target_user_id: 被 ``at`` 的用户号。
-
-        Returns:
-            Tuple[Optional[str], Optional[str]]: 依次返回 QQ 昵称和群昵称。
-        """
+    async def _resolve_at_target_info(self, group_id: str, target_user_id: str):
+        """Optional display names must never block the real QQ identity or @ trigger."""
         if not target_user_id or target_user_id == "all":
             return None, None
-
-        target_user_nickname: Optional[str] = None
-        target_user_cardname: Optional[str] = None
-
-        if group_id:
-            member_info = await self._query_service.get_group_member_info(group_id, target_user_id, no_cache=True)
-            if member_info is not None:
-                target_user_nickname = normalize_optional_string(member_info.get("nickname"))
-                target_user_cardname = normalize_optional_string(member_info.get("card"))
-
-        if target_user_nickname or target_user_cardname:
-            return target_user_nickname, target_user_cardname
-
-        stranger_info = await self._query_service.get_stranger_info(target_user_id)
-        if stranger_info is None:
+        if target_user_id == os.environ.get("QQBRIDGE_BOT_QQ", "").strip():
             return None, None
+        key = (group_id, target_user_id)
+        now = time.monotonic()
+        cached = self._at_info_cache.get(key)
+        if cached is not None and cached[0] > now:
+            return cached[1]
+        result = (None, None)
+        try:
+            async with asyncio.timeout(1.0):
+                info = await self._query_service.get_group_member_info(group_id, target_user_id, no_cache=False) if group_id else None
+                if info:
+                    result = (normalize_optional_string(info.get("nickname")), normalize_optional_string(info.get("card")))
+                if not any(result):
+                    info = await self._query_service.get_stranger_info(target_user_id)
+                    if info:
+                        result = (normalize_optional_string(info.get("nickname")), None)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            self._logger.debug(f"可选的@昵称查询未完成，保留QQ号继续收消息: {type(exc).__name__}")
+        if len(self._at_info_cache) >= 1024:
+            self._at_info_cache.pop(next(iter(self._at_info_cache)))
+        self._at_info_cache[key] = (time.monotonic() + (600.0 if any(result) else 30.0), result)
+        return result
 
-        return normalize_optional_string(stranger_info.get("nickname")), target_user_cardname
 
     @staticmethod
     def _build_text_segment(text: str) -> QQSegment:

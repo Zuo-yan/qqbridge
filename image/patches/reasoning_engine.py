@@ -26,7 +26,10 @@ from src.common.logger import get_logger
 from src.config.config import global_config
 from src.maisaka.reliability import (
     exception_failure_kind,
+    notice_eligible,
     notify_failure,
+    planner_prose_should_reply,
+    planner_prose_to_direction,
     policy_sensitive_text,
     response_failure_kind,
     retry_transient,
@@ -562,7 +565,13 @@ class MaisakaReasoningEngine:
             state.cycle_end = CycleEnd("tool_continue", "Planner 工具执行完成，继续下一轮内部思考。")
             return False
 
-        if self.passive_replyer_enabled and planner_content:
+        if planner_prose_should_reply(
+            planner_content,
+            passive=self.passive_replyer_enabled,
+            addressed=notice_eligible(self._runtime, state.reply_target_message),
+        ):
+            if not self.passive_replyer_enabled:
+                logger.info(f"{self._runtime.log_prefix} Planner 未调用回复工具，已把正文收成回复方向交给回复模型")
             await self._reply_from_planner_content(planner_content, cycle_detail, state)
             self._end_planner_no_tool_cycle(
                 planner_extra_lines,
@@ -589,15 +598,16 @@ class MaisakaReasoningEngine:
         cycle_detail: CycleDetail,
         state: CycleRuntimeState,
     ) -> None:
-        """把最终正文作为指导执行一次回复，不追加虚构的工具调用或工具结果。"""
+        """把规划正文收成回复方向后执行一次回复，不把草稿交给回复模型。"""
 
         started_at = time.time()
         execution_id = uuid.uuid4().hex
         target = state.reply_target_message
+        direction = planner_prose_to_direction(content) or '【回复方向】这不是草稿。根据当前对话自己组织回复，禁止复述规划稿里的原句。'
         arguments = {
             **self._reply_options,
             "msg_id": target.message_id if target is not None else "",
-            "reply_reference": content,
+            "reply_reference": direction,
         }
         self._reply_options = {}
         self._runtime._update_stage_status("Replyer", "根据 Planner 正文生成可见回复")
@@ -2206,6 +2216,9 @@ class MaisakaReasoningEngine:
             return False, "", tool_result_summaries, tool_monitor_results
 
         execution_context = self._build_tool_execution_context(latest_thought)
+        # Freeze authorization to the same real message used for this planner request.
+        if state.reply_target_message is not None:
+            execution_context.metadata["anchor_message"] = state.reply_target_message
         availability_context = self._build_tool_availability_context()
         tool_spec_map = {
             tool_spec.name: tool_spec
@@ -2256,7 +2269,7 @@ class MaisakaReasoningEngine:
                     self._dfy_search_calls = count + 1
                     try:
                         result = await asyncio.wait_for(
-                            self._runtime._tool_registry.invoke(invocation, execution_context), timeout=20.0
+                            self._runtime._tool_registry.invoke(invocation, execution_context), timeout=35.0
                         )
                     except asyncio.TimeoutError:
                         result = ToolExecutionResult(
@@ -2268,6 +2281,9 @@ class MaisakaReasoningEngine:
             else:
                 result = await self._runtime._tool_registry.invoke(invocation, execution_context)
             tool_ended_at = time.time()
+            if invocation.tool_name == "gemini_search" and not result.success:
+                self._runtime._dfy_provider_failure_turn = self._active_logical_turn_id
+                await notify_failure(self._runtime, state.reply_target_message, "search", selected_reply=True)
             if invocation.tool_name != "wait":
                 self._runtime._reset_consecutive_wait_count(f"tool:{invocation.tool_name}")
             if is_unexpanded_tool and not result.success:

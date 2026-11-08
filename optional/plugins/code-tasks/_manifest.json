@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "id": "local.code-tasks",
+  "version": "0.2.1",
+  "name": "大肥鱼后台文件任务",
+  "description": "Codex SDK + Vertex Flash MEDIUM；简单静态网页与单文件修改，原群交付并@发起人。",
+  "author": {"name": "QQBridge local", "url": "http://localhost/qqbridge"},
+  "urls": {"repository": "http://localhost/qqbridge/local-plugins/code-tasks"},
+  "license": "MIT",
+  "host_application": {"min_version": "1.3.15", "max_version": "1.3.99"},
+  "sdk": {"min_version": "2.16.0", "max_version": "2.99.99"},
+  "dependencies": [{"type": "python_package", "name": "aiohttp", "version_spec": ">=3.10,<4"}],
+  "plugin_type": "extension",
+  "capabilities": ["send.text", "send.hybrid", "send.custom", "message.get_by_id", "message.get_by_time_in_chat", "api.call"],
+  "i18n": {"default_locale": "zh-CN", "supported_locales": ["zh-CN"]}
+}

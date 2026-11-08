@@ -50,16 +50,15 @@ class EmojiSelectionResult(BaseModel):
 
 
 def get_tool_spec() -> ToolSpec:
-    """获取 send_emoji 工具声明。"""
-
+    """获取 send_emoji 工具声明；宽松语义选图，优先本体形象。"""
     return ToolSpec(
         name="send_emoji",
-        description="发送一张表情包来表达情绪、调侃、反击、发钱打赏或参与互动。可以在发送文本回复（reply）之后紧接着调用，也可以代替文字单独发送。当用户索要金钱/军费（如金圆券）、挑衅、调侃、或当前情境极具戏剧性和情绪张力时，应积极调用本工具发送最贴切的专属表情包。",
+        description="发送一张已有表情包。适合参与当前对话时，日常闲聊、问候、调侃、夸夸或接梗都可主动使用，不要求先被@或对方先发表情。优先大肥鱼本体形象，情绪大致贴合即可，不要求图中文字逐字对应。可以单独回应，也可在必要文字回答后加一张；单独发表情后不再补文字。正经问题先解答，一轮最多一张，不连刷。",
         parameters_schema={
             "type": "object",
             "properties": {
-                "msg_id": {"type": "string", "description": "要回复的消息编号；小黑盒发评论时必须指定主帖或评论消息。"},
-                "hint": {"type": "string", "description": "可选。期望发送的表情包关键词或梗名，例如'金圆券'、'太爱国了'、'成何体统'、'娘希匹'、'优势在我'、'我怀疑你通共'等。"},
+                "msg_id": {"type": "string", "description": "本轮要回应的真实消息编号。"},
+                "hint": {"type": "string", "description": "可选，用自然语言描述希望表达的感觉，如开心得意、惊讶、轻松接梗、装可怜。也可填表情名称。不要求固定完整关键词；优先大肥鱼自己的形象。"},
             },
         },
         provider_name="maisaka_builtin",
@@ -342,6 +341,21 @@ async def _render_emoji_selection_system_prompt(
     return await prompt_manager.render_prompt(prompt_template)
 
 
+def _is_preferred_persona_emoji(emoji: MaiEmoji) -> bool:
+    """QQBridge persona-sticker preference, patch 2026.11.05.3."""
+    description = emoji.description or ""
+    return "大肥鱼专属" in description or all(
+        tag in description for tag in ("蓝发", "鲸鱼娘", "女仆")
+    )
+
+
+def _sample_emoji_candidates(emojis: list[MaiEmoji], count: int) -> list[MaiEmoji]:
+    preferred = [emoji for emoji in emojis if _is_preferred_persona_emoji(emoji)]
+    others = [emoji for emoji in emojis if not _is_preferred_persona_emoji(emoji)]
+    chosen = sample(preferred, min(count, len(preferred)))
+    return chosen + sample(others, min(max(0, count - len(chosen)), len(others)))
+
+
 async def _select_emoji_with_sub_agent(
     tool_ctx: BuiltinToolRuntimeContext,
     reasoning: str,
@@ -361,20 +375,19 @@ async def _select_emoji_with_sub_agent(
 
     if hint:
         hint_lower = hint.lower().strip()
-        matched = []
-        for e in available_emojis:
-            e_name = e.full_path.name.lower()
-            e_desc = (e.description or "").lower()
-            if hint_lower in e_name or hint_lower in e_desc:
-                matched.append(e)
-            elif any(part in e_desc for part in hint_lower.split() if part):
-                matched.append(e)
+        # Only explicit sticker names use the fast path. Natural descriptions
+        # are passed to the selector instead of matching a generic word blindly.
+        matched = [e for e in available_emojis
+                   if hint_lower == e.full_path.stem.lower()
+                   or (hint_lower.startswith("肥鱼") and len(hint_lower) >= 4
+                       and hint_lower in (e.description or "").lower())]
         if matched:
-            logger.info(f"{tool_ctx.runtime.log_prefix} [send_emoji] 根据 hint='{hint}' 直接精准匹配到表情: {matched[0].full_path.name}")
-            return matched[0], f"根据提示词 '{hint}' 精准匹配" 
+            preferred = [e for e in matched if _is_preferred_persona_emoji(e)]
+            selected = sample(preferred or matched, 1)[0]
+            return selected, f"按表情名称选择 '{hint}'"
 
     total_candidate_count = min(len(available_emojis), _get_emoji_candidate_count())
-    sampled_emojis = sample(available_emojis, total_candidate_count)
+    sampled_emojis = _sample_emoji_candidates(available_emojis, total_candidate_count)
     candidate_message = await _build_emoji_candidate_message(sampled_emojis)
     grid_rows, grid_columns = _calculate_grid_shape(len(sampled_emojis))
 
@@ -383,6 +396,11 @@ async def _select_emoji_with_sub_agent(
         grid_rows=grid_rows,
         grid_columns=grid_columns,
     )
+    if any(_is_preferred_persona_emoji(emoji) for emoji in sampled_emojis):
+        system_prompt += (
+            "\n选图偏好：优先大肥鱼专属或蓝发鲸鱼娘女仆本体，包括静态、动态和同形象变体；"
+            "情绪大致贴合即可，不要求图中文字或标签逐字匹配。没有合适本体图再选其他图，不选情绪相反的图。"
+        )
     candidate_lines = []
     for idx, e in enumerate(sampled_emojis, start=1):
         desc = (e.description or "").split(",")[0]
@@ -393,6 +411,7 @@ async def _select_emoji_with_sub_agent(
         content=(
             f"[选择任务]\n候选总数: {len(sampled_emojis)}\n拼图布局: {grid_rows}x{grid_columns}\n"
             f"候选表情详情：\n{candidate_summary}\n"
+            f"本轮选图提示（仅作语气与情绪线索）：{hint.strip()[:500] or '结合最近对话自然选择'}\n"
             f"请结合对话意图与上方序号列表，选出最贴切的一张表情序号，请只输出 JSON。"
         ),
         timestamp=datetime.now(),

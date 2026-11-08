@@ -51,6 +51,7 @@ class QQEventRouter:
         self._gateway_name = gateway_name
         self._load_settings = load_settings
         self._runtime: Optional[QQRuntimeBundle] = None
+        self._pending_inbound_count = 0
 
     def bind_runtime(self, runtime: QQRuntimeBundle) -> None:
         """绑定当前路由器使用的运行时依赖。
@@ -145,12 +146,7 @@ class QQEventRouter:
         message_dict["account_id"] = self_id
         message_dict["scope"] = settings.client.connection_id or None
         external_message_id = str(payload.get("message_id") or "").strip()
-        accepted = await self._gateway_capability.route_message(
-            gateway_name=self._gateway_name,
-            message=message_dict,
-            external_message_id=external_message_id,
-            dedupe_key=external_message_id,
-        )
+        accepted = await self._route_inbound_with_recovery(message_dict, external_message_id)
         if not accepted:
             self._logger.debug(f"Host 丢弃了 入站消息: {external_message_id or '无消息 ID'}")
 
@@ -359,3 +355,42 @@ class QQEventRouter:
         if not self_id:
             raise ValueError("get_login_info 响应缺少有效的 user_id")
         return self_id
+
+    async def _route_inbound_with_recovery(self, message_dict, external_message_id):
+        """Bounded, deduplicated delivery across transient offline/ready races."""
+        runtime = self._require_runtime()
+        if self._pending_inbound_count >= 256:
+            self._logger.error(f"入站暂存达到上限，未投递消息: {external_message_id}")
+            return False
+        self._pending_inbound_count += 1
+        try:
+            async with asyncio.timeout(45.0):
+                for attempt in range(3):
+                    if not runtime.runtime_state.account_id:
+                        self._logger.warning(f"消息网关短暂未就绪，暂存入站消息等待恢复: {external_message_id}")
+                        if not await runtime.runtime_state.wait_until_ready(45.0):
+                            return False
+                    if str(runtime.runtime_state.account_id) != str(message_dict.get("account_id", "")):
+                        self._logger.warning(f"暂存消息账号与恢复账号不同，拒绝跨账号投递: {external_message_id}")
+                        return False
+                    try:
+                        return await self._gateway_capability.route_message(
+                            gateway_name=self._gateway_name,
+                            message=message_dict,
+                            external_message_id=external_message_id,
+                            dedupe_key=external_message_id,
+                        )
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as exc:
+                        if "E_METHOD_NOT_ALLOWED" not in str(exc) or "消息网关" not in str(exc):
+                            raise
+                        if attempt == 2:
+                            raise
+                        # Host readiness can change between the local check and RPC.
+                        await asyncio.sleep(0.1)
+        except TimeoutError:
+            self._logger.error(f"入站消息等待网关恢复超过45秒，未投递: {external_message_id}")
+            return False
+        finally:
+            self._pending_inbound_count -= 1

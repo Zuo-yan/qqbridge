@@ -572,6 +572,15 @@ def process_llm_response_segments(
 ) -> list[ProcessedResponseSegment]:
     """处理回复文本，并保留错别字纠正消息的引用提示。"""
 
+    # 本地补丁：“肥鱼总结：”另起一段时，拆成“详细回答”和“肥鱼总结”两条独立消息。
+    _FISH_SUMMARY_SPLIT = re.compile(r"(?:\r?\n\s*|\s+)(?=肥鱼总结\s*[:：])")
+    _fish_parts = _FISH_SUMMARY_SPLIT.split(text.strip(), maxsplit=1)
+    if len(_fish_parts) == 2 and _fish_parts[0].strip() and _fish_parts[1].strip():
+        _fish_segments: list[ProcessedResponseSegment] = []
+        for _fish_part in _fish_parts:
+            _fish_segments.extend(process_llm_response_segments(_fish_part.strip(), enable_splitter, enable_chinese_typo))
+        return _fish_segments
+
     if not global_config.response_post_process.enable_response_post_process:
         return [ProcessedResponseSegment(text)]
 

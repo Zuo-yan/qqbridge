@@ -1,0 +1,51 @@
+{
+  "manifest_version": 2,
+  "id": "github.jiakeju.maibot-curator",
+  "version": "0.1.9",
+  "name": "麦麦很好奇（Memory Keeper）",
+  "description": "后台整理插件：学习群里的黑话、表达方式与表情包，按角色性格精选、查重合并，并整理群友日程。支持 WebUI 配置与 dry-run（只出报告、不改库）。",
+  "author": {
+    "name": "JJK",
+    "url": "https://github.com/JiaKeJu"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/JiaKeJu/maibot-curator",
+    "homepage": "https://github.com/JiaKeJu/maibot-curator",
+    "documentation": "https://github.com/JiaKeJu/maibot-curator#readme",
+    "issues": "https://github.com/JiaKeJu/maibot-curator/issues"
+  },
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
+  },
+  "sdk": {
+    "min_version": "2.8.0",
+    "max_version": "2.16.99"
+  },
+  "dependencies": [],
+  "plugin_type": "data",
+  "display": {
+    "icon": {
+      "type": "local",
+      "value": "assets/icon.png",
+      "fallback": "sparkles",
+      "background": "#1C272C"
+    }
+  },
+  "capabilities": [
+    "database.query",
+    "llm.generate",
+    "llm.embed",
+    "config.get",
+    "message.get_by_time_in_chat",
+    "chat.get_group_streams",
+    "chat.get_private_streams",
+    "person.get_id",
+    "web.search",
+    "web.fetch"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN"
+  }
+}

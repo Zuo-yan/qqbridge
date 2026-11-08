@@ -15,7 +15,7 @@ import time
 import uuid
 from pathlib import Path
 
-VERSION = '2026.10.28.9'
+VERSION = '2026.11.06.1'
 REASONING_PLACEHOLDER = '我应该根据我上面思考的内容进行反思，重新思考我下一步的行动，我需要分析当前场景，对话，然后直接输出我的想法：'
 FAILURE_EMOJI_PATH = Path('/MaiMBot/data/reply-reliability/fox-server-no-response.png')
 
@@ -44,6 +44,85 @@ def sanitize_policy_sensitive_text(text):
 def policy_sensitive_text(text):
     """Recognize explicit terms that should not be retried as a benign message."""
     return bool(_POLICY_SENSITIVE_TEXT.search(str(text or '')))
+
+
+def planner_prose_should_reply(content, *, passive, addressed):
+    """Recover a written planner answer instead of reporting an empty failure.
+
+    Passive mode already forwards every non-empty body. While the reply tool
+    remains required, only an addressed turn is recovered. The reflection
+    placeholder is not a user-facing answer.
+    """
+    text = str(content or '').strip()
+    if not text or text == REASONING_PLACEHOLDER or text.startswith(REASONING_PLACEHOLDER):
+        return False
+    return bool(passive or addressed)
+
+
+def planner_prose_to_direction(content):
+    """Turn an unsolicited planner draft into reply direction, not a script.
+
+    A short direction is preserved. A finished reply is reduced to factual
+    fragments so the replyer cannot rewrite along the original sentences.
+    """
+    text = str(content or "").strip()
+    if text == REASONING_PLACEHOLDER or text.startswith(REASONING_PLACEHOLDER):
+        text = text[len(REASONING_PLACEHOLDER):].strip()
+    if not text:
+        return ""
+    if _is_short_direction(text):
+        return text
+    points = []
+    seen = set()
+    for sentence in re.split(r"[\n。！？!?]+", text):
+        for clause in _direction_clauses(sentence):
+            if clause in seen:
+                continue
+            seen.add(clause)
+            points.append(clause)
+            if len(points) >= 6:
+                break
+        if len(points) >= 6:
+            break
+    if not points:
+        return "【回复方向】这不是草稿。根据当前对话自己组织回复，禁止复述规划稿里的原句。"
+    return (
+        "【回复方向】这不是草稿。禁止复述、改写或沿用下面任何片段的原句，用你自己的话回复。\n"
+        "只吸收这些信息：\n"
+        + "\n".join(f"- {point}" for point in points)
+    )
+
+
+def _is_short_direction(text):
+    if any(mark in text for mark in ("\n", "肥鱼总结", "本鱼", "哼")):
+        return False
+    if len(text) > 40:
+        return False
+    return len(re.findall(r"[。！？!?]", text)) <= 1
+
+
+_VOICE_MARK = re.compile(r"本鱼|肥鱼总结|白饭|哼")
+_VOICE_PREFIX = re.compile(r"^(?:肥鱼总结[:：]\s*|哼[，,！!]?\s*|本鱼(?:觉得|认为|告诉你)?[，,：:]?\s*)+")
+_FACT_MARK = re.compile(r"\d|℃|度|http|因为|但是|不是|没有|已经|左右|约")
+
+
+def _direction_clauses(sentence):
+    sentence = _VOICE_PREFIX.sub("", sentence.strip())
+    clauses = []
+    for raw in re.split(r"[，,；;：:]", sentence):
+        clause = raw.strip(" 。！？!?、")
+        if len(clause) < 4:
+            continue
+        has_fact = _FACT_MARK.search(clause) is not None
+        if _VOICE_MARK.search(clause) and not re.search(r"\d|℃", clause):
+            continue
+        clause = _VOICE_MARK.sub("", clause).strip(" ，,：:")
+        if len(clause) < 4:
+            continue
+        if not has_fact and len(clause) < 12:
+            continue
+        clauses.append(clause[:48])
+    return clauses
 
 
 class ProviderResponseFailure(ValueError):
@@ -160,7 +239,7 @@ def _has_pending_stop_request(runtime):
     return False
 
 
-def notice_eligible(runtime, target, *, is_self=None):
+def notice_eligible(runtime, target, *, is_self=None, selected_reply=False):
     if target is None or target.is_notify or target.session_id != runtime.session_id:
         return False
     if is_self is None:
@@ -176,7 +255,7 @@ def notice_eligible(runtime, target, *, is_self=None):
     text = re.sub(r'@\S+\s*', '', text).strip()
     if _STOP_REQUEST.match(text):
         return False
-    return (not runtime.chat_stream.is_group_session) or bool(target.is_at or target.is_mentioned)
+    return selected_reply or (not runtime.chat_stream.is_group_session) or bool(target.is_at or target.is_mentioned)
 
 
 async def notify_failure(
@@ -189,9 +268,10 @@ async def notify_failure(
     emoji_path=None,
     now=None,
     is_self=None,
+    selected_reply=False,
 ):
     """Send the fixed failure sticker to an addressed user; no LLM, no repeats."""
-    if not notice_eligible(runtime, target, is_self=is_self):
+    if not notice_eligible(runtime, target, is_self=is_self, selected_reply=selected_reply):
         return False
     now = time.monotonic() if now is None else now
     gate = getattr(runtime, '_dfy_failure_notice_gate', None)
@@ -205,15 +285,17 @@ async def notify_failure(
         gate['attempted'] = {message_id}
     gate['last'] = now
     texts = {
-        'policy': '这条内容触发了 Gemini 的上游内容限制，本喵没法继续展开。聊天记录没有删，其他正常消息可以照常聊。',
+        'policy': '这条内容触发了 Gemini 的上游内容限制，暂时无法继续展开。聊天记录没有删，其他正常消息可以照常聊。',
         'technical': '这次模型请求失败了，暂时没能回上。稍后再试一下。',
-        'empty': '这次没生成有效回复，稍后再叫本喵一下。',
+        'empty': '这次没生成有效回复，请稍后再试一下。',
+        'timeout': '这次回复生成超时了，本鱼暂时没能答上，请稍后再试一下。',
+        'search': '这次联网搜索没能完成，暂时没有查到可靠结果，请稍后再试一下。',
     }
     path = Path(emoji_path or FAILURE_EMOJI_PATH)
     try:
         emoji_base64 = base64.b64encode(path.read_bytes()).decode('ascii')
     except Exception:
-        logging.getLogger('reply_reliability').exception('Failure sticker is unavailable; using text fallback')
+        logging.getLogger('reply_reliability').debug('Failure sticker is unavailable; using text fallback')
     else:
         if sender is None:
             from src.services.send_service import emoji_to_stream_with_message

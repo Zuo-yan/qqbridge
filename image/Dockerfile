@@ -20,8 +20,14 @@ COPY patches/openai_client.py /MaiMBot/src/llm_models/model_client/openai_client
 COPY patches/emoji_manager.py /MaiMBot/src/emoji_system/emoji_manager.py
 COPY patches/show_emoji_list.py /MaiMBot/src/maisaka/builtin_tool/show_emoji_list.py
 COPY patches/send_emoji.py /MaiMBot/src/maisaka/builtin_tool/send_emoji.py
+COPY patches/gemini_client.py /MaiMBot/src/llm_models/model_client/gemini_client.py
+COPY patches/utils_model.py /MaiMBot/src/llm_models/utils_model.py
+COPY patches/dfy_reply_policy.py /MaiMBot/src/maisaka/dfy_reply_policy.py
+COPY patches/dfy_visual_evidence.py /MaiMBot/src/maisaka/dfy_visual_evidence.py
+COPY patches/image_manager.py /MaiMBot/src/chat/image_system/image_manager.py
+COPY patches/component_query.py /MaiMBot/src/plugin_runtime/component_query.py
+COPY patches/maisaka_chat.prompt /MaiMBot/prompts/zh-CN/maisaka_chat.prompt
 
 LABEL org.opencontainers.image.title="QQBridge MaiBot"
-LABEL org.opencontainers.image.version="1.3.0"
+LABEL org.opencontainers.image.version="1.3.1"
 LABEL org.opencontainers.image.source="https://github.com/Zuo-yan/qqbridge"
-LABEL org.opencontainers.image.description="MaiBot base image with the QQBridge v1.3.0 runtime patches"

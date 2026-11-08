@@ -192,8 +192,8 @@ class SafePageFetcher:
                 raise PageFetchError(
                     f"网页返回 HTTP {exc.response.status_code}"
                 ) from exc
-            except httpx.HTTPError as exc:
-                raise PageFetchError(f"网页抓取失败: {exc}") from exc
+            except (httpx.HTTPError, LookupError, ValueError):
+                raise PageFetchError("网页抓取或解码失败（请求详情已隐藏）") from None
 
             parser = _TextExtractor()
             if "html" in content_type or not content_type:
@@ -221,7 +221,10 @@ class SafePageFetcher:
             (".local", ".internal", ".localhost")
         ):
             raise PageFetchError("不允许抓取本机或内部网络地址")
-        port = parts.port or (443 if parts.scheme == "https" else 80)
+        try:
+            port = parts.port or (443 if parts.scheme == "https" else 80)
+        except ValueError:
+            raise PageFetchError("网页端口无效") from None
         try:
             records = await asyncio.to_thread(
                 socket.getaddrinfo,
@@ -229,8 +232,8 @@ class SafePageFetcher:
                 port,
                 type=socket.SOCK_STREAM,
             )
-        except socket.gaierror as exc:
-            raise PageFetchError(f"无法解析网页主机: {hostname}") from exc
+        except socket.gaierror:
+            raise PageFetchError("无法解析网页主机") from None
         addresses = {
             str(record[4][0]).split("%", 1)[0]
             for record in records

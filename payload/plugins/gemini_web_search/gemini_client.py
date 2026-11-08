@@ -29,10 +29,17 @@ class SearchSource:
 
 
 @dataclass(frozen=True, slots=True)
+class SearchCitation:
+    text: str
+    source_indices: tuple[int, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class SearchOutcome:
     text: str
     sources: tuple[SearchSource, ...]
     queries: tuple[str, ...]
+    citations: tuple[SearchCitation, ...] = ()
 
 
 class GeminiSearchClient:
@@ -55,6 +62,7 @@ class GeminiSearchClient:
         self._max_uses = max_uses
         self._client = httpx.AsyncClient(
             timeout=httpx.Timeout(timeout_seconds, connect=min(15.0, timeout_seconds)),
+            follow_redirects=False,
         )
 
     async def close(self) -> None:
@@ -69,9 +77,12 @@ class GeminiSearchClient:
     ) -> SearchOutcome:
         """Run one grounded Google Search request through Gemini."""
 
-        user_content = "Search the web for: " + query
-        if original_question:
-            user_content += "\nThe original user question is: " + original_question
+        from vertex_search_privacy import clean_text, public_url, validate_query
+
+        del original_question
+        if not self._api_key.strip():
+            raise GeminiSearchError("Magpie gateway key 未配置")
+        user_content = "Search the web for: " + validate_query(query)
         payload: dict[str, Any] = {
             "model": self._model,
             "max_tokens": self._max_output_tokens,
@@ -95,19 +106,15 @@ class GeminiSearchClient:
                 },
                 json=payload,
             )
-            response.raise_for_status()
+            if response.status_code != 200:
+                raise GeminiSearchError(f"Magpie 搜索接口返回 HTTP {response.status_code}（详情已隐藏）")
             data = response.json()
-        except httpx.TimeoutException as exc:
-            raise GeminiSearchError("Gemini 联网搜索超时") from exc
-        except httpx.HTTPStatusError as exc:
-            body = exc.response.text[:500].replace("\n", " ")
-            raise GeminiSearchError(
-                f"Gemini 搜索接口返回 HTTP {exc.response.status_code}: {body}"
-            ) from exc
-        except (httpx.HTTPError, ValueError) as exc:
-            raise GeminiSearchError(f"Gemini 搜索请求失败: {exc}") from exc
+        except httpx.TimeoutException:
+            raise GeminiSearchError("Gemini 联网搜索超时") from None
+        except (httpx.HTTPError, ValueError):
+            raise GeminiSearchError("Magpie 搜索请求或响应解析失败（详情已隐藏）") from None
 
-        blocks = data.get("content")
+        blocks = data.get("content") if isinstance(data, dict) else None
         if not isinstance(blocks, list):
             raise GeminiSearchError("Gemini 搜索响应缺少 content 数组")
 
@@ -123,15 +130,15 @@ class GeminiSearchClient:
             if block_type == "text":
                 text = str(block.get("text") or "").strip()
                 if text:
-                    texts.append(text)
+                    texts.append(clean_text(text, (self._api_key,)))
                 continue
             if block_type == "server_tool_use":
-                searched = True
+                searched = searched or block.get("name") == "web_search"
                 tool_input = block.get("input")
                 if isinstance(tool_input, dict):
                     query_text = str(tool_input.get("query") or "").strip()
                     if query_text and query_text not in queries:
-                        queries.append(query_text)
+                        queries.append(clean_text(query_text, (self._api_key,))[:256])
                 continue
             if block_type != "web_search_tool_result":
                 continue
@@ -143,10 +150,11 @@ class GeminiSearchClient:
                 if not isinstance(raw_result, dict):
                     continue
                 url = str(raw_result.get("url") or "").strip()
-                if not url or url in seen_urls:
+                if (len(sources) >= max_sources or raw_result.get("type") != "web_search_result"
+                        or not public_url(url) or self._api_key in url or url in seen_urls):
                     continue
                 seen_urls.add(url)
-                title = str(raw_result.get("title") or url).strip()
+                title = clean_text(str(raw_result.get("title") or url).strip(), (self._api_key,))[:500]
                 sources.append(SearchSource(title=title, url=url))
                 if len(sources) >= max_sources:
                     break

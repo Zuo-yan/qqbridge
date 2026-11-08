@@ -1,6 +1,7 @@
 """消息网关运行时状态管理。"""
 
 from typing import Any, Optional, Protocol
+import asyncio
 
 from .config import QQServerConfig
 
@@ -43,6 +44,7 @@ class QQRuntimeStateManager:
         self._gateway_name = gateway_name
         self._logger = logger
         self._runtime_state_connected: bool = False
+        self._ready_event = asyncio.Event()
         self._reported_account_id: Optional[str] = None
         self._reported_scope: Optional[str] = None
 
@@ -98,6 +100,7 @@ class QQRuntimeStateManager:
             return False
 
         self._runtime_state_connected = True
+        self._ready_event.set()
         self._reported_account_id = normalized_account_id
         self._reported_scope = scope
         self._logger.info(
@@ -109,11 +112,13 @@ class QQRuntimeStateManager:
     async def report_disconnected(self) -> None:
         """向 Host 上报当前连接已断开，并撤销消息网关路由。"""
 
+        self._ready_event.clear()
         if not self._runtime_state_connected:
             self._reported_account_id = None
             self._reported_scope = None
             return
 
+        self._runtime_state_connected = False
         try:
             await self._gateway_capability.update_state(
                 gateway_name=self._gateway_name,
@@ -126,3 +131,13 @@ class QQRuntimeStateManager:
             self._runtime_state_connected = False
             self._reported_account_id = None
             self._reported_scope = None
+
+    async def wait_until_ready(self, timeout: float = 45.0) -> bool:
+        """Wait through a short offline heartbeat without inventing a login identity."""
+        if self.account_id:
+            return True
+        try:
+            await asyncio.wait_for(self._ready_event.wait(), timeout=timeout)
+        except TimeoutError:
+            return False
+        return self.account_id is not None

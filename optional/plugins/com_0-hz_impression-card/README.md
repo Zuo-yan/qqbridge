@@ -1,0 +1,170 @@
+# 印象卡片 (Impression Card)
+
+为麦麦引入一套**欢乐向**的好感度 / 印象系统：群友可以查询自己（或他人）的「印象卡片」，
+麦麦可以凭自己的喜好给人加减分、写印象笔记。一切数值都没有上下限——高分会顶出雷达边界、
+负分会穿过圆心凹陷进去，好感量表条也能越过 `scale_min`–`scale_max` 两端。
+
+> 这是一个 meme 向的插件，不必太当真。
+
+> [!NOTE]
+> 如果运行docker版请确保MaiBot已经升级到1.0.4或以上，本插件需要使用MaiBot内置playwright浏览器来渲染图片
+
+## 功能一览
+
+- **`/卡片`**（别名 `/card`、`/印象卡片`、`/impression_card`）：生成并发送一张印象卡图片。
+  - `/卡片` 查自己；`/卡片 @某人`、引用某人后 `/卡片`、或 `/卡片 名字` 查他人（可在配置里关闭查他人）。
+  - 可选 **`雷达:N`**（或 `radar:` / `top_n:` / `雷达数:`）指定雷达图显示几个得分最高的维度；省略则用配置 `radar_top_n`（默认 5）。
+  - 默认仅渲染已存档案。设 `[light_refresh] enabled = true` 会先用较短窗口的最近聊天做一次 LLM 增量微调（deltas），再渲染。微调**不会**发【系统通知】；持久印象笔记长于卡面上限时**不会被覆盖**。后台更新走 `[proactive]` 定期提醒 + `nudge_impression`。
+  - 卡片布局（T 字型）：**顶部 title bar** = 头像+昵称（左）· 标题（中）· 好感度数字（右）；
+    其下一条 **横向好感量表条**（映射 `scale_min`–`scale_max`，可双向越界）；
+    **下方主区域** = 左侧多维属性**雷达图**、右侧放大的**印象笔记**。
+- **`/刷新印象`**（别名 `/refresh_impression`）：结合记忆与最近聊天重新评估某人，再发卡（同样支持 `雷达:N`）。
+- **`/印象卡片帮助`**（别名 `/impression_card_help`、`/卡片帮助`、`/card_help`）：发送命令与雷达维度用法说明。
+- 麦麦可调用的工具（LLM tools）：
+  | 工具 | 作用 |
+  | --- | --- |
+  | `adjust_score` | 给某人某项加 / 减分（可负），按配置以【系统通知】播报 |
+  | `set_score` | 直接把某项设为指定值（重置 / 校准） |
+  | `append_impression` | 追加人物印象笔记（超长后台 LLM 精简） |
+  | `rewrite_impression` | 覆盖人物印象笔记 |
+  | `get_impression_detail` | 以 Markdown 返回某人的完整档案 |
+  | `nudge_impression` | 用较小近期聊天对已有档案做增量微调（deltas，可选微调简介）。立即返回，LLM 在后台写入；没有档案时不要调用 |
+  | `refresh_impression` | 结合长期记忆 + 最近聊天 + 既有数据重算分值与简介 |
+  | `send_impression_card` | 向当前聊天主动发送印象卡片图片（同 `/卡片`；可选 `refresh_first`、`radar_top_n`） |
+
+  > 工具的 `target` 传对方 QQ 号、昵称、别名、群名片或 person_id；省略则默认当前发言者。`dimension` 传 `total`（好感度总值）或某个维度 key。
+
+- **定期提醒（`[proactive]`）**：默认每 **300 秒** 扫描聊天流；每个流默认每 **6 小时** 最多提醒一次。只对间隔内**有过新消息**的聊天唤醒规划器（第一次见到某流只记下时间、不触发）。简报写入内部上下文后调用 `maisaka.proactive.trigger`；默认意图要求**少说话**，小幅更新用 `nudge_impression`。设 `[proactive] enabled = false` 可关闭。
+
+## 数值与维度
+
+- **好感度（总值）**始终存在、独立加减，用顶部数字 + 横向量表条展示，可越界。
+- **子项维度**可在 `config.toml` 的 `[[dimensions]]` 里任意增删改，默认内置 **22 项**
+  （混合养成 / 抽象 meme / RPG 属性，数量对齐大阿尔卡纳）：熟悉、信赖、欢乐、省心、贴贴、抽象、
+  含金量、合拍、安心、慷慨、智力、魅力、活跃、幸运、混沌、中二、缘分、直觉、不羁、神秘、虔诚、希望。
+  - 各子项均为**正向表述**（越高越好）：加分=认可，扣分=不满。
+  - 默认不在 config 里写维度即用内置 22 项，插件升级新增维度也能自动用上。
+  - 改 `label` / 顺序而保持 `key` 不变**不会丢数据**；改 `key` 视为新维度（旧值默认保留）。
+  - 新增维度、未评分项、未生成用户的**默认值由 `default_score` 配置**（出厂默认 5）。
+  - 图表参考区间由 **`scale_min` / `scale_max`** 配置（出厂默认 0–10）；冷启动 / 刷新 prompt 会注入当前配置值。
+- **雷达图维度选取**（`radar_top_n`，默认 5）：
+  - 取得分最高的 N 项；若最低分为负数，则显示最高 N−1 项 + 最低 1 项。
+  - 命令 / 工具可临时覆盖：`雷达:N` 或 `radar_top_n` 参数（0 表示用配置值）。
+
+## 印象笔记与持久化
+
+- **`size_limit`（默认 256 字符）**：卡面右侧印象笔记的显示上限。
+- **`impression_note_size_limit`（默认 81920 字节）**：`persistent_impression` 开启时的数据库存储上限；超出后强制 LLM 精简并写回。
+- **`persistent_impression`（默认开启）**：
+  - 库中可累积长文（在 `impression_note_size_limit` 内）；`append_impression` / `rewrite_impression` 逻辑相同。
+  - 生成卡片时若超出 `size_limit`，**临时**用 LLM 精简卡面显示，**不改数据库**。
+  - 超出 `impression_note_size_limit` 时，后台 LLM 精简并**写回数据库**（与 append / rewrite 无关）。
+- **关闭 `persistent_impression`**：忽略 `impression_note_size_limit`，沿用旧行为——以 `size_limit` 为唯一上限，超出后在写入时后台精简入库；卡面直接读库。
+
+## 图片格式
+
+卡片本身**没有任何合成动画效果**。是否出动图，**只取决于用户头像本身是不是动图**：
+
+- 头像是动图（多帧 gif / webp / apng）→ 把头像各帧合进卡片，输出动图（`animated_format`：`animated_webp` 默认 / `apng` / `gif`）。
+- 头像是静态图、拉不到头像、或关掉 `animate_with_avatar` → 输出静态单张（`static_format`：`webp` 默认 / `png` / `jpg`）。
+
+其它 `[image]` 项：`max_avatar_frames`（动图头像取帧上限，超出抽样）、`avatar_frame_fallback_ms`、
+`loop`、`jpg_quality`、`webp_quality`、`background_color`（jpg/gif 填充底色）、`send_as_emoji`（走表情通道）。
+
+> 实现：`render.html2png` 只出一张 PNG。动图路径下，卡片先把头像位置用纯色块（色键）渲染一次，
+> 再由 Pillow 把头像每帧贴进色键区域——形状由模板自身的圆角/边框决定，对自定义模板也通用，且**只渲染一次浏览器**。
+
+## 卡片外观
+
+`[card]` 的 `card_template` 指向 HTML 模板（相对插件目录），内置三套：
+
+- `assets/parchment.html` — 羊皮纸
+- `assets/holo.html` — 全息科技
+- `assets/cute.html` — 可爱贴纸
+
+指向你自己的 HTML 即可完全自定义。模板可用的占位符与必须保留的 SVG 着色类，见各内置模板顶部注释。
+
+## WebUI 配置提示
+
+每个配置项都带中文 `description`，WebUI 默认在鼠标悬浮该项标签时弹出中文说明。
+
+## 数据存储
+
+- 存于插件目录下的 SQLite（默认 `data/affinity.sqlite3`），按 `person_id` 主键。
+- **跨私聊 / 群聊共用一份**：同一个人在哪都查到同一张卡。
+
+## 关于「从记忆系统调取信息」
+
+新用户（库里没有）或刷新时，麦麦会结合以下来源生成各维度分值与简介：
+
+1. **`PersonInfo.memory_points`**（若仍有数据）
+2. Host 能力 **`knowledge.search`**（底层 A_Memorix，按 `person_id` 与昵称等多路检索长期记忆）
+3. 全部已知身份指代（QQ 号、昵称、别名、群名片等）
+4. 最近 N 条聊天记录（默认 512 条，`recent_messages_limit` 可配）
+
+`[cold_start]` 下还可调 `memory_search_limit`、`memory_max_items`、`memory_max_chars` 控制写入 prompt 的长期记忆规模。刷新印象时有独立的重评指引（`refresh_guidance`），避免分数惯性膨胀。
+
+> 无需修改 MaiBot 主程序：记忆检索走内置 `knowledge.search` 能力（已在 `_manifest.json` 声明）。
+
+## 权限与网络边界
+
+### 刷新印象权限
+
+- **`refresh_admin_only`（默认 `true`）**：仅管理员可使用 `/刷新印象` 主动重算印象。
+- **`admin_qq_ids`**：管理员 QQ 号列表，例如 `["123456789", "987654321"]`。
+- `/卡片` 不受限；新用户查卡触发的冷启动生成也不受限。
+- 麦麦调用的工具（`nudge_impression`、`refresh_impression`、`send_impression_card` 等）不受此限制。
+- 设为 `refresh_admin_only = false` 可恢复所有人可用 `/刷新印象`。
+
+> **从 v0.2.1 升级**：v0.2.2 起 `/刷新印象` 默认仅管理员可用。升级后请在 `config.toml` 的 `[general]` 中配置 `admin_qq_ids`（你的 QQ 号），或设 `refresh_admin_only = false` 恢复旧行为；未配置时所有人使用 `/刷新印象` 会收到提示。`/卡片` 与麦麦工具不受影响。
+
+声明的 `capabilities`（见 `_manifest.json`）全部是 Host SDK 暴露的能力字符串，无一处冗余：
+
+- **`database.get`**：读取 Host 内置 `PersonInfo` 表（身份解析、群名片匹配、`memory_points` 冷启动）。
+  好感度数据另存于插件自带的本地 SQLite（`data/affinity.sqlite3`），二者不同，`database.get` 仅用于读
+  `PersonInfo`，**确为必需**。冒烟测试 `test_manifest_capabilities_cover_usage` 会校验声明与源码用量一致。
+- **`person.get_value`**：仅在冷启动加载长期记忆时读取**唯一一个 key —— `memory_points`**（`PersonInfo`
+  里没有该字段时的回退路径），不读取任意 Person 字段。
+- 其余 `person.get_id` / `person.get_id_by_name` / `knowledge.search` / `llm.generate` / `render.html2png`
+  / `send.*` / `config.get` / `chat.get_all_streams` / `message.count_new` / `message.get_recent`
+  / `message.get_by_time_in_chat` / `maisaka.context.append` / `maisaka.proactive.trigger` 各对应一处明确用途。
+
+**出站网络**：插件唯一的对外请求是拉取 QQ 头像 —— `GET https://q1.qlogo.cn/g?b=qq&nk=<QQ号>&s=640`。
+
+- 协议 / 主机 / 路径**全部硬编码**，URL 中唯一被替换的 `<QQ号>` 必须先通过纯 ASCII 数字校验
+  （`_is_qq_user_id`），调用方无法注入 scheme / host，**不存在 SSRF 面**；只对平台属于 QQ 系
+  （`qq`/`qqguild`/`napcat`）的用户发起。
+- 发出的唯一数据是对方 QQ 号；8s 超时；失败即静默回退占位头像。
+- Host SDK **没有「出站网络」这一 capability**（`capabilities` 是封闭枚举，httpx 直接由插件进程发起、
+  不经 Host 令牌），因此 `_manifest.json` 无从声明；改以本节文档化来源与校验策略。
+- 需要纯离线 / 隐私场景，设 `[image] fetch_avatar = false` 即彻底关闭该请求。
+
+## 配置
+
+所有可调项见 `config.default.toml`。除 `[[dimensions]]` 外的字段**留空 / 注释掉即用内置默认**；
+插件升级调整默认时，留空字段会自动跟随新值。
+
+LLM 调用（冷启动 / 刷新印象 / 查询微调 / 简介精简）的 `cap.call` RPC 超时由 `[general] llm_rpc_timeout_ms` 控制，默认 **120000**（120 秒）。查询微调与冷启动共用该超时，没有单独的 timeout 配置项。会在返回前等待这次 LLM 的工具和命令（`refresh_impression`、`get_impression_detail`、`send_impression_card`、`/卡片`、`/刷新印象`）向 Host 声明的调用上限是 `llm_rpc_timeout_ms + 10000`。`nudge_impression` 立即返回，不占这个上限。改 `llm_rpc_timeout_ms` 后需要重载插件，Host 才会用新的调用上限。
+
+`[proactive]` 控制定期提醒：`interval_hours`（默认 6）是每个聊天流的提醒间隔；`poll_seconds`（默认 300）是扫描间隔；只对间隔内有过消息的活跃聊天触发；默认意图少说话。`enabled = false` 关闭扫描循环。
+
+## 安装
+
+1. 把本目录放进（或软链到）`MaiBot/plugins/`。
+2. 依赖：`httpx`、`pillow`（见 `_manifest.json`）。卡面中文渲染使用插件内置 `assets/fonts/` 的 Noto Sans SC（woff2），**无需访问 Google Fonts 或外网**。
+3. 启动 MaiBot 自动加载，或在 WebUI 中管理。
+
+## 开发 / 测试
+
+离线冒烟测试（不依赖 Host）：
+
+```bash
+PYTHONPATH=../maibot-plugin-sdk python tests/smoke_test.py
+```
+
+覆盖：能力声明与源码一致、配置一致性、维度解析、SVG 生成（雷达 + 量表条双向越界）、
+模板占位符渲染、头像帧解析与色键合成、身份 / 别名解析、雷达 top_n 选取、长期记忆 helper 等。
+
+## License
+
+MIT

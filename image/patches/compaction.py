@@ -213,6 +213,21 @@ def _build_compaction_request(
     return request
 
 
+def _response_format_unavailable(exc: Exception) -> bool:
+    """Recognize this explicit API capability error, not policy or bad JSON."""
+    pending, seen = [exc], set()
+    while pending and len(seen) < 12:
+        error = pending.pop()
+        if id(error) in seen:
+            continue
+        seen.add(id(error))
+        text = str(error).lower()
+        if 'response_format' in text and 'this response_format type is unavailable now' in text:
+            return True
+        pending.extend(e for e in (getattr(error, '__cause__', None), getattr(error, '__context__', None)) if e is not None)
+    return False
+
+
 async def build_context_summary(
     removed_messages: Sequence[LLMContextMessage],
     *,
@@ -243,6 +258,14 @@ async def build_context_summary(
         except Exception as exc:
             if isinstance(exc, ProviderResponseFailure) and exc.kind == "policy":
                 raise
+            # Compatibility overlay 1.0.0. Keep strict local validation and archive
+            # requirements; only this explicit schema-capability error gets one
+            # retry without the unsupported transport response_format field.
+            if not attempt and request.response_format is not None and _response_format_unavailable(exc):
+                request = request.detached_snapshot()
+                request.response_format = None
+                logger.warning("摘要接口不支持 response_format，改用 JSON 提示并保留严格本地校验，重试一次")
+                continue
             if attempt or not (isinstance(exc, ValueError) or transient_exception(exc)):
                 raise
     try:

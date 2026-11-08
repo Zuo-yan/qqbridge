@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+  "id": "github.beichen24a1.memewiki",
+  "version": "0.1.0",
+  "name": "梗百科",
+  "description": "让麦麦认得网络梗和黑话：内置 6668 条本地词条（SQLite 毫秒级），注册 search_meme_wiki 工具与大模型可自主调用，另提供 /梗 命令查询。",
+  "author": {
+    "name": "beichen24a1",
+    "url": "https://github.com/beichen24a1"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/beichen24a1/MaiBot-MemeWiki",
+    "homepage": "https://github.com/beichen24a1/MaiBot-MemeWiki",
+    "issues": "https://github.com/beichen24a1/MaiBot-MemeWiki/issues"
+  },
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
+  },
+  "sdk": {
+    "min_version": "2.0.0",
+    "max_version": "2.99.99"
+  },
+  "dependencies": [],
+  "plugin_type": "tool",
+  "display": {
+    "icon": {
+      "type": "lucide",
+      "value": "book-open"
+    }
+  },
+  "capabilities": ["send.text"],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": ["zh-CN"]
+  }
+}

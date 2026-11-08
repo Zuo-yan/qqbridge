@@ -1,8 +1,10 @@
 # QQBridge 一键部署包
 
-版本：`1.3.0`
+版本：`1.3.1`
 
-这是一个可同时部署到 **Windows 11 x64** 和 **原生 Linux x86_64** 的私人 QQ 聊天机器人部署包，组合 MaiBot、NapCat、17 个插件、14 个运行时补丁、当前“哈基米”人设、表情包和提示图片。
+线上扩展源码与部署边界见 [optional/README.md](optional/README.md)。默认安装不会自动启用这些扩展。
+
+这是一个可同时部署到 **Windows 11 x64** 和 **原生 Linux x86_64** 的私人 QQ 聊天机器人部署包，组合 MaiBot、NapCat、16 个默认插件、21 个运行时补丁、当前“哈基米”人设、表情包和提示图片。
 
 Windows 使用 Docker Desktop + WSL2 Ubuntu；原生 Linux 使用 Docker Engine + Compose v2。两种平台共用同一套配置、插件、人设、镜像、数据目录、升级和回滚逻辑。
 
@@ -66,8 +68,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 要求 Linux x86_64、Python 3.10+、`systemd`、`sudo`、Docker Engine 和 Docker Compose v2。默认按 rootful Docker 管理；已测试目标为常见 Ubuntu/Debian 系发行版。
 
 ```bash
-unzip qqbridge-v1.3.0.zip
-cd qqbridge-v1.3.0
+unzip qqbridge-v1.3.1.zip
+cd qqbridge-v1.3.1
 bash ./install-linux.sh
 ```
 
@@ -205,8 +207,8 @@ bash ./configure-linux.sh --advanced
 
 ```text
 ~/qqbridge/                       # Linux 默认；Windows 位于 WSL 用户主目录
-├── releases/1.3.0/
-├── current -> releases/1.3.0/
+├── releases/1.3.1/
+├── current -> releases/1.3.1/
 ├── backups/
 └── instances/default/
     ├── .env
@@ -235,13 +237,13 @@ Windows 局域网模式只创建“专用网络”和 `LocalSubnet` 入站规则
 
 ```powershell
 # Windows
-.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.3.0.zip'
+.\upgrade.ps1 -Package 'C:\path\to\qqbridge-v1.3.1.zip'
 .\rollback.ps1
 ```
 
 ```bash
 # Linux
-bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.3.0.zip
+bash ./upgrade-linux.sh --package ~/downloads/qqbridge-v1.3.1.zip
 bash ./rollback-linux.sh
 bash ./rollback-linux.sh --backup-id 20261031T120000Z
 ```
@@ -269,9 +271,9 @@ bash ./rollback-linux.sh --backup-id 20261031T120000Z
 
 ## 插件
 
-包内包含 17 个插件目录：
+包内包含 16 个默认插件目录：
 
-`Color2333_maibot-multi-platform-parser`、`MaiBot-SnowLuma-Adapter`、`TAIY2020_smart_poke_plugin`、`codex-draw`、`com_maibot-link-parser`、`deepseek-v4-pro_private-humanizer`、`gemini_web_search`、`github_erhan111119_mai-repost-shit`、`hajimi-file-download`、`juzi865_emoji2face`、`maibot-community_mai-repeater`、`maibot-moepix`、`mizuku003_tieba-share`、`persona-manager`、`token_usage_report`、`xuqian13_tts_voice_plugin`、`xxxxx7258_moegirl-wiki-plugin`。
+`Color2333_maibot-multi-platform-parser`、`MaiBot-SnowLuma-Adapter`、`TAIY2020_smart_poke_plugin`、`codex-draw`、`com_maibot-link-parser`、`deepseek-v4-pro_private-humanizer`、`gemini_web_search`、`github_erhan111119_mai-repost-shit`、`hajimi-file-download`、`juzi865_emoji2face`、`maibot-community_mai-repeater`、`mizuku003_tieba-share`、`persona-manager`、`token_usage_report`、`xuqian13_tts_voice_plugin`、`xxxxx7258_moegirl-wiki-plugin`。
 
 上游仓库、来源提交、打包树哈希和许可证文件名见 `plugin-metadata.json` 与 `THIRD_PARTY_NOTICES.md`。
 

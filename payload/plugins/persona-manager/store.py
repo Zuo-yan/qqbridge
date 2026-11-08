@@ -87,7 +87,7 @@ class Store:
 
     def current(self, session):
         with closing(self.connect()) as db:
-            row=db.execute('SELECT c.name,v.id,v.body,v.notes,s.switched,s.summary FROM cards c JOIN versions v ON v.id=c.published_id LEFT JOIN sessions s ON s.card_id=c.id AND s.session_id=? WHERE c.id=COALESCE((SELECT card_id FROM sessions WHERE session_id=?),(SELECT id FROM cards WHERE name=?))',(session,session,'哈基米')).fetchone()
+            row=db.execute('SELECT c.name,v.id,v.body,v.notes,s.switched,s.summary FROM cards c JOIN versions v ON v.id=c.published_id LEFT JOIN sessions s ON s.card_id=c.id AND s.session_id=? WHERE c.id=COALESCE((SELECT card_id FROM sessions WHERE session_id=?),(SELECT id FROM cards WHERE name=?))',(session,session,'大肥鱼')).fetchone()
             if not row: raise ValueError('默认人设未发布')
             return dict(row)
 

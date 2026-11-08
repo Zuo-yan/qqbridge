@@ -11,7 +11,10 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 from typing import Any, ClassVar, Dict, List, Mapping, Optional, cast
+
 
 from maibot_sdk import MaiBotPlugin, MessageGateway, PluginConfigBase, Tool
 from maibot_sdk.types import ToolParameterInfo, ToolParamType
@@ -36,6 +39,7 @@ from .profile import (
 from .qq_face_map import QQ_FACE_DESCRIPTIONS
 from .runtime import QQEventRouter, QQRuntimeBuilder, QQRuntimeBundle
 from .services import QQActionService, QQQueryService
+from .codecs.outbound.temp_session import choose_temp_group, with_temp_group
 
 
 def _matches_scoped_identifier(allowed_values: List[str], current_value: str) -> bool:
@@ -77,6 +81,8 @@ class SnowLumaAdapterPlugin(
         self._event_router: Optional[QQEventRouter] = None
         self._runtime_bundle: Optional[QQRuntimeBundle] = None
         self._debug_logger: Optional[AdaDebugLogger] = None
+        self._temp_session_cache: Dict[str, Any] = {}
+        self._temp_session_lock = asyncio.Lock()
 
     def get_components(self) -> List[Dict[str, Any]]:
         """收集组件，并为 NapCat API 注册同名 SnowLuma 别名。"""
@@ -200,6 +206,7 @@ class SnowLumaAdapterPlugin(
                 "message": [{"type": "text", "data": {"text": normalized_message}}],
             }
 
+        action_params = await self._apply_temp_session(action_name, action_params)
         try:
             response = await runtime_bundle.action_service.call_action(action_name, action_params)
         except Exception as exc:
@@ -830,6 +837,7 @@ class SnowLumaAdapterPlugin(
 
         try:
             for action_name, params in actions:
+                params = await self._apply_temp_session(action_name, params)
                 await runtime_bundle.action_service.call_action(action_name, params)
         except Exception as exc:
             return {"success": False, "error": str(exc)}
@@ -888,6 +896,7 @@ class SnowLumaAdapterPlugin(
 
         responses: List[Mapping[str, Any]] = []
         for action_name, params in actions:
+            params = await self._apply_temp_session(action_name, params)
             if debug_logger is not None:
                 debug_logger.log_raw_outbound(internal_message_id, action_name, params)
             try:
@@ -934,6 +943,84 @@ class SnowLumaAdapterPlugin(
                 "adapter_callbacks": adapter_callbacks,
             },
         }
+
+
+    async def _apply_temp_session(self, action_name: str, params: Mapping[str, Any]) -> Dict[str, Any]:
+        """给非好友私聊附上来源群号，让 NapCat 走群临时会话。"""
+
+        updated = dict(params)
+        if action_name not in {"send_private_msg", "send_private_forward_msg"}:
+            return updated
+        if str(updated.get("group_id") or "").strip():
+            return updated
+        group_id = await self._temp_source_group(str(updated.get("user_id") or ""))
+        return with_temp_group(action_name, updated, group_id)
+
+    async def _temp_source_group(self, user_id: str) -> str:
+        """按好友身份和共同群选择临时会话来源群，结果缓存 10 分钟。"""
+
+        target = str(user_id or "").strip()
+        if not target or self._runtime_bundle is None:
+            return ""
+        now = time.monotonic()
+        async with self._temp_session_lock:
+            cache = self._temp_session_cache
+            expires = float(cache.get("at") or 0) + float(cache.get("ttl") or 0)
+            if not cache or now >= expires:
+                cache = await self._load_temp_session_cache()
+                self._temp_session_cache = cache
+            return choose_temp_group(target, set(cache.get("friends") or ()), list(cache.get("groups") or ()))
+
+    async def _load_temp_session_cache(self) -> Dict[str, Any]:
+        """读取好友和群成员。查询失败时保留短缓存，避免每条私聊都重试。"""
+
+        bundle = self._runtime_bundle
+        now = time.monotonic()
+        if bundle is None:
+            return {"at": now, "ttl": 60, "friends": set(), "groups": []}
+        service = bundle.action_service
+        friends_data = await service.safe_call_action_data("get_friend_list", {})
+        groups_data = await service.safe_call_action_data("get_group_list", {})
+        friends: set[str] = set()
+        if isinstance(friends_data, list):
+            for item in friends_data:
+                if isinstance(item, Mapping):
+                    friend_id = str(item.get("user_id") or "").strip()
+                    if friend_id:
+                        friends.add(friend_id)
+        groups: List[Dict[str, Any]] = []
+        if isinstance(groups_data, list):
+            for item in groups_data:
+                if not isinstance(item, Mapping):
+                    continue
+                group_id = str(item.get("group_id") or "").strip()
+                if not group_id:
+                    continue
+                members_data = await service.safe_call_action_data(
+                    "get_group_member_list", {"group_id": group_id}
+                )
+                if not isinstance(members_data, list):
+                    continue
+                members = {
+                    str(member.get("user_id") or "").strip()
+                    for member in members_data
+                    if isinstance(member, Mapping) and str(member.get("user_id") or "").strip()
+                }
+                if not members:
+                    continue
+                try:
+                    member_count = int(item.get("member_count") or 0)
+                except (TypeError, ValueError):
+                    member_count = 0
+                groups.append(
+                    {
+                        "group_id": group_id,
+                        "member_count": member_count or len(members),
+                        "members": members,
+                    }
+                )
+        failed = friends_data is None and groups_data is None
+        return {"at": now, "ttl": 60 if failed else 600, "friends": friends, "groups": groups}
 
     @staticmethod
     def _is_action_response_ok(response: Mapping[str, Any]) -> bool:

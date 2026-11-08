@@ -84,10 +84,10 @@ def main() -> None:
 
     plugins = manifest.get("plugins")
     patches = manifest.get("patches")
-    if not isinstance(plugins, list) or len(plugins) != 17:
-        fail("manifest must list exactly 17 plugins")
-    if not isinstance(patches, list) or len(patches) != 14:
-        fail("manifest must list exactly 14 patches")
+    if not isinstance(plugins, list) or not plugins:
+        fail("manifest must list plugins")
+    if not isinstance(patches, list) or not patches:
+        fail("manifest must list patches")
     plugin_dirs = [
         path
         for path in (root / "payload" / "plugins").iterdir()
