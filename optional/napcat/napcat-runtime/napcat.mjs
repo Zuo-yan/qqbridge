@@ -10797,7 +10797,7 @@ class nG {
   async getTempChatInfo(e, n) {
     return this.context.session.getMsgService().getTempChatInfo(e, n);
   }
-  async sendMsg(e, n, r = 1e4) {
+  async sendMsg(e, n, r = 3e4) {
     if (e.chatType === Te.KCHATTYPETEMPC2CFROMGROUP && e.guildId && e.guildId !== "") {
       const s = await this.core.apis.GroupApi.getGroupMember(e.guildId, e.peerUid);
       s && await this.PrepareTempChat(e.peerUid, e.guildId, s.nick);
@@ -34303,7 +34303,7 @@ const Wse = "\x1B[40m  \x1B[0m", lm = "\x1B[47m  \x1B[0m", zse = (t) => t ? Wse 
   websocketClients: p.Array(eae, { default: [] }),
   plugins: p.Array(tae, { default: [] })
 }, { default: {} }), rae = p.Object({
-  baseTimeout: p.Number({ default: 1e4 }),
+  baseTimeout: p.Number({ default: 3e4 }),
   uploadSpeedKBps: p.Number({ default: 256 }),
   downloadSpeedKBps: p.Number({ default: 256 }),
   maxTimeout: p.Number({ default: 18e5 })
@@ -41534,7 +41534,7 @@ const ys = /* @__PURE__ */ Go(Pae), Dae = p.Object({
   websocketClients: p.Array(Bae, { default: [] }),
   plugins: p.Array(Rae, { default: [] })
 }, { default: {} }), Lae = p.Object({
-  baseTimeout: p.Number({ default: 1e4 }),
+  baseTimeout: p.Number({ default: 3e4 }),
   uploadSpeedKBps: p.Number({ default: 256 }),
   downloadSpeedKBps: p.Number({ default: 256 }),
   maxTimeout: p.Number({ default: 18e5 })

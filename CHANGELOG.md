@@ -1,5 +1,14 @@
 # 更新记录
 
+## 1.3.6
+
+- 语音合成与富媒体超时优化：NapCat OneBot `baseTimeout` 与 `sendMsg` 默认发送等待超时放宽至 30s（原 10s），彻底解决长语音及富媒体上传耗时超过 10s 导致误报超时失败的假死问题。
+- 静默错误处理：将 `xuqian13_tts_voice_plugin` 的 `send_error_messages` 默认设为 `false`，屏蔽向群聊公屏推送 `语音合成失败: 语音发送失败` 等系统级扰民提示。
+
+## 1.3.5
+
+- 主动私聊与虚拟锚点修复：修复主动私聊虚拟锚点解析、群消息回填污染及前置异常预留锁释放。
+
 ## 1.3.3
 
 - 帕累托最优加固：释放 `host_bridge.py` 与 `vertex_responses_gateway.py` (v1.2.0) 在网络 I/O 期间的全局锁，支持并发请求、将 `MAX_TOKENS` 映射为 `incomplete` 终态并提升最大输出上限至 32768。

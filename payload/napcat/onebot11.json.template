@@ -25,7 +25,7 @@
   "parseMultMsg": false,
   "imageDownloadProxy": "",
   "timeout": {
-    "baseTimeout": 10000,
+    "baseTimeout": 30000,
     "uploadSpeedKBps": 256,
     "downloadSpeedKBps": 256,
     "maxTimeout": 1800000

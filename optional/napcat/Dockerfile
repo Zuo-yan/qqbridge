@@ -2,3 +2,4 @@ FROM mlikiowa/napcat-docker@sha256:b101b8968cc31ae428ec0f8e117386e4ced7773b2d822
 COPY napcat-runtime/ /app/napcat/
 LABEL local.qqbridge.delivery-evidence.version="1.0.1"
 LABEL local.qqbridge.private-target.version="1.0.0"
+LABEL local.qqbridge.media-timeout.version="1.0.0"

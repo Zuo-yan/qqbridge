@@ -6,7 +6,7 @@ default_backend = "mimo"
 use_replyer_rewrite = false
 use_base64_audio = true
 split_sentences = false
-send_error_messages = true
+send_error_messages = false
 [components]
 action_enabled = true
 command_enabled = true
