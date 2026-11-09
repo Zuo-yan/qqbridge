@@ -1,6 +1,6 @@
 {
   "package": "qqbridge",
-  "package_version": "1.3.6",
+  "package_version": "1.3.7",
   "created_at_utc": "2026-10-31T10:48:11Z",
   "platform": "Windows 11 x64 / Linux x86_64",
   "runtime": "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
@@ -322,8 +322,8 @@
       "size": 4600
     },
     "CHANGELOG.md": {
-      "sha256": "19705e7d3fe77c8be00b0776c6b032201a06c5d957aa713603adad608bd1d125",
-      "size": 4794
+      "sha256": "02bd53677e0575ed81f456f7df1557acde24486b3c4166f1551b49224c820035",
+      "size": 5292
     },
     "LICENSE": {
       "sha256": "cd5c4838ffc620c6c6f0e37cb4201f0f5bb0a904099eb177b3d1bd5c196414bf",
@@ -342,7 +342,7 @@
       "size": 3049
     },
     "VERSION": {
-      "sha256": "f4eaae07c72dd003028a4583ee93e5146e4fb2e5ba80566d3e79d73edd39ee36",
+      "sha256": "2e2fb4f506f3685f920a391c93c20293c9abb742cfc74456834bf4aaf0dd1c2b",
       "size": 6
     },
     "access-linux.sh": {
@@ -4882,8 +4882,8 @@
       "size": 8904
     },
     "payload/personas/legacy-dafeiyu.md": {
-      "sha256": "149fd78d22d2485c53880ccd891fc017fa7d2b3402f5b6cd95eaff7b8e551e61",
-      "size": 8952
+      "sha256": "194132b95d60829855a04431282ef402b1ada9c574e0d055cee0cbd932a72163",
+      "size": 11388
     },
     "payload/plugins/Color2333_maibot-multi-platform-parser/.gitignore": {
       "sha256": "d8b53c91f549fba2b59e1b7090fb60866809714c0edbc0fdbb72a628635c8e7b",
