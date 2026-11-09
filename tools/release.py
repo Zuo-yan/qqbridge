@@ -49,6 +49,12 @@ def main():
         files[name] = {'sha256': digest(data), 'size': len(data)}
     if args.refresh_manifest:
         manifest['files'] = files
+        patch_dir = root / 'image' / 'patches'
+        if patch_dir.is_dir() and 'patches' in manifest:
+            for item in manifest['patches']:
+                p_path = patch_dir / item['name']
+                if p_path.is_file():
+                    item['sha256'] = digest(p_path.read_bytes())
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
     elif manifest['files'] != files:
         raise SystemExit('Manifest differs from tracked package. Review source then use --refresh-manifest before packaging.')

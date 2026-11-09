@@ -1,5 +1,10 @@
 # 更新记录
 
+## 1.3.9
+
+- 全任务首选 Gemini 与帕累托调度改进：将规划器 (`planner`)、主回复 (`replyer`)、记忆 (`memory`)、工具 (`utils`)、学习 (`learner`)、快模 (`fast_model`)、表情 (`emoji`)、语音 (`voice`) 等全线任务模型队列重构为 100% 优先使用 Google Gemini 模型（Gemini 3.8 Flash / Flash Low），选择策略统一采用 `sequential` 顺序优先。
+- 跨服务商 DeepSeek 极速兜底：全任务统一配置 `deepseek_flash` 作为跨厂商保底模型；主回复 (`replyer`) 采用 `[Flash -> DeepSeek]` 极速切流方案，移除中间慢速探针延迟；调度器 (`utils_model.py`) 为规划器 `planner` 注入 Gemini Flash 15s 尝试超时上限，在 Gemini 遇网络抖动或服务不可用时实现秒级平滑降级，彻底杜绝死锁与超时卡死。
+
 ## 1.3.8
 
 - 模型路由与延迟优化：将主要回复 (`replyer`) 与视觉 (`vlm`) 任务首选模型调整为 Gemini 3.8 Flash (`vertex_flash`)，配合 Visible Grace 流式保底机制，消除原先回退等待的 6s 延迟并大幅提升首字生成与交互响应速度。

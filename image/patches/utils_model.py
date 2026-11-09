@@ -1311,6 +1311,7 @@ class LLMOrchestrator:
                 return min(timeout_s, deadline)
         elif self.task_name == "planner":
             deadline = {
+                "gemini-3.8-flash": 15.0,
                 "deepseek-flash": 20.0,
             }.get(request.model_info.model_identifier)
             if deadline is not None:

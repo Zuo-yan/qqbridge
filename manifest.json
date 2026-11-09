@@ -1,6 +1,6 @@
 {
   "package": "qqbridge",
-  "package_version": "1.3.8",
+  "package_version": "1.3.9",
   "created_at_utc": "2026-10-31T10:48:11Z",
   "platform": "Windows 11 x64 / Linux x86_64",
   "runtime": "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
@@ -288,7 +288,7 @@
     },
     {
       "name": "utils_model.py",
-      "sha256": "44974be4c041ca113280fce24fa1fe84b9ebe6aaed38a7bfc8b7e2b4e3809b5b"
+      "sha256": "9b8b6938216ae4aee8b90de11da91441f0c0cdb31f6ee64ed91fbfcfac77220e"
     }
   ],
   "excluded_sensitive_or_runtime_data": [
@@ -322,8 +322,8 @@
       "size": 4600
     },
     "CHANGELOG.md": {
-      "sha256": "90f87eb6e304d61fc1496461300f5e041e00b10ef1f5fc9f30532f82f47261f1",
-      "size": 6154
+      "sha256": "039ae5036240b6935a48cf87b71db39921498e830d93a697ec0245c2c9d065db",
+      "size": 6975
     },
     "LICENSE": {
       "sha256": "cd5c4838ffc620c6c6f0e37cb4201f0f5bb0a904099eb177b3d1bd5c196414bf",
@@ -342,7 +342,7 @@
       "size": 3049
     },
     "VERSION": {
-      "sha256": "1a8b366d8080cb8b3aaafa357ed10b035b75c965db444a1f76b700bed3d49992",
+      "sha256": "7635ad71ecd62fea77470b67ae8572b410e628331551abb2c3f745473722637b",
       "size": 6
     },
     "access-linux.sh": {
@@ -470,8 +470,8 @@
       "size": 38468
     },
     "image/patches/utils_model.py": {
-      "sha256": "44974be4c041ca113280fce24fa1fe84b9ebe6aaed38a7bfc8b7e2b4e3809b5b",
-      "size": 77931
+      "sha256": "9b8b6938216ae4aee8b90de11da91441f0c0cdb31f6ee64ed91fbfcfac77220e",
+      "size": 77973
     },
     "image/proxy-requirements.txt": {
       "sha256": "d800d5d68a28d7693457399d6c945978e2eceaea0f70191c08acfbd626161d68",
@@ -6230,8 +6230,8 @@
       "size": 6420
     },
     "tools/release.py": {
-      "sha256": "582084f634cd9ac6a0a4f89cdc0eb1db0af87831e6929a5086926ce2372f0c04",
-      "size": 3768
+      "sha256": "955cbe5f026dddf3ab167d97ba477f4c6d47c61b74b1b64496d72503ced28ff9",
+      "size": 4069
     },
     "upgrade-linux.sh": {
       "sha256": "707b15bd21528f7fc4d029ff02606bda4f88b41cb25e20cd2a67b8de28b8430d",
