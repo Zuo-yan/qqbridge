@@ -17,6 +17,12 @@ logger = logging.getLogger("plugin.tts_voice_plugin.doubao")
 
 # 豆包语音情感映射表（用于自动生成context_texts）
 DOUBAO_EMOTION_MAP = {
+    # 傲娇与特色情绪
+    "傲娇": "用傲娇、嘴硬但心软的语气说话，声音可爱矜持一点",
+    "撒娇": "用撒娇、求饶、甜甜的语气说话",
+    "别扭": "用别扭、不好意思、借坡下驴的语气说话，稍微小声一点",
+    "调侃": "用开玩笑、轻松调侃的调皮语气说话",
+
     # 积极情绪
     "开心": "你的语气再欢乐一点",
     "兴奋": "用特别兴奋激动的语气说话",
@@ -79,13 +85,23 @@ class DoubaoBackend(TTSBackendBase):
         解析情感参数为 context_texts
 
         Args:
-            emotion: 情感关键词
+            emotion: 情感关键词或控制指令
 
         Returns:
             context_texts 列表或 None
         """
-        if emotion and emotion in DOUBAO_EMOTION_MAP:
-            return [DOUBAO_EMOTION_MAP[emotion]]
+        if not emotion or not str(emotion).strip():
+            return None
+        emotion_str = str(emotion).strip()
+        if emotion_str in DOUBAO_EMOTION_MAP:
+            return [DOUBAO_EMOTION_MAP[emotion_str]]
+        # 允许直接传递自然语言指令，如 "用傲娇的语气说话"、"带点撒娇和委屈" 等
+        if emotion_str.startswith("用") or "语气" in emotion_str or "一点" in emotion_str or "说" in emotion_str:
+            return [emotion_str]
+        # 模糊匹配 DOUBAO_EMOTION_MAP 的 key
+        for k, v in DOUBAO_EMOTION_MAP.items():
+            if k in emotion_str:
+                return [v]
         return None
 
     async def execute(
