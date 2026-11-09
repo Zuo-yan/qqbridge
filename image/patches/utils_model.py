@@ -1305,7 +1305,7 @@ class LLMOrchestrator:
             deadline = {
                 "gemini-4-argon": 6.0,
                 "gemini-3.8-flash": 15.0,
-                "deepseek-flash": 8.0,
+                "deepseek-flash": 16.0,
             }.get(request.model_info.model_identifier)
             if deadline is not None:
                 return min(timeout_s, deadline)

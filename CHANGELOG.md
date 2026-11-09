@@ -1,5 +1,10 @@
 # 更新记录
 
+## 1.3.10
+
+- 全线废止 LOW 档思考强度：彻底移除模型配置中的最低思考强度（LOW 档），将主回复 (`replyer`) 与规划器 (`planner`) 关键任务模型升级为 HIGH 极高思考深度（`vertex_flash_high`），辅助任务（记忆、工具、快模、表情、语音）统一配置 MEDIUM 深度思考，消除人设弱化与逻辑降智。
+- DeepSeek-Flash (v4 1017) 深度推理思维链兜底：启用 v4 1017 原生 `reasoning_content` 思维链能力；调度器 (`utils_model.py`) 将 `replyer` 的 `deepseek-flash` 尝试超时放宽至 16.0s，为深度推导留足时间，实现高智力、无损人设的平滑故障降级。
+
 ## 1.3.9
 
 - 全任务首选 Gemini 与帕累托调度改进：将规划器 (`planner`)、主回复 (`replyer`)、记忆 (`memory`)、工具 (`utils`)、学习 (`learner`)、快模 (`fast_model`)、表情 (`emoji`)、语音 (`voice`) 等全线任务模型队列重构为 100% 优先使用 Google Gemini 模型（Gemini 3.8 Flash / Flash Low），选择策略统一采用 `sequential` 顺序优先。

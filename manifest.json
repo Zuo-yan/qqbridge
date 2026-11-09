@@ -1,6 +1,6 @@
 {
   "package": "qqbridge",
-  "package_version": "1.3.9",
+  "package_version": "1.3.10",
   "created_at_utc": "2026-10-31T10:48:11Z",
   "platform": "Windows 11 x64 / Linux x86_64",
   "runtime": "Docker Desktop + WSL2 Ubuntu, or Docker Engine + Compose v2",
@@ -288,7 +288,7 @@
     },
     {
       "name": "utils_model.py",
-      "sha256": "9b8b6938216ae4aee8b90de11da91441f0c0cdb31f6ee64ed91fbfcfac77220e"
+      "sha256": "f4c4de00d70ef9d7edf710d6420370e0634e7222794353a82a3228aa63dc1a2c"
     }
   ],
   "excluded_sensitive_or_runtime_data": [
@@ -322,8 +322,8 @@
       "size": 4600
     },
     "CHANGELOG.md": {
-      "sha256": "039ae5036240b6935a48cf87b71db39921498e830d93a697ec0245c2c9d065db",
-      "size": 6975
+      "sha256": "fdf52732b0562ca6db6478bc376bb128b223c86251b0f7425c6dc63c3bab471e",
+      "size": 7645
     },
     "LICENSE": {
       "sha256": "cd5c4838ffc620c6c6f0e37cb4201f0f5bb0a904099eb177b3d1bd5c196414bf",
@@ -342,8 +342,8 @@
       "size": 3049
     },
     "VERSION": {
-      "sha256": "7635ad71ecd62fea77470b67ae8572b410e628331551abb2c3f745473722637b",
-      "size": 6
+      "sha256": "3d2bf319f391a5667376167073fd4784881c6ba8fc829c3f7bbac787a64030fe",
+      "size": 7
     },
     "access-linux.sh": {
       "sha256": "b1f163469b545b46df00c9604e60561f08e7ebda2069e6e4858a020dc54acb55",
@@ -470,8 +470,8 @@
       "size": 38468
     },
     "image/patches/utils_model.py": {
-      "sha256": "9b8b6938216ae4aee8b90de11da91441f0c0cdb31f6ee64ed91fbfcfac77220e",
-      "size": 77973
+      "sha256": "f4c4de00d70ef9d7edf710d6420370e0634e7222794353a82a3228aa63dc1a2c",
+      "size": 77974
     },
     "image/proxy-requirements.txt": {
       "sha256": "d800d5d68a28d7693457399d6c945978e2eceaea0f70191c08acfbd626161d68",
